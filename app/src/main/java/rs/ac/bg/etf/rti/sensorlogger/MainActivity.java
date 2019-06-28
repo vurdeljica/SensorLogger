@@ -1,13 +1,17 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
-import androidx.annotation.NonNull;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import rs.ac.bg.etf.rti.sensorlogger.fragments.*;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import rs.ac.bg.etf.rti.sensorlogger.fragments.HomeFragment;
+import rs.ac.bg.etf.rti.sensorlogger.fragments.JournalFragment;
+import rs.ac.bg.etf.rti.sensorlogger.fragments.LogsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.nav_home:
                             selectedFragment = new HomeFragment();
                             break;
-                        case R.id.nav_delete:
-                            selectedFragment = new DeleteFragment();
+                        case R.id.nav_logs:
+                            selectedFragment = new LogsFragment();
                             break;
                         case R.id.nav_journal:
                             selectedFragment = new JournalFragment();
@@ -50,5 +54,6 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
             };
+
 }
 

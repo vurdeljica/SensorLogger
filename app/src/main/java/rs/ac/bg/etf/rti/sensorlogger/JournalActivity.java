@@ -1,8 +1,5 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
@@ -10,13 +7,16 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class JournalActivity extends AppCompatActivity {
 
@@ -36,7 +36,7 @@ public class JournalActivity extends AppCompatActivity {
     private void prepareCollapsingToolbar() {
         Toolbar toolbar = findViewById(R.id.journal_toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null)
+        if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         CollapsingToolbarLayout ctl = findViewById(R.id.journal_collapsing_toolbar);
