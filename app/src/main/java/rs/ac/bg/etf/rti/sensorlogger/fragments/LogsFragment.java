@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 
-
 public class LogsFragment extends Fragment {
 
     @Nullable

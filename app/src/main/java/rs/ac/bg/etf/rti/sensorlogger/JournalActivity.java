@@ -1,14 +1,18 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.Toolbar;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.textfield.TextInputEditText;
@@ -17,6 +21,8 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+
+import rs.ac.bg.etf.rti.sensorlogger.beans.DailyActivity;
 
 public class JournalActivity extends AppCompatActivity {
 
@@ -31,6 +37,10 @@ public class JournalActivity extends AppCompatActivity {
 
         prepareTimeFromPickerDialog();
         prepareTimeToPickerDialog();
+
+        if (isExistingActivity()) {
+            editExistingActivity();
+        }
     }
 
     private void prepareCollapsingToolbar() {
@@ -38,6 +48,13 @@ public class JournalActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JournalActivity.this.onBackPressed();
+            }
+        });
 
         CollapsingToolbarLayout ctl = findViewById(R.id.journal_collapsing_toolbar);
         ctl.setTitle("Add activity");
@@ -74,15 +91,25 @@ public class JournalActivity extends AppCompatActivity {
     }
 
     private void prepareTimeFromPickerDialog() {
-        setOnTimeClickListener(R.id.journal_time_from_dropdown);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        Time time = new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), 0);
+
+        setOnTimeClickListener(R.id.journal_time_from_dropdown, time);
     }
 
     private void prepareTimeToPickerDialog() {
-        setOnTimeClickListener(R.id.journal_time_to_dropdown);
+        Calendar calendar = Calendar.getInstance();
+        Time time = new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), 0);
+
+        setOnTimeClickListener(R.id.journal_time_to_dropdown, time);
     }
 
-    private void setOnTimeClickListener(int editTextId) {
+    private void setOnTimeClickListener(int editTextId, Time initTime) {
         final TextInputEditText timeEditText = findViewById(editTextId);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a", Locale.US);
+        timeEditText.setText(sdf.format(initTime));
 
         final TimePickerDialog.OnTimeSetListener timeListener = new TimePickerDialog.OnTimeSetListener() {
 
@@ -108,4 +135,70 @@ public class JournalActivity extends AppCompatActivity {
 
         });
     }
+
+    private boolean isExistingActivity() {
+        return getIntent().getExtras() != null;
+    }
+
+    public void editExistingActivity() {
+        int dailyActivityPosition = getIntent().getExtras().getInt("position");
+
+        DailyActivity activity = new DailyActivity("Nocno trcanje",
+                "Hight intensity", "Jun 28", "5:37 PM",
+                "6:37 PM", "No notes");
+
+
+        TextInputEditText name = findViewById(R.id.journal_activity_name);
+        AutoCompleteTextView type = findViewById(R.id.journal_acitivty_type);
+        TextInputEditText date = findViewById(R.id.journal_date_dropdown);
+        TextInputEditText timeFrom = findViewById(R.id.journal_time_from_dropdown);
+        TextInputEditText timeTo = findViewById(R.id.journal_time_to_dropdown);
+        TextInputEditText notes = findViewById(R.id.journal_notes);
+
+        name.setText(activity.getActivityTitle());
+        type.setText(activity.getActivityType());
+        date.setText(activity.getDate());
+        timeFrom.setText(activity.getStartTime());
+        timeTo.setText(activity.getEndTime());
+        notes.setText(activity.getNotes());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.journal_toolbar_items, menu);
+        setSaveDailyActivityCallback(menu);
+        return true;
+    }
+
+    private void setSaveDailyActivityCallback(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.save_activity_text);
+        AppCompatTextView save_text = (AppCompatTextView) searchItem.getActionView();
+        save_text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isExistingActivity()) {
+                    int position = getIntent().getExtras().getInt("position");
+                    updateDailyActivity(position);
+                }
+                else {
+                    addNewDailyActivity();
+                }
+
+                JournalActivity.this.onBackPressed();
+            }
+        });
+    }
+
+    private void updateDailyActivity(int position) {
+
+    }
+
+    private void addNewDailyActivity() {
+
+    }
+
+    private void deleteActivity() {
+
+    }
+
 }
