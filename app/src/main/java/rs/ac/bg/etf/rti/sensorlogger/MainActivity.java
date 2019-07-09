@@ -9,9 +9,10 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import rs.ac.bg.etf.rti.sensorlogger.fragments.HomeFragment;
-import rs.ac.bg.etf.rti.sensorlogger.fragments.JournalFragment;
-import rs.ac.bg.etf.rti.sensorlogger.fragments.LogsFragment;
+import io.realm.Realm;
+import rs.ac.bg.etf.rti.sensorlogger.fragment.HomeFragment;
+import rs.ac.bg.etf.rti.sensorlogger.fragment.JournalFragment;
+import rs.ac.bg.etf.rti.sensorlogger.fragment.LogsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DatabaseManager.getInstance().init(this);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);

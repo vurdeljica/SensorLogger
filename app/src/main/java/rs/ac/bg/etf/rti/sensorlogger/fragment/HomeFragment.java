@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger.fragments;
+package rs.ac.bg.etf.rti.sensorlogger.fragment;
 
 import android.os.Bundle;
 import androidx.annotation.Nullable;
