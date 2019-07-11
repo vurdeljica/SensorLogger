@@ -16,6 +16,8 @@ import rs.ac.bg.etf.rti.sensorlogger.fragment.LogsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    Fragment selectedFragment = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,11 +35,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (selectedFragment != null && selectedFragment instanceof JournalFragment) {
+            ((JournalFragment) selectedFragment).updateFragment();
+        }
+
+
+
+    }
+
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
 
                     switch (item.getItemId()) {
                         case R.id.nav_home:

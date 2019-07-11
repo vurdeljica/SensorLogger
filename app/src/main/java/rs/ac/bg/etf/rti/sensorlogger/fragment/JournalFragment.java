@@ -13,6 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import android.widget.ExpandableListView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,6 +50,16 @@ public class JournalFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        prepareAdapterData();
+    }
+
+
+    public void updateFragment() {
+        prepareAdapterData();
+        refreshAdapter();
+    }
+
+    private void prepareAdapterData() {
         DatabaseManager dbManager = DatabaseManager.getInstance();
         journalList = dbManager.getDailyActivities();
 
@@ -55,7 +68,15 @@ public class JournalFragment extends Fragment {
                         .collect(Collectors.groupingBy(new Function<DailyActivity, String>() {
                             @Override
                             public String apply(DailyActivity dailyActivity) {
-                                SimpleDateFormat sdf_date = new SimpleDateFormat("MMM d");
+                                if (isDateToday(dailyActivity.getDate())) {
+                                    return "Today";
+                                }
+
+                                if (isDateYesterday(dailyActivity.getDate())) {
+                                    return "Yesterday";
+                                }
+
+                                SimpleDateFormat sdf_date = new SimpleDateFormat("EEE, MMM d");
                                 return sdf_date.format(dailyActivity.getDate());
                             }
                         }))
@@ -65,25 +86,41 @@ public class JournalFragment extends Fragment {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    private void refreshAdapter() {
+        ExpandableListView listView = (ExpandableListView) getActivity().findViewById(R.id.list);
+        DailyActivityListAdapter listAdapter = (DailyActivityListAdapter)listView.getExpandableListAdapter();
+        listAdapter.setListDataHeader(listDataHeader);
+        listAdapter.setListHashMap(listHash);
+        listAdapter.notifyDataSetChanged();
+    }
 
-        DatabaseManager dbManager = DatabaseManager.getInstance();
-        journalList = dbManager.getDailyActivities();
+    private boolean isDateToday(Date _date) {
+        Calendar today = Calendar.getInstance();
 
-        listHash = new HashMap<>(
-                Stream.of(journalList)
-                        .collect(Collectors.groupingBy(new Function<DailyActivity, String>() {
-                            @Override
-                            public String apply(DailyActivity dailyActivity) {
-                                SimpleDateFormat sdf_date = new SimpleDateFormat("MMM d");
-                                return sdf_date.format(dailyActivity.getDate());
-                            }
-                        }))
-        );
+        Calendar date = Calendar.getInstance();
+        date.setTime(_date);
 
-        listDataHeader = new ArrayList<>(listHash.keySet());
+        if (today.get(Calendar.YEAR) == date.get(Calendar.YEAR)
+                && today.get(Calendar.DAY_OF_YEAR) == date.get(Calendar.DAY_OF_YEAR)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isDateYesterday(Date _date) {
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DAY_OF_YEAR, -1);
+
+        Calendar date = Calendar.getInstance();
+        date.setTime(_date);
+
+        if (yesterday.get(Calendar.YEAR) == date.get(Calendar.YEAR)
+                && yesterday.get(Calendar.DAY_OF_YEAR) == date.get(Calendar.DAY_OF_YEAR)) {
+            return true;
+        }
+
+        return false;
     }
 
 

@@ -26,6 +26,22 @@ public class DailyActivityListAdapter extends BaseExpandableListAdapter {
         this.listHashMap = listHashMap;
     }
 
+    public List<String> getListDataHeader() {
+        return listDataHeader;
+    }
+
+    public void setListDataHeader(List<String> listDataHeader) {
+        this.listDataHeader = listDataHeader;
+    }
+
+    public HashMap<String, List<DailyActivity>> getListHashMap() {
+        return listHashMap;
+    }
+
+    public void setListHashMap(HashMap<String, List<DailyActivity>> listHashMap) {
+        this.listHashMap = listHashMap;
+    }
+
     @Override
     public int getGroupCount() {
         return listDataHeader.size();

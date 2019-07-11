@@ -4,16 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.DatePickerDialog;
-import android.app.Fragment;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.DatePicker;
+import android.widget.ExpandableListView;
 import android.widget.TimePicker;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
