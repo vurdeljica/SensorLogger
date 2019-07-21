@@ -52,6 +52,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
+                    android:paddingBottom="@dimen/vertical_padding"
+                    android:paddingTop="@dimen/vertical_padding"
+                    android:paddingStart="@dimen/horizontal_padding"
+                    android:paddingEnd="@dimen/horizontal_padding"
                     tools:context=".presentation.journalEntry.JournalEntryActivity">
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -113,7 +117,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/start_time"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="@dimen/vertical_padding"
                         app:endIconDrawable="@drawable/ic_arrow_drop_down_black_24dp"
                         app:endIconMode="custom">
 

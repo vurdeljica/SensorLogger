@@ -29,6 +29,8 @@ public class JournalEntryActivity extends AppCompatActivity implements JournalEn
         if (getIntent().getExtras() != null) {
             long dailyActivityId = getIntent().getExtras().getLong("id");
             activity = dbManager.getDailyActivity(dailyActivityId);
+            String dailyActivityTitle = activity.getActivityTitle();
+            setTitle(dailyActivityTitle != null ? dailyActivityTitle : activity.getActivityType());
         } else {
             activity = new DailyActivity();
         }
