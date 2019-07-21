@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger;
+package rs.ac.bg.etf.rti.sensorlogger.database;
 
 import android.content.Context;
 
@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 
 public class DatabaseManager {
 
-    public static DatabaseManager instance;
+    private static DatabaseManager instance;
 
     private DatabaseManager() {
 
@@ -34,10 +33,9 @@ public class DatabaseManager {
     }
 
     public void insertOrUpdateDailyActivity(DailyActivity _dailyActivity) {
-        Realm realm = Realm.getDefaultInstance();
-        final DailyActivity dailyActivity = _dailyActivity;
 
-        try {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final DailyActivity dailyActivity = _dailyActivity;
             boolean isNewActivity = dailyActivity.getId() == -1;
 
             if (isNewActivity) {
@@ -51,70 +49,39 @@ public class DatabaseManager {
                 dailyActivity.setId(nextId);
             }
 
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    realm.insertOrUpdate(dailyActivity);
-                }
-            });
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(dailyActivity));
 
-        }
-        finally {
-            if (realm != null) {
-                realm.close();
-            }
         }
     }
 
     public void deleteDailyActivity(long dailyActivityId) {
-        Realm realm = Realm.getDefaultInstance();
-        final long id = dailyActivityId;
 
-        try {
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    RealmResults<DailyActivity> result = realm.where(DailyActivity.class).equalTo("id", id).findAll();
-                    result.deleteAllFromRealm();
-                }
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final long id = dailyActivityId;
+            realm.executeTransaction(realm1 -> {
+                RealmResults<DailyActivity> result = realm1.where(DailyActivity.class).equalTo("id", id).findAll();
+                result.deleteAllFromRealm();
             });
-        }
-        finally {
-            if (realm != null) {
-                realm.close();
-            }
         }
     }
 
     public DailyActivity getDailyActivity(long dailyActivityId) {
-        Realm realm = Realm.getDefaultInstance();
         DailyActivity dailyActivity;
 
-        try {
+        try (Realm realm = Realm.getDefaultInstance()) {
             DailyActivity dailyActivityFromRealm = realm.where(DailyActivity.class).equalTo("id", dailyActivityId).findFirst();
             dailyActivity = realm.copyFromRealm(dailyActivityFromRealm);
-        }
-        finally {
-            if (realm != null) {
-                realm.close();
-            }
         }
 
         return dailyActivity;
     }
 
     public List<DailyActivity> getDailyActivities() {
-        Realm realm = Realm.getDefaultInstance();
         List<DailyActivity> dailyActivities = new ArrayList<>();
 
-        try {
+        try (Realm realm = Realm.getDefaultInstance()) {
             RealmResults<DailyActivity> results = realm.where(DailyActivity.class).sort("date", Sort.DESCENDING).findAll();
             dailyActivities.addAll(realm.copyFromRealm(results));
-        }
-        finally {
-            if (realm != null) {
-                realm.close();
-            }
         }
 
         return dailyActivities;

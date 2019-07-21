@@ -1,12 +1,18 @@
 package rs.ac.bg.etf.rti.sensorlogger.model;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
 public class DailyActivity extends RealmObject {
+    private static SimpleDateFormat sdf_date = new SimpleDateFormat("MMM d", Locale.US);
+    private static SimpleDateFormat sdf_time = new SimpleDateFormat("h:mm a", Locale.US);
 
     @PrimaryKey
     private long id;
@@ -29,6 +35,15 @@ public class DailyActivity extends RealmObject {
 
     public DailyActivity() {
         id = -1;
+        date = new Date();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, 0);
+
+        endTime = calendar.getTime();
+
+        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        startTime = calendar.getTime();
     }
 
     public DailyActivity(long id, String activityTitle, String activityType, Date date, Date startTime, Date endTime, String notes) {
@@ -41,12 +56,36 @@ public class DailyActivity extends RealmObject {
         this.notes = notes;
     }
 
+    public String getDateAsString() {
+        return sdf_date.format(date);
+    }
+
+    public void setDateAsString(String date) {
+        try {
+            this.date = sdf_date.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Date getDate() {
         return date;
     }
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getStartTimeAsString() {
+        return sdf_time.format(startTime);
+    }
+
+    public void setStartTimeAsString(String date) {
+        try {
+            this.startTime = sdf_time.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     public Date getStartTime() {
@@ -57,12 +96,33 @@ public class DailyActivity extends RealmObject {
         this.startTime = startTime;
     }
 
+    public String getEndTimeAsString() {
+        return sdf_time.format(endTime);
+    }
+
+    public void setEndTimeAsString(String date) {
+        try {
+            this.endTime = sdf_time.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Date getEndTime() {
         return endTime;
     }
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public String getActivityDuration() {
+        long timeDiff = endTime.getTime() - startTime.getTime();
+        long hours = timeDiff / 3600000;
+        long minutes = (timeDiff % 3600000) / 60000;
+        String hoursTxt = hours == 0 ? "" : hours + " hr ";
+        String minutesTxt = minutes == 0 ? "" : minutes + " min";
+        return hoursTxt + minutesTxt;
     }
 
     public String getActivityTitle() {

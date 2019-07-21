@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger;
+package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -9,10 +9,11 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import io.realm.Realm;
-import rs.ac.bg.etf.rti.sensorlogger.fragment.HomeFragment;
-import rs.ac.bg.etf.rti.sensorlogger.fragment.JournalFragment;
-import rs.ac.bg.etf.rti.sensorlogger.fragment.LogsFragment;
+import rs.ac.bg.etf.rti.sensorlogger.database.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new HomeFragment()).commit();
         }
-
     }
 
     @Override
@@ -42,33 +42,26 @@ public class MainActivity extends AppCompatActivity {
         if (selectedFragment != null && selectedFragment instanceof JournalFragment) {
             ((JournalFragment) selectedFragment).updateFragment();
         }
-
-
-
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-                    switch (item.getItemId()) {
-                        case R.id.nav_home:
-                            selectedFragment = new HomeFragment();
-                            break;
-                        case R.id.nav_logs:
-                            selectedFragment = new LogsFragment();
-                            break;
-                        case R.id.nav_journal:
-                            selectedFragment = new JournalFragment();
-                            break;
-                    }
-
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                            selectedFragment).commit();
-
-                    return true;
+            item -> {
+                switch (item.getItemId()) {
+                    case R.id.nav_home:
+                        selectedFragment = new HomeFragment();
+                        break;
+                    case R.id.nav_logs:
+                        selectedFragment = new LogsFragment();
+                        break;
+                    case R.id.nav_journal:
+                        selectedFragment = new JournalFragment();
+                        break;
                 }
+
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        selectedFragment).commit();
+
+                return true;
             };
 
 }
