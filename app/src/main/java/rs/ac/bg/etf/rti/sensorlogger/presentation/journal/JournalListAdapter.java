@@ -1,7 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation.journal;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import androidx.databinding.DataBindingUtil;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.annimon.stream.function.Function;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import java.util.Locale;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.ListEntryDailyActivityBinding;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.journalEntry.JournalEntryActivity;
 
 public class JournalListAdapter extends BaseExpandableListAdapter {
     private List<DailyActivity> journalList;

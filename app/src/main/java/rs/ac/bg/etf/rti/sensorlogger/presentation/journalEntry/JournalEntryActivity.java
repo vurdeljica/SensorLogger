@@ -79,12 +79,12 @@ public class JournalEntryActivity extends AppCompatActivity implements JournalEn
 
     @Override
     public void onJournalEntrySaved() {
-        onBackPressed();
+        onNavigateUp();
     }
 
     @Override
     public void onJournalEntryDeleted() {
-        onBackPressed();
+        onNavigateUp();
     }
 
     @Override

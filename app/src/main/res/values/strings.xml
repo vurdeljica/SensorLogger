@@ -12,4 +12,8 @@
     <string name="end_time">End</string>
     <string name="notes">Notes</string>
     <string name="add_activity">Add activity</string>
+    <string name="notification_title">Today\'s activities</string>
+    <string name="notification_text">Please add your daily activities</string>
+    <string name="notification_channel_name">Daily activities reminder</string>
+    <string name="notification_channel_description">Reminder notifications for adding daily activities</string>
 </resources>

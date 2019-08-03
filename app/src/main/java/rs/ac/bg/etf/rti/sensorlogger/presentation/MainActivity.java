@@ -1,15 +1,12 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
 import android.os.Bundle;
-import android.view.MenuItem;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import rs.ac.bg.etf.rti.sensorlogger.database.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
@@ -23,8 +20,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        DatabaseManager.getInstance().init(this);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
