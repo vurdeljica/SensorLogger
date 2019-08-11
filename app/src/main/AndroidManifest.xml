@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="rs.ac.bg.etf.rti.sensorlogger">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:name=".config.SensorLoggerApplication"
         android:allowBackup="true"

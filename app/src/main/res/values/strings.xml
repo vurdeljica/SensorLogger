@@ -16,4 +16,10 @@
     <string name="notification_text">Please add your daily activities</string>
     <string name="notification_channel_name">Daily activities reminder</string>
     <string name="notification_channel_description">Reminder notifications for adding daily activities</string>
+    <string name="permission_rationale">Location data is used as part of the Google Fit API</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core
+        functionality.</string>
+    <string name="ok">OK</string>
+    <string name="settings">Settings</string>
+    <string name="service_description">Service for logging sensor data used by the SensorLogger</string>
 </resources>
