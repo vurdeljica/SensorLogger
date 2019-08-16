@@ -2,13 +2,15 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.Task;
@@ -27,6 +29,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +37,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
+import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
@@ -55,6 +60,79 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+        NetworkManager networkManager = NetworkManager.getInstance(getApplicationContext());
+
+        Thread thread = new Thread(new Runnable() {
+            boolean transfered = false;
+            @Override
+            public void run() {
+                try {
+                    File dir = null;
+
+                    try {
+
+                        dir = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
+                        System.out.println(Environment.getExternalStorageDirectory() + "/testDirectory");
+                        try {
+                            if (dir.exists()) {
+                                System.out.println("Direcory exists");
+                            }
+                            if (!dir.exists()) {
+                                System.out.println("Direcory doesn't exist");
+                            }
+                            if (dir.mkdir()) {
+                                System.out.println("Directory created");
+                            } else {
+                                System.out.println("Directory is not created");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        /*for (int i = 0; i < 170; i++) {
+                            File file = new File(Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +".txt");
+
+                            if (!file.exists()) {
+                                file.createNewFile();
+                            }
+
+                            FileWriter writer = new FileWriter(file);
+                            for (int j = 0; j < 200000; j++) {
+                                writer.append("blabla");
+                            }
+                            writer.flush();
+                            writer.close();
+                        }*/
+
+                    }
+                    catch(Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    while(!transfered) {
+                        Thread.sleep(1000);
+                        List<ServerInfo> sInfoList = networkManager.getServersInformation();
+                        for(ServerInfo serverInfo : sInfoList) {
+                            Log.d("ZEROCONF TEST", serverInfo.toString());
+
+                            File dirP = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
+
+                            networkManager.uploadDirectoryContentToServer(serverInfo, dirP);
+
+                            transfered = true;
+
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+
+
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
