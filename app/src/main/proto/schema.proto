@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+ option java_package = "rs.ac.bg.etf.rti.sensorlogger";
+ option java_outer_classname = "SensorDataProtos";
+
+ message SensorData {
+     float num1 = 1;
+     float num2 = 2;
+     float num3 = 3;
+ }

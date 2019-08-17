@@ -35,8 +35,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
@@ -52,6 +66,15 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String COUNT_KEY = "com.example.key.count";
 
     Fragment selectedFragment = null;
+
+    public static void doCopy(InputStream is, OutputStream os) throws Exception {
+        int oneByte;
+        while ((oneByte = is.read()) != -1) {
+            os.write(oneByte);
+        }
+        os.close();
+        is.close();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,25 +93,23 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                 try {
                     File dir = null;
 
+                    dir = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
+                    System.out.println(Environment.getExternalStorageDirectory() + "/testDirectory");
                     try {
-
-                        dir = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
-                        System.out.println(Environment.getExternalStorageDirectory() + "/testDirectory");
-                        try {
-                            if (dir.exists()) {
-                                System.out.println("Direcory exists");
-                            }
-                            if (!dir.exists()) {
-                                System.out.println("Direcory doesn't exist");
-                            }
-                            if (dir.mkdir()) {
-                                System.out.println("Directory created");
-                            } else {
-                                System.out.println("Directory is not created");
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        if (dir.exists()) {
+                            System.out.println("Direcory exists");
                         }
+                        if (!dir.exists()) {
+                            System.out.println("Direcory doesn't exist");
+                        }
+                        if (dir.mkdir()) {
+                            System.out.println("Directory created");
+                        } else {
+                            System.out.println("Directory is not created");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                         /*for (int i = 0; i < 170; i++) {
                             File file = new File(Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +".txt");
@@ -103,12 +124,45 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                             }
                             writer.flush();
                             writer.close();
-                        }*/
+                        }
 
                     }
                     catch(Exception e) {
                         e.printStackTrace();
-                    }
+                    }*/
+
+
+                    /*for (int i = 0; i < 10; i++) {
+
+                        String path = Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +".log";
+                        String path_compressed = Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +"-compressed.log";
+                        List<SensorDataProtos.SensorData> sensorDataList = new ArrayList<>();
+
+                        for(int j = 0; j < 70000; j++) {
+                            SensorDataProtos.SensorData sd = SensorDataProtos.SensorData.newBuilder()
+                                    .setNum1((float)1.0)
+                                    .setNum2((float)2.0)
+                                    .setNum3((float)3.0)
+                                    .build();
+                            sensorDataList.add(sd);
+                        }
+
+                        try(FileOutputStream output = new FileOutputStream(path, false)) {
+                            for (SensorDataProtos.SensorData sensorData: sensorDataList) {
+                                sensorData.writeDelimitedTo(output);
+                            }
+
+                            FileInputStream fis = new FileInputStream(path);
+                            FileOutputStream fos = new FileOutputStream(path_compressed);
+                            DeflaterOutputStream dos = new DeflaterOutputStream(fos);
+
+                            doCopy(fis, dos); // copy original.txt to deflated.txt and compress it
+
+                            File file = new File(path);
+                            boolean deleted = file.delete();
+
+                        }
+                    }*/
 
                     while(!transfered) {
                         Thread.sleep(1000);
@@ -128,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
             }
         });
         thread.start();
