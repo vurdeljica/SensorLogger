@@ -1,7 +1,14 @@
 package rs.ac.bg.etf.rti.sensorlogger.database;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +40,6 @@ public class DatabaseManager {
     }
 
     public void insertOrUpdateDailyActivity(DailyActivity _dailyActivity) {
-
         try (Realm realm = Realm.getDefaultInstance()) {
             final DailyActivity dailyActivity = _dailyActivity;
             boolean isNewActivity = dailyActivity.getId() == -1;
@@ -93,6 +99,38 @@ public class DatabaseManager {
         }
 
         return dailyActivities;
+    }
+
+    public void saveToJson(File parentDirectory) {
+        List<DailyActivity> dailyActivities = new ArrayList<>();
+        Gson gson = new GsonBuilder().create(); //... obtain your Gson;
+        Realm realm = Realm.getDefaultInstance();
+        RealmResults<DailyActivity> results = realm.where(DailyActivity.class).findAll();
+        dailyActivities.addAll(realm.copyFromRealm(results));
+
+        try {
+            File file = new File(parentDirectory.getPath() + "/dailyActivity.json");
+            FileWriter writer = new FileWriter(file);
+            writer.append("{\"activities\":[");
+            for (int i = 0; i < dailyActivities.size(); i++) {
+                DailyActivity dailyActivity = dailyActivities.get(i);
+
+                String json = gson.toJson(dailyActivity);
+                writer.append(json);
+                if (i != dailyActivities.size() - 1) {
+                    writer.append(",");
+                }
+            }
+            for (DailyActivity dailyActivity : dailyActivities) {
+
+            }
+            writer.append("]}");
+            writer.flush();
+            writer.close();
+        }
+        catch(IOException ex) {
+
+        }
     }
 
 }
