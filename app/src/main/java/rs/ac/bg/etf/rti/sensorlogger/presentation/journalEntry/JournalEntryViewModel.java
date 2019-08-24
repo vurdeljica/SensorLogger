@@ -3,6 +3,8 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation.journalEntry;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.view.View;
+import android.widget.DatePicker;
+import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
@@ -28,45 +30,64 @@ public class JournalEntryViewModel extends BaseObservable {
     }
 
     public TextViewBindingAdapter.OnTextChanged getOnTextChangedListener() {
-        return (s, start, before, count) -> handler.clearErrors();
+        return new TextViewBindingAdapter.OnTextChanged() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                handler.clearErrors();
+            }
+        };
     }
 
     public View.OnClickListener getDateOnClickListener() {
-        Calendar calendar = Calendar.getInstance();
-        return v -> new DatePickerDialog(v.getContext(), getOnDateSetListener(), calendar
-                .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)).show();
+        final Calendar calendar = Calendar.getInstance();
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(v.getContext(), JournalEntryViewModel.this.getOnDateSetListener(), calendar
+                        .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        };
     }
 
     private DatePickerDialog.OnDateSetListener getOnDateSetListener() {
         final Calendar calendar = Calendar.getInstance();
-        return (view, year, month, day) -> {
-            calendar.set(year, month, day, 0, 0);
-            journalEntry.setDate(calendar.getTime());
-            notifyChange();
-        };
-    }
-
-    public View.OnClickListener getTimeOnClickListener(boolean isStartTime) {
-        return v -> {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(isStartTime ? journalEntry.getStartTime() : journalEntry.getEndTime());
-            new TimePickerDialog(v.getContext(), getOnTimeSetListener(isStartTime),
-                    calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE),
-                    true).show();
-        };
-    }
-
-    private TimePickerDialog.OnTimeSetListener getOnTimeSetListener(boolean isStartTime) {
-        return (timePicker, hour, minute) -> {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(0, 0, 0, hour, minute);
-            if (isStartTime) {
-                journalEntry.setStartTime(calendar.getTime());
-            } else {
-                journalEntry.setEndTime(calendar.getTime());
+        return new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int day) {
+                calendar.set(year, month, day, 0, 0);
+                journalEntry.setDate(calendar.getTime());
+                JournalEntryViewModel.this.notifyChange();
             }
-            notifyChange();
+        };
+    }
+
+    public View.OnClickListener getTimeOnClickListener(final boolean isStartTime) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(isStartTime ? journalEntry.getStartTime() : journalEntry.getEndTime());
+                new TimePickerDialog(v.getContext(), JournalEntryViewModel.this.getOnTimeSetListener(isStartTime),
+                        calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE),
+                        true).show();
+            }
+        };
+    }
+
+    private TimePickerDialog.OnTimeSetListener getOnTimeSetListener(final boolean isStartTime) {
+        return new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(0, 0, 0, hour, minute);
+                if (isStartTime) {
+                    journalEntry.setStartTime(calendar.getTime());
+                } else {
+                    journalEntry.setEndTime(calendar.getTime());
+                }
+                JournalEntryViewModel.this.notifyChange();
+            }
         };
     }
 
@@ -76,7 +97,6 @@ public class JournalEntryViewModel extends BaseObservable {
             dbManager.insertOrUpdateDailyActivity(journalEntry);
             handler.onJournalEntrySaved();
         }
-
     }
 
     private boolean activityValidation() {

@@ -49,7 +49,12 @@ public class DatabaseManager {
                 dailyActivity.setId(nextId);
             }
 
-            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(dailyActivity));
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm1) {
+                    realm1.insertOrUpdate(dailyActivity);
+                }
+            });
 
         }
     }
@@ -58,9 +63,12 @@ public class DatabaseManager {
 
         try (Realm realm = Realm.getDefaultInstance()) {
             final long id = dailyActivityId;
-            realm.executeTransaction(realm1 -> {
-                RealmResults<DailyActivity> result = realm1.where(DailyActivity.class).equalTo("id", id).findAll();
-                result.deleteAllFromRealm();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm1) {
+                    RealmResults<DailyActivity> result = realm1.where(DailyActivity.class).equalTo("id", id).findAll();
+                    result.deleteAllFromRealm();
+                }
             });
         }
     }

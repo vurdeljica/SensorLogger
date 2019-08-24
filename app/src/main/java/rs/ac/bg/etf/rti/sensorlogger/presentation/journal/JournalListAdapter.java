@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.Function;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,17 +48,21 @@ public class JournalListAdapter extends BaseExpandableListAdapter {
         journalList.addAll(list);
         listHashMap = new HashMap<>(
                 Stream.of(journalList)
-                        .collect(Collectors.groupingBy(dailyActivity -> {
-                            if (isDateToday(dailyActivity.getDate())) {
-                                return "Today";
-                            }
+                        .collect(Collectors.groupingBy(new Function<DailyActivity, String>() {
 
-                            if (isDateYesterday(dailyActivity.getDate())) {
-                                return "Yesterday";
-                            }
+                            @Override
+                            public String apply(DailyActivity dailyActivity) {
+                                if (JournalListAdapter.this.isDateToday(dailyActivity.getDate())) {
+                                    return "Today";
+                                }
 
-                            SimpleDateFormat sdf_date = new SimpleDateFormat("EEE, MMM d", Locale.US);
-                            return sdf_date.format(dailyActivity.getDate());
+                                if (JournalListAdapter.this.isDateYesterday(dailyActivity.getDate())) {
+                                    return "Yesterday";
+                                }
+
+                                SimpleDateFormat sdf_date = new SimpleDateFormat("EEE, MMM d", Locale.US);
+                                return sdf_date.format(dailyActivity.getDate());
+                            }
                         }))
         );
 
