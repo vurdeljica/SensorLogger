@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
@@ -42,6 +43,8 @@ public class WearableMainActivity extends WearableActivity implements DataClient
 
     private int counter = 0;
 
+    private WearableSensorManager wearableSensorManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,8 @@ public class WearableMainActivity extends WearableActivity implements DataClient
                 increaseCounter();
             }
         });
+
+        wearableSensorManager = new WearableSensorManager(getSystemService(SensorManager.class));
 
         // Enables Always-on
         setAmbientEnabled();

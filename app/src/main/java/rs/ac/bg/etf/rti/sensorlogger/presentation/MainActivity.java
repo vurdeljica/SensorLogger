@@ -41,7 +41,7 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
 public class MainActivity extends AppCompatActivity implements DataClient.OnDataChangedListener,
         MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
-    private static String TAG = "MainActivitiy";
+    private static String TAG = "MainActivity";
     private static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String COUNT_KEY = "com.example.key.count";
