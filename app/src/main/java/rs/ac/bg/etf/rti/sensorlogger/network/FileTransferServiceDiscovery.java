@@ -9,6 +9,8 @@ import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 import org.reactivestreams.Subscription;
 
+import java.net.Inet4Address;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -88,7 +90,11 @@ public class FileTransferServiceDiscovery {
     }
 
     private String getIpAddress(BonjourService bonjourService) {
-        String ipv4Address = bonjourService.getInet4Address().getHostAddress();
+        Inet4Address ipv4AddressInetAddress = bonjourService.getInet4Address();
+        String ipv4Address = "";
+        if (ipv4AddressInetAddress != null) {
+            ipv4Address = ipv4AddressInetAddress.getHostAddress();
+        }
 
         boolean containsIpInTXTRecord = bonjourService.getTxtRecords().containsKey("ip");
         if (containsIpInTXTRecord) {
