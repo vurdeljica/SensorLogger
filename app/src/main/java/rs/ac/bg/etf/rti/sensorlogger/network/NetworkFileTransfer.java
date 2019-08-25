@@ -120,9 +120,20 @@ public class NetworkFileTransfer {
 
     public void uploadFileToServer(String serverURL, File file) throws IOException {
         final HttpParams httpParams = new BasicHttpParams();
+        int fileType = -1;
+        if (file.getName().contains("json")) {
+            fileType = 0;
+        }
+        else if (file.getName().contains("mobile")) {
+            fileType = 1;
+        }
+        else if (file.getName().contains("device")) {
+            fileType = 2;
+        }
+
         HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
         HttpClient httpclient = new DefaultHttpClient(httpParams);
-        HttpPost httppost = new HttpPost(serverURL);
+        HttpPost httppost = new HttpPost(serverURL + "/upload?fileType=" + fileType);
         FileInputStream fIn = new FileInputStream(file);
         InputStreamEntity reqEntity = new InputStreamEntity(fIn, -1);
         reqEntity.setContentType("binary/octet-stream");

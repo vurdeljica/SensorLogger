@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
-import rs.ac.bg.etf.rti.sensorlogger.database.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.ActivityJournalEntryBinding;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 

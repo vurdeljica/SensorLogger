@@ -1,7 +1,6 @@
-package rs.ac.bg.etf.rti.sensorlogger.database;
+package rs.ac.bg.etf.rti.sensorlogger.persistency;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -101,7 +100,7 @@ public class DatabaseManager {
         return dailyActivities;
     }
 
-    public void saveToJson(File parentDirectory) {
+    public void saveToJson(File jsonFile) {
         List<DailyActivity> dailyActivities = new ArrayList<>();
         Gson gson = new GsonBuilder().create(); //... obtain your Gson;
         Realm realm = Realm.getDefaultInstance();
@@ -109,8 +108,7 @@ public class DatabaseManager {
         dailyActivities.addAll(realm.copyFromRealm(results));
 
         try {
-            File file = new File(parentDirectory.getPath() + "/dailyActivity.json");
-            FileWriter writer = new FileWriter(file);
+            FileWriter writer = new FileWriter(jsonFile);
             writer.append("{\"activities\":[");
             for (int i = 0; i < dailyActivities.size(); i++) {
                 DailyActivity dailyActivity = dailyActivities.get(i);

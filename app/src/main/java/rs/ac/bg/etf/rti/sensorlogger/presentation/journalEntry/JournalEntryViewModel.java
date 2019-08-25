@@ -12,7 +12,7 @@ import androidx.databinding.adapters.TextViewBindingAdapter;
 
 import java.util.Calendar;
 
-import rs.ac.bg.etf.rti.sensorlogger.database.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 
 public class JournalEntryViewModel extends BaseObservable {

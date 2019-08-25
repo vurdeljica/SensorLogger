@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.broadcastReceivers.NotificationPublisher;
-import rs.ac.bg.etf.rti.sensorlogger.database.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journalEntry.JournalEntryActivity;
 
 public class SensorLoggerApplication extends Application {

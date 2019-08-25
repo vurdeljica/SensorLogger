@@ -4,7 +4,7 @@ import android.database.DataSetObserver;
 
 import androidx.databinding.BaseObservable;
 
-import rs.ac.bg.etf.rti.sensorlogger.database.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
 public class JournalViewModel extends BaseObservable {
 

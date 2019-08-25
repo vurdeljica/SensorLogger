@@ -44,6 +44,10 @@ public class DailyActivity extends RealmObject {
 
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         startTime = calendar.getTime();
+
+        activityType = "";
+        activityTitle = "";
+        notes = "";
     }
 
     public DailyActivity(long id, String activityTitle, String activityType, Date date, Date startTime, Date endTime, String notes) {

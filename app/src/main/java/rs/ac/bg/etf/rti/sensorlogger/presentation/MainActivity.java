@@ -9,8 +9,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.Task;
@@ -37,22 +35,19 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Deflater;
+import java.util.Random;
 import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.PersitencyManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
@@ -66,15 +61,6 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String COUNT_KEY = "com.example.key.count";
 
     Fragment selectedFragment = null;
-
-    public static void doCopy(InputStream is, OutputStream os) throws Exception {
-        int oneByte;
-        while ((oneByte = is.read()) != -1) {
-            os.write(oneByte);
-        }
-        os.close();
-        is.close();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,79 +77,46 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
             @Override
             public void run() {
                 try {
-                    File dir = null;
+                    PersitencyManager.getInstance().saveDailyActivity();
 
-                    dir = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
-                    System.out.println(Environment.getExternalStorageDirectory() + "/testDirectory");
-                    try {
-                        if (dir.exists()) {
-                            System.out.println("Direcory exists");
-                        }
-                        if (!dir.exists()) {
-                            System.out.println("Direcory doesn't exist");
-                        }
-                        if (dir.mkdir()) {
-                            System.out.println("Directory created");
-                        } else {
-                            System.out.println("Directory is not created");
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    Random rand = new Random();
 
-                        /*for (int i = 0; i < 170; i++) {
-                            File file = new File(Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +".txt");
+                     /* for (int i = 0; i < 50; i++) {
 
-                            if (!file.exists()) {
-                                file.createNewFile();
-                            }
-
-                            FileWriter writer = new FileWriter(file);
-                            for (int j = 0; j < 200000; j++) {
-                                writer.append("blabla");
-                            }
-                            writer.flush();
-                            writer.close();
-                        }
-
-                    }
-                    catch(Exception e) {
-                        e.printStackTrace();
-                    }*/
-
-
-                    /*for (int i = 0; i < 10; i++) {
-
-                        String path = Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +".log";
-                        String path_compressed = Environment.getExternalStorageDirectory() + "/testDirectory" + "/test" + i +"-compressed.log";
-                        List<SensorDataProtos.SensorData> sensorDataList = new ArrayList<>();
-
-                        for(int j = 0; j < 70000; j++) {
-                            SensorDataProtos.SensorData sd = SensorDataProtos.SensorData.newBuilder()
-                                    .setNum1((float)1.0)
-                                    .setNum2((float)2.0)
-                                    .setNum3((float)3.0)
+                        List<SensorDataProtos.MobileData> sensorDataList = new ArrayList<>();
+                        List<SensorDataProtos.DeviceData> deviceSensorDataList = new ArrayList<>();
+                        long time = System.currentTimeMillis();
+                        for(int j = 0; j < 30000; j++) {
+                            time += 30;
+                            SensorDataProtos.MobileData mobileData = SensorDataProtos.MobileData.newBuilder()
+                                    .setGpsAccuracy((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setGpsAltitude((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setGpsLatitude((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setGpsLongitude((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setHeartRate((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setStepCount(rand.nextInt(20000))
+                                    .setTimestamp(time)
                                     .build();
-                            sensorDataList.add(sd);
+
+                            sensorDataList.add(mobileData);
+
+                            SensorDataProtos.DeviceData deviceData = SensorDataProtos.DeviceData.newBuilder()
+                                    .setAccX((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setAccY((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setAccZ((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setGyrX((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setGyrY((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setGyrZ((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
+                                    .setMacAddress(j % 2 == 0 ? "first mac address": "second mac address")
+                                    .build();
+
+                            deviceSensorDataList.add(deviceData);
                         }
 
-                        try(FileOutputStream output = new FileOutputStream(path, false)) {
-                            for (SensorDataProtos.SensorData sensorData: sensorDataList) {
-                                sensorData.writeDelimitedTo(output);
-                            }
-
-                            FileInputStream fis = new FileInputStream(path);
-                            FileOutputStream fos = new FileOutputStream(path_compressed);
-                            DeflaterOutputStream dos = new DeflaterOutputStream(fos);
-
-                            doCopy(fis, dos); // copy original.txt to deflated.txt and compress it
-
-                            File file = new File(path);
-                            boolean deleted = file.delete();
-
-                        }
-                    }*/
-
+                        PersitencyManager.getInstance().saveMobileData(sensorDataList);
+                        PersitencyManager.getInstance().saveDeviceData(deviceSensorDataList);
+                    }
+*/
                     while(!transfered) {
                         Thread.sleep(1000);
                         List<ServerInfo> sInfoList = networkManager.getServersInformation();
