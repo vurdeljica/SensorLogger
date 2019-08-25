@@ -10,6 +10,7 @@ import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 import org.reactivestreams.Subscription;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -103,14 +104,16 @@ public class FileTransferServiceDiscovery {
                 .compose(rxdnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    Log.d("TAG", bonjourService.toString());
-                    if (bonjourService.isLost()) {
-                        serviceLostCallback(bonjourService);
-                    } else {
-                        serviceFoundCallback(bonjourService);
+                .subscribe(new Consumer<BonjourService>() {
+                    @Override
+                    public void accept(BonjourService bonjourService) throws Exception {
+                        if (bonjourService.isLost()) {
+                            serviceLostCallback(bonjourService);
+                        } else {
+                            serviceFoundCallback(bonjourService);
+                        }
                     }
-                }, throwable -> Log.e("TAG", "error", throwable));
+                });
     }
 
     //BonjourService bs = new BonjourService.Builder(0, 0, Build.DEVICE, "_hap._tcp", "local.").port(123).build();

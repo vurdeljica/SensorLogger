@@ -43,7 +43,8 @@ public class PersitencyManager {
         return instance;
     }
 
-    public void saveMobileData(List<SensorDataProtos.MobileData> mobileData) {
+    public void saveMobileData(List<SensorDataProtos.MobileData> _mobileData) {
+        final List<SensorDataProtos.MobileData> mobileData = _mobileData;
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -69,7 +70,8 @@ public class PersitencyManager {
         thread.start();
     }
 
-    public void saveDeviceData(List<SensorDataProtos.DeviceData> deviceData) {
+    public void saveDeviceData(List<SensorDataProtos.DeviceData> _deviceData) {
+        final List<SensorDataProtos.DeviceData> deviceData = _deviceData;
         Thread thread = new Thread() {
             @Override
             public void run() {

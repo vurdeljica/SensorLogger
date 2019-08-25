@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,20 +32,11 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.zip.DeflaterOutputStream;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
-import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
-import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersitencyManager;
@@ -70,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        NetworkManager networkManager = NetworkManager.getInstance(getApplicationContext());
+        final NetworkManager networkManager = NetworkManager.getInstance(getApplicationContext());
 
         Thread thread = new Thread(new Runnable() {
             boolean transfered = false;

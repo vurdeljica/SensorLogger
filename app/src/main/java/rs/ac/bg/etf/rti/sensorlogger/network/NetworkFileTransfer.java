@@ -43,7 +43,9 @@ public class NetworkFileTransfer {
 
     }
 
-    public void sendAllFilesInDirectory(String serverURL, File directory) {
+    public void sendAllFilesInDirectory(String _serverURL, File _directory) {
+        final String serverURL = _serverURL;
+        final File directory = _directory;
         Thread thread = new Thread(new Runnable() {
 
             ExecutorService executor = null;
@@ -99,7 +101,9 @@ public class NetworkFileTransfer {
         }
     }
 
-    private Callable<Boolean> makeCallableTaskForFileUpload(String serverURL, File file) {
+    private Callable<Boolean> makeCallableTaskForFileUpload(String _serverURL, File _file) {
+        final File file = _file;
+        final String serverURL = _serverURL;
         Callable<Boolean> callableTask = new Callable<Boolean>() {
 
             @Override
