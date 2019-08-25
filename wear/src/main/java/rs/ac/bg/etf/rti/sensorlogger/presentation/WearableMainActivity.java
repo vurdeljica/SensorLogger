@@ -4,14 +4,11 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.DataClient;
@@ -23,8 +20,6 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.Set;
@@ -35,13 +30,10 @@ public class WearableMainActivity extends WearableActivity implements DataClient
         MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
     private static final String TAG = "WearableMainActivity";
-    private static final String SERVER_APP_CAPABILITY = "sensor_app_servert";
+    private static final String SERVER_APP_CAPABILITY = "sensor_app_server";
     private static final String COUNT_KEY = "com.example.key.count";
 
     private TextView mTextView;
-    private Button button;
-
-    private int counter = 0;
 
     private WearableSensorManager wearableSensorManager;
 
@@ -51,13 +43,6 @@ public class WearableMainActivity extends WearableActivity implements DataClient
         setContentView(R.layout.activity_main);
 
         mTextView = findViewById(R.id.text);
-        button = findViewById(R.id.btn);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                increaseCounter();
-            }
-        });
 
         wearableSensorManager = new WearableSensorManager(getSystemService(SensorManager.class));
 
@@ -70,9 +55,11 @@ public class WearableMainActivity extends WearableActivity implements DataClient
         super.onResume();
 
         Wearable.getDataClient(this).addListener(this);
-//        Wearable.getMessageClient(this).addListener(this);
+        Wearable.getMessageClient(this).addListener(this);
         Wearable.getCapabilityClient(this)
                 .addListener(this, SERVER_APP_CAPABILITY);
+
+        wearableSensorManager.startListening(getApplicationContext());
     }
 
     @Override
@@ -80,13 +67,15 @@ public class WearableMainActivity extends WearableActivity implements DataClient
         super.onPause();
 
         Wearable.getDataClient(this).removeListener(this);
-//        Wearable.getMessageClient(this).removeListener(this);
+        Wearable.getMessageClient(this).removeListener(this);
         Wearable.getCapabilityClient(this).removeListener(this);
+
+        wearableSensorManager.startListening(getApplicationContext());
     }
 
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-        Log.d(TAG, "onCapabiityChanged: ");
+        Log.d(TAG, "onCapabilityChanged: ");
         Set<Node> nodes = capabilityInfo.getNodes();
 
         if (nodes.isEmpty()) {
@@ -120,12 +109,5 @@ public class WearableMainActivity extends WearableActivity implements DataClient
     @Override
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {
         Log.d(TAG, "onMessageReceived: ");
-    }
-
-    private void increaseCounter() {
-        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
-        putDataMapReq.getDataMap().putInt(COUNT_KEY, counter++);
-        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-        Task<DataItem> putDataTask = Wearable.getDataClient(this).putDataItem(putDataReq);
     }
 }

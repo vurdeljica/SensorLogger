@@ -1,0 +1,67 @@
+package rs.ac.bg.etf.rti.sensorlogger.presentation;
+
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.AccelerometerEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.GyroscopeEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.HeartRateEventListener;
+
+class WearableSensorManager {
+    private final SensorManager sensorManager;
+    private List<SensorEventListener> activeSmListeners;
+
+    WearableSensorManager(SensorManager sensorManager) {
+        this.sensorManager = sensorManager;
+        activeSmListeners = new ArrayList<>();
+    }
+
+    void startListening(Context context) {
+        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (accelerometerSensor != null) {
+            AccelerometerEventListener accelerometerEventListener = new AccelerometerEventListener(context);
+            activeSmListeners.add(accelerometerEventListener);
+            sensorManager.registerListener(
+                    accelerometerEventListener,
+                    accelerometerSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL,
+                    SensorManager.SENSOR_DELAY_FASTEST
+            );
+        }
+
+        Sensor gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        if (gyroscopeSensor != null) {
+            GyroscopeEventListener gyroscopeEventListener = new GyroscopeEventListener(context);
+            activeSmListeners.add(gyroscopeEventListener);
+            sensorManager.registerListener(
+                    gyroscopeEventListener,
+                    gyroscopeSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL,
+                    SensorManager.SENSOR_DELAY_FASTEST
+            );
+        }
+
+        Sensor heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+        if (heartRateSensor != null) {
+            HeartRateEventListener heartRateEventListener = new HeartRateEventListener(context);
+            activeSmListeners.add(heartRateEventListener);
+            sensorManager.registerListener(
+                    heartRateEventListener,
+                    heartRateSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL,
+                    SensorManager.SENSOR_DELAY_FASTEST
+            );
+        }
+    }
+
+    void stopListening() {
+        for (SensorEventListener sensorEventListener: activeSmListeners) {
+            sensorManager.unregisterListener(sensorEventListener);
+        }
+    }
+}

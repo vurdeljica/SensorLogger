@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
@@ -45,14 +44,11 @@ public class WearableDataListenerService extends WearableListenerService {
                                 .sendMessage(nodeId, DATA_ITEM_RECEIVED_PATH, payload);
 
                 sendMessageTask.addOnCompleteListener(
-                        new OnCompleteListener<Integer>() {
-                            @Override
-                            public void onComplete(Task<Integer> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "Message sent successfully");
-                                } else {
-                                    Log.d(TAG, "Message failed.");
-                                }
+                        task -> {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Message sent successfully");
+                            } else {
+                                Log.d(TAG, "Message failed.");
                             }
                         });
             }

@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,6 +37,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import rs.ac.bg.etf.rti.sensorlogger.ApplicationSensorManager;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String COUNT_KEY = "com.example.key.count";
 
     Fragment selectedFragment = null;
+
+    private ApplicationSensorManager sensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +142,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new HomeFragment()).commit();
         }
+
+        sensorManager = new ApplicationSensorManager(getSystemService(SensorManager.class));
     }
 
     @Override
@@ -154,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                 .addListener(this, CLIENT_APP_CAPABILITY);
 
         startWearableActivity();
+        sensorManager.startListening(getApplicationContext());
     }
 
 
