@@ -30,64 +30,45 @@ public class JournalEntryViewModel extends BaseObservable {
     }
 
     public TextViewBindingAdapter.OnTextChanged getOnTextChangedListener() {
-        return new TextViewBindingAdapter.OnTextChanged() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                handler.clearErrors();
-            }
-        };
+        return (s, start, before, count) -> handler.clearErrors();
     }
 
     public View.OnClickListener getDateOnClickListener() {
         final Calendar calendar = Calendar.getInstance();
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new DatePickerDialog(v.getContext(), JournalEntryViewModel.this.getOnDateSetListener(), calendar
-                        .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        };
+        return v -> new DatePickerDialog(v.getContext(), JournalEntryViewModel.this.getOnDateSetListener(), calendar
+                .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private DatePickerDialog.OnDateSetListener getOnDateSetListener() {
         final Calendar calendar = Calendar.getInstance();
-        return new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int day) {
-                calendar.set(year, month, day, 0, 0);
-                journalEntry.setDate(calendar.getTime());
-                JournalEntryViewModel.this.notifyChange();
-            }
+        return (view, year, month, day) -> {
+            calendar.set(year, month, day, 0, 0);
+            journalEntry.setDate(calendar.getTime());
+            JournalEntryViewModel.this.notifyChange();
         };
     }
 
     public View.OnClickListener getTimeOnClickListener(final boolean isStartTime) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(isStartTime ? journalEntry.getStartTime() : journalEntry.getEndTime());
-                new TimePickerDialog(v.getContext(), JournalEntryViewModel.this.getOnTimeSetListener(isStartTime),
-                        calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE),
-                        true).show();
-            }
+        return v -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(isStartTime ? journalEntry.getStartTime() : journalEntry.getEndTime());
+            new TimePickerDialog(v.getContext(), JournalEntryViewModel.this.getOnTimeSetListener(isStartTime),
+                    calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE),
+                    true).show();
         };
     }
 
     private TimePickerDialog.OnTimeSetListener getOnTimeSetListener(final boolean isStartTime) {
-        return new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(0, 0, 0, hour, minute);
-                if (isStartTime) {
-                    journalEntry.setStartTime(calendar.getTime());
-                } else {
-                    journalEntry.setEndTime(calendar.getTime());
-                }
-                JournalEntryViewModel.this.notifyChange();
+        return (timePicker, hour, minute) -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(0, 0, 0, hour, minute);
+            if (isStartTime) {
+                journalEntry.setStartTime(calendar.getTime());
+            } else {
+                journalEntry.setEndTime(calendar.getTime());
             }
+            JournalEntryViewModel.this.notifyChange();
         };
     }
 

@@ -7,14 +7,14 @@ import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
-public class DataLayerListenerService extends WearableListenerService {
+public class WearableDataLayerListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerService";
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-        Log.d(TAG, "onDataChanged: " + dataEvents);
+
     }
 
     @Override

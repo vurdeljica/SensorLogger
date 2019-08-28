@@ -30,7 +30,7 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
-        <service android:name=".presentation.DataLayerListenerService">
+        <service android:name=".presentation.WearableDataLayerListenerService">
             <intent-filter>
                 <!-- listeners receive events that match the action and data filters -->
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />

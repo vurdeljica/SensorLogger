@@ -110,14 +110,11 @@ public class FileTransferServiceDiscovery {
                 .compose(rxdnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<BonjourService>() {
-                    @Override
-                    public void accept(BonjourService bonjourService) throws Exception {
-                        if (bonjourService.isLost()) {
-                            serviceLostCallback(bonjourService);
-                        } else {
-                            serviceFoundCallback(bonjourService);
-                        }
+                .subscribe(bonjourService -> {
+                    if (bonjourService.isLost()) {
+                        serviceLostCallback(bonjourService);
+                    } else {
+                        serviceFoundCallback(bonjourService);
                     }
                 });
     }

@@ -14,7 +14,11 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
+import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
+import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
+import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 
 public class DatabaseManager {
 
@@ -38,6 +42,38 @@ public class DatabaseManager {
         //Realm.setDefaultConfiguration(config);
     }
 
+    public void insertHeartRateMonitor(HeartRateMonitor _heartRateMonitor) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final HeartRateMonitor heartRateMonitor = _heartRateMonitor;
+
+            realm.executeTransaction(realm1 -> realm1.insert(heartRateMonitor));
+        }
+    }
+
+    public void insertAccelerometer(Accelerometer _accelerometer) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final Accelerometer accelerometer = _accelerometer;
+
+            realm.executeTransaction(realm1 -> realm1.insert(accelerometer));
+        }
+    }
+
+    public void insertGyroscope(Gyroscope _gyroscope) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final Gyroscope gyroscope = _gyroscope;
+
+            realm.executeTransaction(realm1 -> realm1.insert(gyroscope));
+        }
+    }
+
+    public void insertPedometer(Pedometer _pedometer) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final Pedometer pedometer = _pedometer;
+
+            realm.executeTransaction(realm1 -> realm1.insert(pedometer));
+        }
+    }
+
     public void insertOrUpdateDailyActivity(DailyActivity _dailyActivity) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final DailyActivity dailyActivity = _dailyActivity;
@@ -54,12 +90,7 @@ public class DatabaseManager {
                 dailyActivity.setId(nextId);
             }
 
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm1) {
-                    realm1.insertOrUpdate(dailyActivity);
-                }
-            });
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(dailyActivity));
 
         }
     }
@@ -68,12 +99,9 @@ public class DatabaseManager {
 
         try (Realm realm = Realm.getDefaultInstance()) {
             final long id = dailyActivityId;
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm1) {
-                    RealmResults<DailyActivity> result = realm1.where(DailyActivity.class).equalTo("id", id).findAll();
-                    result.deleteAllFromRealm();
-                }
+            realm.executeTransaction(realm1 -> {
+                RealmResults<DailyActivity> result = realm1.where(DailyActivity.class).equalTo("id", id).findAll();
+                result.deleteAllFromRealm();
             });
         }
     }

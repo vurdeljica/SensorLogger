@@ -1,23 +1,19 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.util.Log;
+
+import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
 public class PedometerEventListener implements SensorEventListener {
     private final static String TAG = "Pedometer";
 
-    private Context context;
-
-    public PedometerEventListener(Context context) {
-        this.context = context;
-    }
-
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Log.d(TAG, prettyPrintFloatArray(event.values));
+        Pedometer pedometer = new Pedometer(event.timestamp, (int) event.values[0]);
+        DatabaseManager.getInstance().insertPedometer(pedometer);
     }
 
     @Override

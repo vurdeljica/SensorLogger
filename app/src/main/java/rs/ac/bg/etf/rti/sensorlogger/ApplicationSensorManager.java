@@ -1,6 +1,5 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
@@ -17,34 +16,23 @@ public class ApplicationSensorManager {
         activeSmListeners = new ArrayList<>();
     }
 
-    public void startListening(Context context) {
-//        Sensor gpsSensor = sensorManager.getDefaultSensor(Sensor.);
-//        if (gpsSensor != null) {
-//            GPSEventListener gpsEventListener = new GPSEventListener(context);
-//            activeSmListeners.add(gpsEventListener);
-//            sensorManager.registerListener(
-//                    gpsEventListener,
-//                    gpsSensor,
-//                    SensorManager.SENSOR_DELAY_NORMAL,
-//                    SensorManager.SENSOR_DELAY_FASTEST
-//            );
-//        }
+    public void startListening() {
 
         Sensor pedometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         if (pedometerSensor != null) {
-            PedometerEventListener pedometerEventListener = new PedometerEventListener(context);
+            PedometerEventListener pedometerEventListener = new PedometerEventListener();
             activeSmListeners.add(pedometerEventListener);
             sensorManager.registerListener(
                     pedometerEventListener,
                     pedometerSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL,
-                    SensorManager.SENSOR_DELAY_FASTEST
+                    SensorManager.SENSOR_DELAY_FASTEST,
+                    SensorManager.SENSOR_DELAY_NORMAL
             );
         }
     }
 
     public void stopListening() {
-        for (SensorEventListener sensorEventListener: activeSmListeners) {
+        for (SensorEventListener sensorEventListener : activeSmListeners) {
             sensorManager.unregisterListener(sensorEventListener);
         }
     }

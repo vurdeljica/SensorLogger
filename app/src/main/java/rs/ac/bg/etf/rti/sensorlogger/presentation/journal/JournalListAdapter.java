@@ -48,21 +48,17 @@ public class JournalListAdapter extends BaseExpandableListAdapter {
         journalList.addAll(list);
         listHashMap = new HashMap<>(
                 Stream.of(journalList)
-                        .collect(Collectors.groupingBy(new Function<DailyActivity, String>() {
-
-                            @Override
-                            public String apply(DailyActivity dailyActivity) {
-                                if (JournalListAdapter.this.isDateToday(dailyActivity.getDate())) {
-                                    return "Today";
-                                }
-
-                                if (JournalListAdapter.this.isDateYesterday(dailyActivity.getDate())) {
-                                    return "Yesterday";
-                                }
-
-                                SimpleDateFormat sdf_date = new SimpleDateFormat("EEE, MMM d", Locale.US);
-                                return sdf_date.format(dailyActivity.getDate());
+                        .collect(Collectors.groupingBy(dailyActivity -> {
+                            if (JournalListAdapter.this.isDateToday(dailyActivity.getDate())) {
+                                return "Today";
                             }
+
+                            if (JournalListAdapter.this.isDateYesterday(dailyActivity.getDate())) {
+                                return "Yesterday";
+                            }
+
+                            SimpleDateFormat sdf_date = new SimpleDateFormat("EEE, MMM d", Locale.US);
+                            return sdf_date.format(dailyActivity.getDate());
                         }))
         );
 

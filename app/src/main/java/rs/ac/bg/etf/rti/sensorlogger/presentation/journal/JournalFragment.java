@@ -46,12 +46,7 @@ public class JournalFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentJournalBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_journal, container, false);
 
-        binding.addJournalButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                JournalFragment.this.startActivity(new Intent(JournalFragment.this.getActivity(), JournalEntryActivity.class));
-            }
-        });
+        binding.addJournalButton.setOnClickListener(v -> JournalFragment.this.startActivity(new Intent(JournalFragment.this.getActivity(), JournalEntryActivity.class)));
 
         viewModel = new JournalViewModel();
         binding.setVm(viewModel);
@@ -65,14 +60,11 @@ public class JournalFragment extends Fragment {
     }
 
     private ExpandableListView.OnChildClickListener getOnChildClickListener() {
-        return new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Log.d("TEST", "Journal Entry on click");
-                DailyActivity activity = (DailyActivity) parent.getExpandableListAdapter().getChild(groupPosition, childPosition);
-                JournalFragment.this.startJournalEntryActivity(activity.getId(), v.getContext());
-                return true;
-            }
+        return (parent, v, groupPosition, childPosition, id) -> {
+            Log.d("TEST", "Journal Entry on click");
+            DailyActivity activity = (DailyActivity) parent.getExpandableListAdapter().getChild(groupPosition, childPosition);
+            JournalFragment.this.startJournalEntryActivity(activity.getId(), v.getContext());
+            return true;
         };
     }
 

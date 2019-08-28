@@ -57,7 +57,7 @@ public class NetworkFileTransfer {
 
                     sendGeneralInformation(serverURL, files.length);
 
-                    List<Future<?>> futures = new ArrayList<Future<?>>();
+                    List<Future<?>> futures = new ArrayList<>();
                     executor = Executors.newFixedThreadPool(10);//creating a pool of 10 threads
 
                     for(int i = 0; i < files.length; i++) {
@@ -104,18 +104,14 @@ public class NetworkFileTransfer {
     private Callable<Boolean> makeCallableTaskForFileUpload(String _serverURL, File _file) {
         final File file = _file;
         final String serverURL = _serverURL;
-        Callable<Boolean> callableTask = new Callable<Boolean>() {
-
-            @Override
-            public Boolean call() {
-                try {
-                    Log.d("PERFORMANCE", System.currentTimeMillis() + "");
-                    uploadFileToServer(serverURL, file);
-                    return true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
+        Callable<Boolean> callableTask = () -> {
+            try {
+                Log.d("PERFORMANCE", System.currentTimeMillis() + "");
+                uploadFileToServer(serverURL, file);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
             }
         };
 

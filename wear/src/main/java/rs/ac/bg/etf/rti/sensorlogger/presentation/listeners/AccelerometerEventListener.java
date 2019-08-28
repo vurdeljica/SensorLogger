@@ -6,9 +6,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
@@ -17,10 +14,10 @@ import com.google.android.gms.wearable.Wearable;
 
 public class AccelerometerEventListener implements SensorEventListener {
     private final static String TAG = "Accelerometer";
+    private final static String PATH = "/accelerometer";
     private final static String DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.data";
     private final static String ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.accuracy";
     private final static String TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
-    private final static String PATH = "/accelerometer";
 
     private Context context;
 
@@ -37,12 +34,7 @@ public class AccelerometerEventListener implements SensorEventListener {
         putDataMapReq.getDataMap().putInt(ACCURACY_KEY, event.accuracy);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         Task<DataItem> dataItemTask = Wearable.getDataClient(context).putDataItem(putDataReq);
-        dataItemTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "Failed to send data");
-            }
-        });
+        dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
     }
 
     @Override

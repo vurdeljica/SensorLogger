@@ -13,6 +13,8 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.GyroscopeEventListen
 import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.HeartRateEventListener;
 
 class WearableSensorManager {
+    //sensor sampling period in microseconds - frequency approx. 30 Hz
+    private final int SAMPLING_PERIOD = 33333;
     private final SensorManager sensorManager;
     private List<SensorEventListener> activeSmListeners;
 
@@ -29,8 +31,7 @@ class WearableSensorManager {
             sensorManager.registerListener(
                     accelerometerEventListener,
                     accelerometerSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL,
-                    SensorManager.SENSOR_DELAY_FASTEST
+                    SAMPLING_PERIOD
             );
         }
 
@@ -41,8 +42,7 @@ class WearableSensorManager {
             sensorManager.registerListener(
                     gyroscopeEventListener,
                     gyroscopeSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL,
-                    SensorManager.SENSOR_DELAY_FASTEST
+                    SAMPLING_PERIOD
             );
         }
 
@@ -53,8 +53,8 @@ class WearableSensorManager {
             sensorManager.registerListener(
                     heartRateEventListener,
                     heartRateSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL,
-                    SensorManager.SENSOR_DELAY_FASTEST
+                    SensorManager.SENSOR_DELAY_FASTEST,
+                    SensorManager.SENSOR_DELAY_NORMAL
             );
         }
     }

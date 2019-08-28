@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".config.SensorLoggerApplication"
@@ -34,7 +34,7 @@
 
         <receiver android:name=".broadcastReceivers.NotificationPublisher" />
 
-        <service android:name=".services.WearableDataListenerService">
+        <service android:name=".services.ApplicationDataListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
                 <data
