@@ -11,6 +11,7 @@ import java.util.List;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.AccelerometerEventListener;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.GyroscopeEventListener;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.HeartRateEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.PedometerEventListener;
 
 class WearableSensorManager {
     //sensor sampling period in microseconds - frequency approx. 30 Hz
@@ -53,6 +54,18 @@ class WearableSensorManager {
             sensorManager.registerListener(
                     heartRateEventListener,
                     heartRateSensor,
+                    SensorManager.SENSOR_DELAY_FASTEST,
+                    SensorManager.SENSOR_DELAY_NORMAL
+            );
+        }
+
+        Sensor stepCountSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if (stepCountSensor != null) {
+            PedometerEventListener pedometerEventListener = new PedometerEventListener(context);
+            activeSmListeners.add(pedometerEventListener);
+            sensorManager.registerListener(
+                    pedometerEventListener,
+                    stepCountSensor,
                     SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL
             );

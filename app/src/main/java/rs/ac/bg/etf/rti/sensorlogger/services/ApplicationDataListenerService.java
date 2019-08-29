@@ -13,6 +13,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
+import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.MainActivity;
 
@@ -33,6 +34,11 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
     private final static String DATA_GYROSCOPE_ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.accuracy";
     private final static String DATA_GYROSCOPE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
+
+    private final static String DATA_STEPS_PATH = "/steps";
+    private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
+    private final static String DATA_STEPS_ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.accuracy";
+    private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
 
     private static final String MESSAGE_START_ACTIVITY_PATH = "/start-activity";
 
@@ -67,6 +73,14 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
                     Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2], accuracy);
                     databaseManager.insertOrUpdateGyroscope(gyroscope);
+                    break;
+                }
+                case DATA_STEPS_PATH: {
+                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
+                    float[] data = dataMap.getFloatArray(DATA_STEPS_DATA_KEY);
+                    long timestamp = dataMap.getLong(DATA_STEPS_TIMESTAMP_KEY);
+                    Pedometer pedometer = new Pedometer(timestamp, (int) data[0]);
+                    databaseManager.insertOrUpdatePedometer(pedometer);
                     break;
                 }
                 default: {

@@ -1,16 +1,12 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.hardware.SensorManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,17 +14,13 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -45,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import rs.ac.bg.etf.rti.sensorlogger.ApplicationSensorManager;
 import rs.ac.bg.etf.rti.sensorlogger.BuildConfig;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.Utils;
@@ -62,8 +53,6 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     private static final String START_ACTIVITY_PATH = "/start-activity";
 
     Fragment selectedFragment = null;
-
-    private ApplicationSensorManager sensorManager;
 
     // Used in checking for runtime permissions.
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -106,8 +95,6 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                     new HomeFragment()).commit();
         }
 
-        sensorManager = new ApplicationSensorManager(getSystemService(SensorManager.class));
-
         // Check that the user hasn't revoked permissions by going to Settings.
         if (Utils.requestingLocationUpdates(this)) {
             if (!checkPermissions()) {
@@ -146,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                 .addListener(this, CLIENT_APP_CAPABILITY);
 
         startWearableActivity();
-        sensorManager.startListening(getApplicationContext());
     }
 
     @Override

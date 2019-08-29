@@ -57,7 +57,7 @@
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
                 <data
                     android:host="*"
-                    android:path="/pedometer"
+                    android:path="/steps"
                     android:scheme="wear" />
             </intent-filter>
             <intent-filter>
