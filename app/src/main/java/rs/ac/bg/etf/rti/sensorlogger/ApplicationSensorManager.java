@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicationSensorManager {
+    private static final long UPDATE_INTERVAL = 33333;
     private final SensorManager sensorManager;
     private List<SensorEventListener> activeSmListeners;
 
@@ -16,8 +18,7 @@ public class ApplicationSensorManager {
         activeSmListeners = new ArrayList<>();
     }
 
-    public void startListening() {
-
+    public void startListening(Context context) {
         Sensor pedometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         if (pedometerSensor != null) {
             PedometerEventListener pedometerEventListener = new PedometerEventListener();

@@ -1,11 +1,25 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -22,6 +37,7 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,14 +46,18 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import rs.ac.bg.etf.rti.sensorlogger.ApplicationSensorManager;
+import rs.ac.bg.etf.rti.sensorlogger.BuildConfig;
 import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.Utils;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
+import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
 
-public class MainActivity extends AppCompatActivity implements CapabilityClient.OnCapabilityChangedListener {
+public class MainActivity extends AppCompatActivity implements CapabilityClient.OnCapabilityChangedListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
     private static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String START_ACTIVITY_PATH = "/start-activity";
 
@@ -45,108 +65,41 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
 
     private ApplicationSensorManager sensorManager;
 
+    // Used in checking for runtime permissions.
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+
+    // A reference to the service used to get location updates.
+    private LocationListenerService mService = null;
+
+    // Tracks the bound state of the service.
+    private boolean mBound = false;
+
+    // Monitors the state of the connection to the service.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationListenerService.LocalBinder binder = (LocationListenerService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            mService.requestLocationUpdates();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        999);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-//            // Permission has already been granted
-//            final NetworkManager networkManager = NetworkManager.getInstance(getApplicationContext());
-//
-//            Thread thread = new Thread(new Runnable() {
-//                boolean transferred = false;
-//
-//                @Override
-//                public void run() {
-//                    try {
-//                        PersitencyManager.getInstance().saveDailyActivity();
-//
-//                        Random rand = new Random();
-//
-//                        for (int i = 0; i < 2; i++) {
-//
-//                            List<SensorDataProtos.MobileData> sensorDataList = new ArrayList<>();
-//                            List<SensorDataProtos.DeviceData> deviceSensorDataList = new ArrayList<>();
-//                            long time = System.currentTimeMillis();
-//                            for (int j = 0; j < 30000; j++) {
-//                                time += 30;
-//                                SensorDataProtos.MobileData mobileData = SensorDataProtos.MobileData.newBuilder()
-//                                        .setGpsAccuracy(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setGpsAltitude(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setGpsLatitude(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setGpsLongitude(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setHeartRate(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setStepCount(rand.nextInt(20000))
-//                                        .setTimestamp(time)
-//                                        .build();
-//
-//                                sensorDataList.add(mobileData);
-//
-//                                SensorDataProtos.DeviceData deviceData = SensorDataProtos.DeviceData.newBuilder()
-//                                        .setAccX(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setAccY(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setAccZ(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setGyrX(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setGyrY(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setGyrZ(rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                        .setMacAddress(j % 2 == 0 ? "first mac address" : "second mac address")
-//                                        .build();
-//
-//                                deviceSensorDataList.add(deviceData);
-//                            }
-//
-//                            PersitencyManager.getInstance().saveMobileData(sensorDataList);
-//                            PersitencyManager.getInstance().saveDeviceData(deviceSensorDataList);
-//                        }
-//
-//                        while (!transferred) {
-//                            Thread.sleep(1000);
-//                            List<ServerInfo> sInfoList = networkManager.getServersInformation();
-//                            for (ServerInfo serverInfo : sInfoList) {
-//                                Log.d("ZEROCONF TEST", serverInfo.toString());
-//
-//                                File dirP = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
-//
-//                                networkManager.uploadDirectoryContentToServer(serverInfo, dirP);
-//
-//                                transferred = true;
-//
-//                                break;
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-//            });
-//            thread.start();
-        }
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -154,105 +107,35 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         }
 
         sensorManager = new ApplicationSensorManager(getSystemService(SensorManager.class));
-    }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case 999: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-//                    final NetworkManager networkManager = NetworkManager.getInstance(getApplicationContext());
-//
-//                    Thread thread = new Thread(new Runnable() {
-//                        boolean transfered = false;
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                PersitencyManager.getInstance().saveDailyActivity();
-//
-//                                Random rand = new Random();
-//
-//                                for (int i = 0; i < 50; i++) {
-//
-//                                    List<SensorDataProtos.MobileData> sensorDataList = new ArrayList<>();
-//                                    List<SensorDataProtos.DeviceData> deviceSensorDataList = new ArrayList<>();
-//                                    long time = System.currentTimeMillis();
-//                                    for(int j = 0; j < 30000; j++) {
-//                                        time += 30;
-//                                        SensorDataProtos.MobileData mobileData = SensorDataProtos.MobileData.newBuilder()
-//                                                .setGpsAccuracy((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setGpsAltitude((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setGpsLatitude((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setGpsLongitude((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setHeartRate((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setStepCount(rand.nextInt(20000))
-//                                                .setTimestamp(time)
-//                                                .build();
-//
-//                                        sensorDataList.add(mobileData);
-//
-//                                        SensorDataProtos.DeviceData deviceData = SensorDataProtos.DeviceData.newBuilder()
-//                                                .setAccX((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setAccY((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setAccZ((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setGyrX((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setGyrY((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setGyrZ((float)rand.nextFloat() * 150 * (rand.nextFloat() > 0.5 ? 1 : -1))
-//                                                .setMacAddress(j % 2 == 0 ? "first mac address": "second mac address")
-//                                                .build();
-//
-//                                        deviceSensorDataList.add(deviceData);
-//                                    }
-//
-//                                    PersitencyManager.getInstance().saveMobileData(sensorDataList);
-//                                    PersitencyManager.getInstance().saveDeviceData(deviceSensorDataList);
-//                                }
-//
-//                                while(!transfered) {
-//                                    Thread.sleep(1000);
-//                                    List<ServerInfo> sInfoList = networkManager.getServersInformation();
-//                                    for(ServerInfo serverInfo : sInfoList) {
-//                                        Log.d("ZEROCONF TEST", serverInfo.toString());
-//
-//                                        File dirP = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
-//
-//                                        networkManager.uploadDirectoryContentToServer(serverInfo, dirP);
-//
-//                                        transfered = true;
-//
-//                                        break;
-//                                    }
-//                                }
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//
-//                        }
-//                    });
-//                    thread.start();
-//
-//                } else {
-//                    // permission denied, boo! Disable the
-//                    // functionality that depends on this permission.
-//                }
-//                return;
-//            }
-
-                    // other 'case' lines to check for other
-                    // permissions this app might request.
-                }
+        // Check that the user hasn't revoked permissions by going to Settings.
+        if (Utils.requestingLocationUpdates(this)) {
+            if (!checkPermissions()) {
+                requestPermissions();
             }
         }
     }
 
     @Override
-    public void onResume() {
+    protected void onStart() {
+        super.onStart();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+
+        // Bind to the service. If the service is in foreground mode, this signals to the service
+        // that since this activity is in the foreground, the service can exit foreground mode.
+        bindService(new Intent(this, LocationListenerService.class), mServiceConnection,
+                Context.BIND_AUTO_CREATE);
+
+        if (!checkPermissions()) {
+            requestPermissions();
+        } else {
+//            mService.requestLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onResume() {
         super.onResume();
 
         if (selectedFragment != null && selectedFragment instanceof JournalFragment) {
@@ -263,15 +146,113 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                 .addListener(this, CLIENT_APP_CAPABILITY);
 
         startWearableActivity();
-        sensorManager.startListening();
+        sensorManager.startListening(getApplicationContext());
     }
-
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         Wearable.getCapabilityClient(this).removeListener(this);
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        if (mBound) {
+            // Unbind from the service. This signals to the service that this activity is no longer
+            // in the foreground, and the service can respond by promoting itself to a foreground
+            // service.
+            unbindService(mServiceConnection);
+            mBound = false;
+        }
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+        mService.removeLocationUpdates();
+        super.onStop();
+    }
+
+    /**
+     * Returns the current state of the permissions needed.
+     */
+    private boolean checkPermissions() {
+        return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+
+    private void requestPermissions() {
+        boolean shouldProvideRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION);
+
+        // Provide an additional rationale to the user. This would happen if the user denied the
+        // request previously, but didn't check the "Don't ask again" checkbox.
+        if (shouldProvideRationale) {
+            Log.i(TAG, "Displaying permission rationale to provide additional context.");
+            Snackbar.make(
+                    findViewById(R.id.activity_main),
+                    R.string.permission_rationale,
+                    Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.ok, view -> {
+                        // Request permission
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                REQUEST_PERMISSIONS_REQUEST_CODE);
+                    })
+                    .show();
+        } else {
+            Log.i(TAG, "Requesting permission");
+            // Request permission. It's possible this can be auto answered if device policy
+            // sets the permission in a given state or the user denied the permission
+            // previously and checked "Never ask again".
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        Log.i(TAG, "onRequestPermissionResult");
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                // If user interaction was interrupted, the permission request is cancelled and you
+                // receive empty arrays.
+                Log.i(TAG, "User interaction was cancelled.");
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted.
+                mService.requestLocationUpdates();
+            } else {
+                // Permission denied.
+                Snackbar.make(
+                        findViewById(R.id.activity_main),
+                        R.string.permission_denied_explanation,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.settings, view -> {
+                            // Build intent that displays the App settings screen.
+                            Intent intent = new Intent();
+                            intent.setAction(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package",
+                                    BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        })
+                        .show();
+            }
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        // Update the buttons state depending on whether location updates are being requested.
+        if (s.equals(Utils.KEY_REQUESTING_LOCATION_UPDATES)) {
+
+        }
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =

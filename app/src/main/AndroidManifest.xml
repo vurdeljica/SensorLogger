@@ -38,7 +38,7 @@
 
         <service android:name=".services.ApplicationDataListenerService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
                 <data
@@ -68,6 +68,11 @@
                     android:scheme="wear" />
             </intent-filter>
         </service>
+
+        <service android:name=".services.LocationListenerService"
+            android:enabled="true"
+            android:exported="false" />
+<!--        android:foregroundServiceType="location"-->
     </application>
 
 </manifest>
