@@ -13,7 +13,7 @@ public class PedometerEventListener implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         Pedometer pedometer = new Pedometer(event.timestamp, (int) event.values[0]);
-        DatabaseManager.getInstance().insertPedometer(pedometer);
+        DatabaseManager.getInstance().insertOrUpdatePedometer(pedometer);
     }
 
     @Override

@@ -3,10 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="rs.ac.bg.etf.rti.sensorlogger">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".config.SensorLoggerApplication"
@@ -34,7 +36,9 @@
 
         <receiver android:name=".broadcastReceivers.NotificationPublisher" />
 
-        <service android:name=".services.ApplicationDataListenerService">
+        <service android:name=".services.ApplicationDataListenerService"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
                 <data

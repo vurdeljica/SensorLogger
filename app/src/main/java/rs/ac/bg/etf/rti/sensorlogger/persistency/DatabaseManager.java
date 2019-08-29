@@ -18,6 +18,7 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
+import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 
 public class DatabaseManager {
@@ -42,35 +43,43 @@ public class DatabaseManager {
         //Realm.setDefaultConfiguration(config);
     }
 
-    public void insertHeartRateMonitor(HeartRateMonitor _heartRateMonitor) {
+    public void insertOrUpdateGPSData(GPSData _gpsData) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            final GPSData gpsData = _gpsData;
+
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(gpsData));
+        }
+    }
+
+    public void insertOrUpdateHeartRateMonitor(HeartRateMonitor _heartRateMonitor) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final HeartRateMonitor heartRateMonitor = _heartRateMonitor;
 
-            realm.executeTransaction(realm1 -> realm1.insert(heartRateMonitor));
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(heartRateMonitor));
         }
     }
 
-    public void insertAccelerometer(Accelerometer _accelerometer) {
+    public void insertOrUpdateAccelerometer(Accelerometer _accelerometer) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final Accelerometer accelerometer = _accelerometer;
 
-            realm.executeTransaction(realm1 -> realm1.insert(accelerometer));
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(accelerometer));
         }
     }
 
-    public void insertGyroscope(Gyroscope _gyroscope) {
+    public void insertOrUpdateGyroscope(Gyroscope _gyroscope) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final Gyroscope gyroscope = _gyroscope;
 
-            realm.executeTransaction(realm1 -> realm1.insert(gyroscope));
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(gyroscope));
         }
     }
 
-    public void insertPedometer(Pedometer _pedometer) {
+    public void insertOrUpdatePedometer(Pedometer _pedometer) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final Pedometer pedometer = _pedometer;
 
-            realm.executeTransaction(realm1 -> realm1.insert(pedometer));
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(pedometer));
         }
     }
 

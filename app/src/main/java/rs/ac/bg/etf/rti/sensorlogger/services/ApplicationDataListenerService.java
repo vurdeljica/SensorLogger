@@ -48,7 +48,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     int accuracy = dataMap.getInt(DATA_HEART_RATE_ACCURACY_KEY);
                     long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
                     HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, data, accuracy);
-                    databaseManager.insertHeartRateMonitor(heartRate);
+                    databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                     break;
                 }
                 case DATA_ACCELEROMETER_PATH: {
@@ -57,7 +57,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     int accuracy = dataMap.getInt(DATA_ACCELEROMETER_ACCURACY_KEY);
                     long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
                     Accelerometer accelerometer = new Accelerometer(timestamp, data[0], data[1], data[2], accuracy);
-                    databaseManager.insertAccelerometer(accelerometer);
+                    databaseManager.insertOrUpdateAccelerometer(accelerometer);
                     break;
                 }
                 case DATA_GYROSCOPE_PATH: {
@@ -66,7 +66,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     int accuracy = dataMap.getInt(DATA_GYROSCOPE_ACCURACY_KEY);
                     long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
                     Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2], accuracy);
-                    databaseManager.insertGyroscope(gyroscope);
+                    databaseManager.insertOrUpdateGyroscope(gyroscope);
                     break;
                 }
                 default: {
