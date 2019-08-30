@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,6 +20,9 @@ import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.work.Constraints;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -36,14 +38,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.rti.sensorlogger.BuildConfig;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.Utils;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
+import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
+
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class MainActivity extends AppCompatActivity implements CapabilityClient.OnCapabilityChangedListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -53,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     private static final String START_ACTIVITY_PATH = "/start-activity";
 
     Fragment selectedFragment = null;
+
+    // Used for saving the listening state
+    private boolean isListening;
 
     // Used in checking for runtime permissions.
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -71,7 +81,9 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             LocationListenerService.LocalBinder binder = (LocationListenerService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
-            mService.requestLocationUpdates();
+            if (isListening) {
+                mService.requestLocationUpdates();
+            }
         }
 
         @Override
@@ -101,12 +113,21 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                 requestPermissions();
             }
         }
+
+        Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(StoreFileWorker.class, 15, TimeUnit.MINUTES)
+                .setInitialDelay(15, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build();
+        WorkManager.getInstance(this).enqueue(workRequest);
+
+        isListening = getDefaultSharedPreferences(this).getBoolean(HomeViewModel.IS_LISTENING_KEY, true);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        PreferenceManager.getDefaultSharedPreferences(this)
+        getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
 
         // Bind to the service. If the service is in foreground mode, this signals to the service
@@ -151,9 +172,8 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             unbindService(mServiceConnection);
             mBound = false;
         }
-        PreferenceManager.getDefaultSharedPreferences(this)
+        getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
-        mService.removeLocationUpdates();
         super.onStop();
     }
 
@@ -162,13 +182,13 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
      */
     private boolean checkPermissions() {
         return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     private void requestPermissions() {
         boolean shouldProvideRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         // Provide an additional rationale to the user. This would happen if the user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
@@ -181,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                     .setAction(R.string.ok, view -> {
                         // Request permission
                         ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                 REQUEST_PERMISSIONS_REQUEST_CODE);
                     })
                     .show();
@@ -191,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             // sets the permission in a given state or the user denied the permission
             // previously and checked "Never ask again".
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
@@ -238,6 +258,15 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         // Update the buttons state depending on whether location updates are being requested.
         if (s.equals(Utils.KEY_REQUESTING_LOCATION_UPDATES)) {
 
+        }
+        if (s.equals(HomeViewModel.IS_LISTENING_KEY)) {
+            if (sharedPreferences.getBoolean(s, true)) {
+                isListening = true;
+                mService.requestLocationUpdates();
+            } else {
+                isListening = false;
+                mService.removeLocationUpdates();
+            }
         }
     }
 

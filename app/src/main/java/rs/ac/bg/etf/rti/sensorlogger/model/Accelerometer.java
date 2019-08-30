@@ -11,17 +11,14 @@ public class Accelerometer extends RealmObject {
     private float y;
     private float z;
 
-    private int accuracy;
-
     public Accelerometer() {
     }
 
-    public Accelerometer(long timestamp, float x, float y, float z, int accuracy) {
+    public Accelerometer(long timestamp, float x, float y, float z) {
         this.timestamp = timestamp;
         this.x = x;
         this.y = y;
         this.z = z;
-        this.accuracy = accuracy;
     }
 
     public long getTimestamp() {
@@ -56,11 +53,4 @@ public class Accelerometer extends RealmObject {
         this.z = z;
     }
 
-    public int getAccuracy() {
-        return accuracy;
-    }
-
-    public void setAccuracy(int accuracy) {
-        this.accuracy = accuracy;
-    }
 }

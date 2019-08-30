@@ -16,7 +16,6 @@ public class HeartRateEventListener implements SensorEventListener {
     private final static String TAG = "HeartRate";
     private final static String PATH = "/heart_rate";
     private final static String DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
-    private final static String ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.accuracy";
     private final static String TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
 
     private Context context;
@@ -31,7 +30,6 @@ public class HeartRateEventListener implements SensorEventListener {
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create(PATH);
         putDataMapReq.getDataMap().putFloatArray(DATA_KEY, event.values);
         putDataMapReq.getDataMap().putLong(TIMESTAMP_KEY, event.timestamp);
-        putDataMapReq.getDataMap().putInt(ACCURACY_KEY, event.accuracy);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         Task<DataItem> dataItemTask = Wearable.getDataClient(context).putDataItem(putDataReq);
         dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));

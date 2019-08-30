@@ -9,15 +9,12 @@ public class HeartRateMonitor extends RealmObject {
 
     private float heartRate;
 
-    private int accuracy;
-
     public HeartRateMonitor() {
     }
 
-    public HeartRateMonitor(long timestamp, float heartRate, int accuracy) {
+    public HeartRateMonitor(long timestamp, float heartRate) {
         this.timestamp = timestamp;
         this.heartRate = heartRate;
-        this.accuracy = accuracy;
     }
 
     public long getTimestamp() {
@@ -36,11 +33,4 @@ public class HeartRateMonitor extends RealmObject {
         this.heartRate = heartRate;
     }
 
-    public int getAccuracy() {
-        return accuracy;
-    }
-
-    public void setAccuracy(int accuracy) {
-        this.accuracy = accuracy;
-    }
 }

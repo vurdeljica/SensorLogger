@@ -18,7 +18,9 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentHomeBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
-        binding.setVm(new HomeViewModel());
+        HomeViewModel vm = new HomeViewModel(getActivity());
+        binding.setVm(vm);
+        binding.materialButton.setOnCheckedChangeListener(vm.onCheckedChangeListener);
         return binding.getRoot();
     }
 }

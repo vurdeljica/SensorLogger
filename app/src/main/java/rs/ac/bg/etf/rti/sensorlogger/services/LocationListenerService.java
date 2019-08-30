@@ -234,26 +234,19 @@ public class LocationListenerService extends Service {
     private Notification getNotification() {
         Intent intent = new Intent(this, LocationListenerService.class);
 
-        CharSequence text = Utils.getLocationText(mLocation);
+        CharSequence text = getString(R.string.recording_location);
 
         // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
         intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
-
-        // The PendingIntent that leads to a call to onStartCommand() in this service.
-        PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
 
         // The PendingIntent to launch activity.
         PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .addAction(R.drawable.ic_add_black_24dp, getString(R.string.launch_activity),
+                .addAction(R.drawable.ic_add_black_24dp, getString(R.string.start_app),
                         activityPendingIntent)
-                .addAction(R.drawable.ic_delete_black_24dp, getString(R.string.remove_location_updates),
-                        servicePendingIntent)
                 .setContentText(text)
-                .setContentTitle(Utils.getLocationTitle(this))
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -284,11 +277,6 @@ public class LocationListenerService extends Service {
         mLocation = location;
         GPSData gpsData = new GPSData(location.getTime(), location.getLongitude(), location.getLatitude(), location.getAltitude());
         DatabaseManager.getInstance().insertOrUpdateGPSData(gpsData);
-
-        // Update notification content if running as a foreground service.
-        if (serviceIsRunningInForeground(this)) {
-            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
-        }
     }
 
     /**

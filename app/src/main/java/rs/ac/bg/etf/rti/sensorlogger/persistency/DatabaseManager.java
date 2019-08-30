@@ -1,6 +1,9 @@
 package rs.ac.bg.etf.rti.sensorlogger.persistency;
 
 import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,12 +19,13 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
+import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
-import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 
 public class DatabaseManager {
+    private static final String TAG = DatabaseManager.class.getSimpleName();
 
     private static DatabaseManager instance;
 
@@ -126,6 +130,76 @@ public class DatabaseManager {
         return dailyActivity;
     }
 
+    @NonNull
+    public Gyroscope getGyroscope(long timestamp) {
+        Gyroscope gyroscope = new Gyroscope();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            Gyroscope gyroscopeFromRealm = realm.where(Gyroscope.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            if (gyroscopeFromRealm != null) {
+                gyroscope = realm.copyFromRealm(gyroscopeFromRealm);
+            }
+        }
+
+        return gyroscope;
+    }
+
+    @NonNull
+    public Accelerometer getAccelerometer(long timestamp) {
+        Accelerometer accelerometer = new Accelerometer();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            Accelerometer accelerometerFromRealm = realm.where(Accelerometer.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            if (accelerometerFromRealm != null) {
+                accelerometer = realm.copyFromRealm(accelerometerFromRealm);
+            }
+        }
+
+        return accelerometer;
+    }
+
+    @NonNull
+    public HeartRateMonitor getHeartRateMonitor(long timestamp) {
+        HeartRateMonitor heartRateMonitor = new HeartRateMonitor();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            HeartRateMonitor heartRateMonitorFromRealm = realm.where(HeartRateMonitor.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            if (heartRateMonitorFromRealm != null) {
+                heartRateMonitor = realm.copyFromRealm(heartRateMonitorFromRealm);
+            }
+        }
+
+        return heartRateMonitor;
+    }
+
+    @NonNull
+    public Pedometer getPedometer(long timestamp) {
+        Pedometer pedometer = new Pedometer();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            Pedometer pedometerFromRealm = realm.where(Pedometer.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            if (pedometerFromRealm != null) {
+                pedometer = realm.copyFromRealm(pedometerFromRealm);
+            }
+        }
+
+        return pedometer;
+    }
+
+    @NonNull
+    public GPSData getGPSData(long timestamp) {
+        GPSData gpsData = new GPSData();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            GPSData gpsDataFromRealm = realm.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            if (gpsDataFromRealm != null) {
+                gpsData = realm.copyFromRealm(gpsDataFromRealm);
+            }
+        }
+
+        return gpsData;
+    }
+
     public List<DailyActivity> getDailyActivities() {
         List<DailyActivity> dailyActivities = new ArrayList<>();
 
@@ -137,12 +211,28 @@ public class DatabaseManager {
         return dailyActivities;
     }
 
+    public void deleteDataBefore(long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<Gyroscope> result1 = realm1.where(Gyroscope.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                result1.deleteAllFromRealm();
+                RealmResults<Accelerometer> result2 = realm1.where(Accelerometer.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                result2.deleteAllFromRealm();
+                RealmResults<Pedometer> result3 = realm1.where(Pedometer.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                result3.deleteAllFromRealm();
+                RealmResults<HeartRateMonitor> result4 = realm1.where(HeartRateMonitor.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                result4.deleteAllFromRealm();
+                RealmResults<GPSData> result5 = realm1.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                result5.deleteAllFromRealm();
+            });
+        }
+    }
+
     public void saveToJson(File jsonFile) {
-        List<DailyActivity> dailyActivities = new ArrayList<>();
         Gson gson = new GsonBuilder().create(); //... obtain your Gson;
         Realm realm = Realm.getDefaultInstance();
         RealmResults<DailyActivity> results = realm.where(DailyActivity.class).findAll();
-        dailyActivities.addAll(realm.copyFromRealm(results));
+        List<DailyActivity> dailyActivities = new ArrayList<>(realm.copyFromRealm(results));
 
         try {
             FileWriter writer = new FileWriter(jsonFile);
@@ -156,15 +246,11 @@ public class DatabaseManager {
                     writer.append(",");
                 }
             }
-            for (DailyActivity dailyActivity : dailyActivities) {
-
-            }
             writer.append("]}");
             writer.flush();
             writer.close();
-        }
-        catch(IOException ex) {
-
+        } catch (IOException ex) {
+            Log.e(TAG, "saveToJson: error while making JSON");
         }
     }
 

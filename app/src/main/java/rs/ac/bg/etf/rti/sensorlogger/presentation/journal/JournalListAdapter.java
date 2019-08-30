@@ -12,7 +12,6 @@ import androidx.databinding.DataBindingUtil;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.annimon.stream.function.Function;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

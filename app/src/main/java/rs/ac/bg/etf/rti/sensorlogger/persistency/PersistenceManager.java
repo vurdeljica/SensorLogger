@@ -9,22 +9,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 
-public class PersitencyManager {
+public class PersistenceManager {
 
     private static final long HISTORY_DELETION_PERIOD = 4 * 60 * 60;
 
-    private static PersitencyManager instance;
+    private static PersistenceManager instance;
     private AtomicInteger mobileFileId = new AtomicInteger(0);
     private AtomicInteger deviceFileId = new AtomicInteger(0);
 
-    File dataDirectory;
+    private File dataDirectory;
 
-    private PersitencyManager() {
+    private PersistenceManager() {
         try {
             //Todo: Namestiti gde se cuvaju podaci, samo treba izmeniti dataPath
             //dataDirectory = new File(dataPath);
@@ -35,9 +34,9 @@ public class PersitencyManager {
         }
     }
 
-    public static PersitencyManager getInstance() {
+    public static PersistenceManager getInstance() {
         if (instance == null) {
-            instance = new PersitencyManager();
+            instance = new PersistenceManager();
         }
 
         return instance;
@@ -129,7 +128,7 @@ public class PersitencyManager {
         thread.start();
     }
 
-    public void deleteLastForHoursOfSensorData() {
+    public void deleteLastFourHoursOfSensorData() {
         File[] files = dataDirectory.listFiles();
         for(int i = 0; i < files.length; i++) {
             File currentFile = files[i];

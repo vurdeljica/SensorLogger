@@ -22,22 +22,18 @@ public class ApplicationDataListenerService extends WearableListenerService {
 
     private final static String DATA_HEART_RATE_PATH = "/heart_rate";
     private final static String DATA_HEART_RATE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
-    private final static String DATA_HEART_RATE_ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.accuracy";
     private final static String DATA_HEART_RATE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
 
     private final static String DATA_ACCELEROMETER_PATH = "/accelerometer";
     private final static String DATA_ACCELEROMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.data";
-    private final static String DATA_ACCELEROMETER_ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.accuracy";
     private final static String DATA_ACCELEROMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
 
     private final static String DATA_GYROSCOPE_PATH = "/gyroscope";
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
-    private final static String DATA_GYROSCOPE_ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.accuracy";
     private final static String DATA_GYROSCOPE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
 
     private final static String DATA_STEPS_PATH = "/steps";
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
-    private final static String DATA_STEPS_ACCURACY_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.accuracy";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
 
     private static final String MESSAGE_START_ACTIVITY_PATH = "/start-activity";
@@ -51,27 +47,24 @@ public class ApplicationDataListenerService extends WearableListenerService {
                 case DATA_HEART_RATE_PATH: {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
-                    int accuracy = dataMap.getInt(DATA_HEART_RATE_ACCURACY_KEY);
                     long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
-                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, data, accuracy);
+                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, data);
                     databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                     break;
                 }
                 case DATA_ACCELEROMETER_PATH: {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float[] data = dataMap.getFloatArray(DATA_ACCELEROMETER_DATA_KEY);
-                    int accuracy = dataMap.getInt(DATA_ACCELEROMETER_ACCURACY_KEY);
                     long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
-                    Accelerometer accelerometer = new Accelerometer(timestamp, data[0], data[1], data[2], accuracy);
+                    Accelerometer accelerometer = new Accelerometer(timestamp, data[0], data[1], data[2]);
                     databaseManager.insertOrUpdateAccelerometer(accelerometer);
                     break;
                 }
                 case DATA_GYROSCOPE_PATH: {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float[] data = dataMap.getFloatArray(DATA_GYROSCOPE_DATA_KEY);
-                    int accuracy = dataMap.getInt(DATA_GYROSCOPE_ACCURACY_KEY);
                     long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
-                    Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2], accuracy);
+                    Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2]);
                     databaseManager.insertOrUpdateGyroscope(gyroscope);
                     break;
                 }
