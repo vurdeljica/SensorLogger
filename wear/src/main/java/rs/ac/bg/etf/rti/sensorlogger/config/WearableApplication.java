@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger.presentation;
+package rs.ac.bg.etf.rti.sensorlogger.config;
 
 import android.app.Application;
 import android.content.Context;

@@ -23,18 +23,22 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_HEART_RATE_PATH = "/heart_rate";
     private final static String DATA_HEART_RATE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
     private final static String DATA_HEART_RATE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
+    private final static String DATA_HEART_RATE_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.node";
 
     private final static String DATA_ACCELEROMETER_PATH = "/accelerometer";
     private final static String DATA_ACCELEROMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.data";
     private final static String DATA_ACCELEROMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
+    private final static String DATA_ACCELEROMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.node";
 
     private final static String DATA_GYROSCOPE_PATH = "/gyroscope";
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
     private final static String DATA_GYROSCOPE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
+    private final static String DATA_GYROSCOPE_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.node";
 
     private final static String DATA_STEPS_PATH = "/steps";
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
+    private final static String DATA_STEPS_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.noed";
 
     private static final String MESSAGE_START_ACTIVITY_PATH = "/start-activity";
 
@@ -48,7 +52,8 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
                     long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
-                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, data);
+                    String nodeId = dataMap.getString(DATA_HEART_RATE_NODE_KEY);
+                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, data, nodeId);
                     databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                     break;
                 }
@@ -56,7 +61,8 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float[] data = dataMap.getFloatArray(DATA_ACCELEROMETER_DATA_KEY);
                     long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
-                    Accelerometer accelerometer = new Accelerometer(timestamp, data[0], data[1], data[2]);
+                    String nodeId = dataMap.getString(DATA_ACCELEROMETER_NODE_KEY);
+                    Accelerometer accelerometer = new Accelerometer(timestamp, data[0], data[1], data[2], nodeId);
                     databaseManager.insertOrUpdateAccelerometer(accelerometer);
                     break;
                 }
@@ -64,7 +70,8 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float[] data = dataMap.getFloatArray(DATA_GYROSCOPE_DATA_KEY);
                     long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
-                    Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2]);
+                    String nodeId = dataMap.getString(DATA_GYROSCOPE_NODE_KEY);
+                    Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2], nodeId);
                     databaseManager.insertOrUpdateGyroscope(gyroscope);
                     break;
                 }
@@ -72,7 +79,8 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float[] data = dataMap.getFloatArray(DATA_STEPS_DATA_KEY);
                     long timestamp = dataMap.getLong(DATA_STEPS_TIMESTAMP_KEY);
-                    Pedometer pedometer = new Pedometer(timestamp, (int) data[0]);
+                    String nodeId = dataMap.getString(DATA_STEPS_NODE_KEY);
+                    Pedometer pedometer = new Pedometer(timestamp, (int) data[0], nodeId);
                     databaseManager.insertOrUpdatePedometer(pedometer);
                     break;
                 }

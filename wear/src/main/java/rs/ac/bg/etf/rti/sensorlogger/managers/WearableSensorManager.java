@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger.presentation;
+package rs.ac.bg.etf.rti.sensorlogger.managers;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -8,23 +8,23 @@ import android.hardware.SensorManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.AccelerometerEventListener;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.GyroscopeEventListener;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.HeartRateEventListener;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.listeners.PedometerEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.listeners.AccelerometerEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.listeners.GyroscopeEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.listeners.HeartRateEventListener;
+import rs.ac.bg.etf.rti.sensorlogger.listeners.PedometerEventListener;
 
-class WearableSensorManager {
+public class WearableSensorManager {
     //sensor sampling period in microseconds - frequency approx. 30 Hz
     private final int SAMPLING_PERIOD = 33333;
     private final SensorManager sensorManager;
     private List<SensorEventListener> activeSmListeners;
 
-    WearableSensorManager(SensorManager sensorManager) {
+    public WearableSensorManager(SensorManager sensorManager) {
         this.sensorManager = sensorManager;
         activeSmListeners = new ArrayList<>();
     }
 
-    void startListening(Context context) {
+    public void startListening(Context context) {
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometerSensor != null) {
             AccelerometerEventListener accelerometerEventListener = new AccelerometerEventListener(context);
@@ -72,7 +72,7 @@ class WearableSensorManager {
         }
     }
 
-    void stopListening() {
+    public void stopListening() {
         for (SensorEventListener sensorEventListener: activeSmListeners) {
             sensorManager.unregisterListener(sensorEventListener);
         }

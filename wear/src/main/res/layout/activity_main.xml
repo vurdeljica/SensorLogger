@@ -1,32 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/dark_grey"
-    android:padding="@dimen/box_inset_layout_padding"
-    tools:context=".presentation.WearableMainActivity"
-    tools:deviceIds="wear">
+<layout>
 
-    <LinearLayout
+    <data>
+
+        <variable
+            name="vm"
+            type="rs.ac.bg.etf.rti.sensorlogger.presentation.WearableMainViewModel" />
+    </data>
+
+    <androidx.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="@dimen/inner_frame_layout_padding"
-        app:boxedEdges="all"
-        tools:ignore="MissingPrefix">
+        android:background="@color/white"
+        android:padding="@dimen/box_inset_layout_padding"
+        tools:context=".presentation.WearableMainActivity"
+        tools:deviceIds="wear">
 
-        <Button
-            android:id="@+id/btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/send" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:boxedEdges="all"
+            tools:ignore="MissingPrefix">
 
-        <TextView
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/status_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@{vm.listening ? @color/green : @color/dark_red}"
+                android:textAlignment="center"
+                android:textSize="15sp"
+                android:text="@{vm.listening ? @string/collecting_data : @string/not_collecting_data}" />
 
-    </LinearLayout>
-</androidx.wear.widget.BoxInsetLayout>
+            <TextView
+                android:id="@+id/node_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="20dp"
+                android:text="@{vm.nodeId}"
+                android:textColor="@color/dark_grey" />
+
+        </LinearLayout>
+    </androidx.wear.widget.BoxInsetLayout>
+
+</layout>

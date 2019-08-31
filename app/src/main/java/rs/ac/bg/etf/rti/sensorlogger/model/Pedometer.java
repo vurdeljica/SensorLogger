@@ -9,27 +9,26 @@ public class Pedometer extends RealmObject {
 
     private int stepCount;
 
+    private String nodeId;
+
     public Pedometer() {
     }
 
-    public Pedometer(long timestamp, int stepCount) {
+    public Pedometer(long timestamp, int stepCount, String nodeId) {
         this.timestamp = timestamp;
         this.stepCount = stepCount;
+        this.nodeId = nodeId;
     }
 
     public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public int getStepCount() {
         return stepCount;
     }
 
-    public void setStepCount(int stepCount) {
-        this.stepCount = stepCount;
+    public String getNodeId() {
+        return nodeId;
     }
 }

@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger.presentation.listeners;
+package rs.ac.bg.etf.rti.sensorlogger.listeners;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -12,24 +12,32 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-public class GyroscopeEventListener implements SensorEventListener {
-    private final static String TAG = "Gyroscope";
-    private final static String PATH = "/gyroscope";
-    private final static String DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
-    private final static String TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
+import rs.ac.bg.etf.rti.sensorlogger.R;
+
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+
+public class HeartRateEventListener implements SensorEventListener {
+    private final static String TAG = "HeartRate";
+    private final static String PATH = "/heart_rate";
+    private final static String DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
+    private final static String TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
+    private static final String NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.node";
+    private static final String NODE_ID_KEY = "nodeId";
 
     private Context context;
 
-    public GyroscopeEventListener(Context context) {
+    public HeartRateEventListener(Context context) {
         this.context = context;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         Log.d(TAG, prettyPrintFloatArray(event.values));
+        String nodeId = getDefaultSharedPreferences(context).getString(NODE_ID_KEY, context.getString(R.string.unknown));
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create(PATH);
         putDataMapReq.getDataMap().putFloatArray(DATA_KEY, event.values);
         putDataMapReq.getDataMap().putLong(TIMESTAMP_KEY, event.timestamp);
+        putDataMapReq.getDataMap().putString(NODE_KEY, nodeId);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         Task<DataItem> dataItemTask = Wearable.getDataClient(context).putDataItem(putDataReq);
         dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));

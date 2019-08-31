@@ -4,6 +4,7 @@
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
     -->
-    <string name="hello_world">Hello Square World!</string>
-    <string name="send">Send</string>
+    <string name="collecting_data">TRACKING</string>
+    <string name="not_collecting_data">NOT TRACKING</string>
+    <string name="unknown">unknown</string>
 </resources>

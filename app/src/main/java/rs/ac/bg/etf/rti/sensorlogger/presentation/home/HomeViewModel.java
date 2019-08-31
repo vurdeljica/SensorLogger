@@ -15,7 +15,7 @@ public class HomeViewModel extends BaseObservable {
     private boolean listening;
     private Context context;
 
-    CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, b) -> {
+    public CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, b) -> {
         SharedPreferences sharedPref = getDefaultSharedPreferences(context);
         sharedPref.edit().putBoolean(IS_LISTENING_KEY, b).apply();
     };

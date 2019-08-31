@@ -8,37 +8,18 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.work.Constraints;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.Wearable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.rti.sensorlogger.BuildConfig;
 import rs.ac.bg.etf.rti.sensorlogger.R;
@@ -48,17 +29,14 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
-public class MainActivity extends AppCompatActivity implements CapabilityClient.OnCapabilityChangedListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainActivity";
-    private static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
-    private static final String START_ACTIVITY_PATH = "/start-activity";
-    private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
+
+    private MainViewModel viewModel;
 
     Fragment selectedFragment = null;
 
@@ -103,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
+        viewModel = new MainViewModel(getApplicationContext());
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new HomeFragment()).commit();
@@ -115,20 +95,15 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             }
         }
 
-        Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
-        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(StoreFileWorker.class, 15, TimeUnit.MINUTES)
-                .setInitialDelay(15, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build();
-        WorkManager.getInstance(this).enqueue(workRequest);
+        viewModel.startStoreWorker();
 
-        isListening = getDefaultSharedPreferences(this).getBoolean(HomeViewModel.IS_LISTENING_KEY, false);
+        isListening = getDefaultSharedPreferences(getApplicationContext()).getBoolean(HomeViewModel.IS_LISTENING_KEY, false);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        getDefaultSharedPreferences(this)
+        getDefaultSharedPreferences(getApplicationContext())
                 .registerOnSharedPreferenceChangeListener(this);
 
         // Bind to the service. If the service is in foreground mode, this signals to the service
@@ -149,15 +124,14 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             ((JournalFragment) selectedFragment).updateFragment();
         }
 
-        Wearable.getCapabilityClient(this)
-                .addListener(this, CLIENT_APP_CAPABILITY);
+        viewModel.startCapabilityListener();
 
-        startWearableActivity();
+        viewModel.startWearableActivity();
     }
 
     @Override
     protected void onPause() {
-        Wearable.getCapabilityClient(this).removeListener(this);
+        viewModel.stopCapabilityListener();
 
         super.onPause();
     }
@@ -171,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             unbindService(mServiceConnection);
             mBound = false;
         }
-        getDefaultSharedPreferences(this)
+        getDefaultSharedPreferences(getApplicationContext())
                 .unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
     }
@@ -264,8 +238,11 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                 mService.requestLocationUpdates();
             } else {
                 isListening = false;
-                mService.removeLocationUpdates();
+                if (mService != null) {
+                    mService.removeLocationUpdates();
+                }
             }
+            viewModel.setWearableShouldStartListeners(isListening);
         }
     }
 
@@ -289,86 +266,5 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                 return true;
             };
 
-    @Override
-    public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-        Log.d(TAG, "onCapabilityChanged: ");
-        Set<Node> nodes = capabilityInfo.getNodes();
-
-        if (nodes.isEmpty()) {
-            return;
-        }
-        for (Node node : nodes) {
-            Toast.makeText(MainActivity.this, node.getDisplayName() + " " + node.getId(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Sends an RPC to start a fullscreen Activity on the wearable.
-     */
-    public void startWearableActivity() {
-        Log.d(TAG, "Generating start activity RPC");
-
-        // Trigger an AsyncTask that will query for a list of connected nodes and send a
-        // "start-activity" message to each connected node.
-        new StartWearableActivityTask().execute();
-    }
-
-    @WorkerThread
-    private void sendStartActivityMessage(String node) {
-
-        Task<Integer> sendMessageTask =
-                Wearable.getMessageClient(this).sendMessage(node, START_ACTIVITY_PATH, new byte[0]);
-
-        try {
-            // Block on a task and get the result synchronously (because this is on a background
-            // thread).
-            Integer result = Tasks.await(sendMessageTask);
-            Log.d(TAG, "Message sent: " + result);
-
-        } catch (ExecutionException exception) {
-            Log.e(TAG, "Task failed: " + exception);
-
-        } catch (InterruptedException exception) {
-            Log.e(TAG, "Interrupt occurred: " + exception);
-        }
-    }
-
-    @WorkerThread
-    private Collection<String> getNodes() {
-        HashSet<String> results = new HashSet<>();
-
-        Task<List<Node>> nodeListTask =
-                Wearable.getNodeClient(getApplicationContext()).getConnectedNodes();
-
-        try {
-            // Block on a task and get the result synchronously (because this is on a background
-            // thread).
-            List<Node> nodes = Tasks.await(nodeListTask);
-
-            for (Node node : nodes) {
-                results.add(node.getId());
-            }
-
-        } catch (ExecutionException exception) {
-            Log.e(TAG, "Task failed: " + exception);
-
-        } catch (InterruptedException exception) {
-            Log.e(TAG, "Interrupt occurred: " + exception);
-        }
-
-        return results;
-    }
-
-    private class StartWearableActivityTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... args) {
-            Collection<String> nodes = getNodes();
-            for (String node : nodes) {
-                sendStartActivityMessage(node);
-            }
-            return null;
-        }
-    }
 }
 
