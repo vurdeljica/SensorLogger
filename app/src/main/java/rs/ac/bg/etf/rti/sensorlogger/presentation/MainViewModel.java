@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -27,6 +28,7 @@ import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
+    private static final String STORE_WORKER_ID = "StoreFileWorker";
 
     private static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String START_ACTIVITY_PATH = "/start-activity";
@@ -58,7 +60,8 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
                 .setInitialDelay(15, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build();
-        WorkManager.getInstance(context).enqueue(workRequest);
+        WorkManager workManager = WorkManager.getInstance(context);
+        workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, workRequest);
     }
 
 

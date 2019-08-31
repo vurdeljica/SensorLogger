@@ -6,6 +6,11 @@ import android.widget.CompoundButton;
 
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+import androidx.work.Constraints;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
+import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -15,9 +20,16 @@ public class HomeViewModel extends BaseObservable {
     private boolean listening;
     private Context context;
 
-    public CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, b) -> {
+    public CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, on) -> {
         SharedPreferences sharedPref = getDefaultSharedPreferences(context);
-        sharedPref.edit().putBoolean(IS_LISTENING_KEY, b).apply();
+        sharedPref.edit().putBoolean(IS_LISTENING_KEY, on).apply();
+        if (!on) {
+            Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(StoreFileWorker.class)
+                    .setConstraints(constraints)
+                    .build();
+            WorkManager.getInstance(context).enqueue(workRequest);
+        }
     };
 
     HomeViewModel(Context context) {

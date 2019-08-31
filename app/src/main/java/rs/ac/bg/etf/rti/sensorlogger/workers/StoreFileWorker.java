@@ -26,7 +26,6 @@ public class StoreFileWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        // Do the work here--in this case, upload the images.
         long endTime = System.currentTimeMillis();
         long startTime = endTime - 15 * 60 * 1000;
         DatabaseManager dbManager = DatabaseManager.getInstance();
