@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
+import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;

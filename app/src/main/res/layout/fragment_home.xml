@@ -20,7 +20,8 @@
             android:background="@drawable/circular_shape"
             android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
             android:textOff="@string/start"
-            android:textOn="@string/stop" />
+            android:textOn="@string/stop"
+            android:checked="@={vm.listening}"/>
 
     </RelativeLayout>
 </layout>

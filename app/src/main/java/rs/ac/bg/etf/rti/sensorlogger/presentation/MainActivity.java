@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     private static final String TAG = "MainActivity";
     private static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String START_ACTIVITY_PATH = "/start-activity";
+    private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
 
     Fragment selectedFragment = null;
 
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                 .build();
         WorkManager.getInstance(this).enqueue(workRequest);
 
-        isListening = getDefaultSharedPreferences(this).getBoolean(HomeViewModel.IS_LISTENING_KEY, true);
+        isListening = getDefaultSharedPreferences(this).getBoolean(HomeViewModel.IS_LISTENING_KEY, false);
     }
 
     @Override
@@ -137,8 +138,6 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
 
         if (!checkPermissions()) {
             requestPermissions();
-        } else {
-//            mService.requestLocationUpdates();
         }
     }
 
@@ -307,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
      * Sends an RPC to start a fullscreen Activity on the wearable.
      */
     public void startWearableActivity() {
-        Log.d(TAG, "Generating RPC");
+        Log.d(TAG, "Generating start activity RPC");
 
         // Trigger an AsyncTask that will query for a list of connected nodes and send a
         // "start-activity" message to each connected node.
