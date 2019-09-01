@@ -53,7 +53,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
                     long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
                     String nodeId = dataMap.getString(DATA_HEART_RATE_NODE_KEY);
-                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, data, nodeId);
+                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, (int) data, nodeId);
                     databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                     break;
                 }

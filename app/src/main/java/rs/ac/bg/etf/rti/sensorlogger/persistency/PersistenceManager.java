@@ -18,8 +18,8 @@ public class PersistenceManager {
     private static final long HISTORY_DELETION_PERIOD = 4 * 60 * 60;
 
     private static PersistenceManager instance;
-    private AtomicInteger mobileFileId = new AtomicInteger(0);
-    private AtomicInteger deviceFileId = new AtomicInteger(0);
+//    private AtomicInteger mobileFileId = new AtomicInteger(0);
+//    private AtomicInteger deviceFileId = new AtomicInteger(0);
 
     private File dataDirectory;
 
@@ -42,24 +42,23 @@ public class PersistenceManager {
         return instance;
     }
 
-    public void saveMobileData(List<SensorDataProtos.MobileData> _mobileData) {
+    public void saveMobileData(List<SensorDataProtos.MobileData> _mobileData, long timestamp) {
         final List<SensorDataProtos.MobileData> mobileData = _mobileData;
         Thread thread = new Thread() {
             @Override
             public void run() {
-                int fileId = mobileFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/mobile" + fileId + ".bin";
-                String compressedFilePath = dataDirectory.getPath() + "/mobile" + fileId + "-compressed.bin";
+//                int fileId = mobileFileId.getAndIncrement();
+                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile.bin";
+                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile-compressed.bin";
 
-                try(FileOutputStream output = new FileOutputStream(binaryFilePath, false))
-                {
+                try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
                     for (SensorDataProtos.MobileData mobileSensorData : mobileData) {
                         mobileSensorData.writeDelimitedTo(output);
                     }
 
                     compressFile(binaryFilePath, compressedFilePath);
 
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -69,17 +68,17 @@ public class PersistenceManager {
         thread.start();
     }
 
-    public void saveDeviceData(List<SensorDataProtos.DeviceData> _deviceData) {
+    public void saveDeviceData(List<SensorDataProtos.DeviceData> _deviceData, String nodeId, long timestamp) {
         final List<SensorDataProtos.DeviceData> deviceData = _deviceData;
         Thread thread = new Thread() {
             @Override
             public void run() {
-                int fileId = deviceFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/device" + fileId + ".bin";
-                String compressedFilePath = dataDirectory.getPath() + "/device" + fileId + "-compressed.bin";
+//                int fileId = deviceFileId.getAndIncrement();
+                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".bin";
+                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.bin";
 
-                try(FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
-                    for (SensorDataProtos.DeviceData mobileDeviceData: deviceData) {
+                try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
+                    for (SensorDataProtos.DeviceData mobileDeviceData : deviceData) {
                         mobileDeviceData.writeDelimitedTo(output);
                     }
 

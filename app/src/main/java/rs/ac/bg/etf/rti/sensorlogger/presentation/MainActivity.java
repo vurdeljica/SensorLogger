@@ -127,6 +127,39 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         viewModel.startCapabilityListener();
 
         viewModel.startWearableActivity();
+
+//        final NetworkManager networkManager = NetworkManager.getInstance(getApplicationContext());
+//
+//        Thread thread = new Thread(new Runnable() {
+//            boolean transferred = false;
+//
+//            @Override
+//            public void run() {
+//                try {
+//                    PersistenceManager.getInstance().saveDailyActivity();
+//
+//                    while (!transferred) {
+//                        Thread.sleep(1000);
+//                        List<ServerInfo> sInfoList = networkManager.getServersInformation();
+//                        for (ServerInfo serverInfo : sInfoList) {
+//                            Log.d("ZEROCONF TEST", serverInfo.toString());
+//
+//                            File dirP = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
+//
+//                            networkManager.uploadDirectoryContentToServer(serverInfo, dirP);
+//
+//                            transferred = true;
+//
+//                            break;
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//        });
+//        thread.start();
     }
 
     @Override

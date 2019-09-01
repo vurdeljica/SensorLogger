@@ -7,14 +7,14 @@ public class HeartRateMonitor extends RealmObject {
     @PrimaryKey
     private long timestamp;
 
-    private float heartRate;
+    private int heartRate;
 
     private String nodeId;
 
     public HeartRateMonitor() {
     }
 
-    public HeartRateMonitor(long timestamp, float heartRate, String nodeId) {
+    public HeartRateMonitor(long timestamp, int heartRate, String nodeId) {
         this.timestamp = timestamp;
         this.heartRate = heartRate;
         this.nodeId = nodeId;
@@ -24,7 +24,7 @@ public class HeartRateMonitor extends RealmObject {
         return timestamp;
     }
 
-    public float getHeartRate() {
+    public int getHeartRate() {
         return heartRate;
     }
 

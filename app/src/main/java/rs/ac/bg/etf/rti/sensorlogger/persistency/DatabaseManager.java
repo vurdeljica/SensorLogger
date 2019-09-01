@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -131,11 +132,11 @@ public class DatabaseManager {
     }
 
     @NonNull
-    public Gyroscope getGyroscope(long timestamp) {
-        Gyroscope gyroscope = new Gyroscope();
+    public List<Gyroscope> getGyroscope(long timestamp) {
+        List<Gyroscope> gyroscope = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            Gyroscope gyroscopeFromRealm = realm.where(Gyroscope.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            List<Gyroscope> gyroscopeFromRealm = realm.where(Gyroscope.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
             if (gyroscopeFromRealm != null) {
                 gyroscope = realm.copyFromRealm(gyroscopeFromRealm);
             }
@@ -145,11 +146,11 @@ public class DatabaseManager {
     }
 
     @NonNull
-    public Accelerometer getAccelerometer(long timestamp) {
-        Accelerometer accelerometer = new Accelerometer();
+    public List<Accelerometer> getAccelerometer(long timestamp) {
+        List<Accelerometer> accelerometer = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            Accelerometer accelerometerFromRealm = realm.where(Accelerometer.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            List<Accelerometer> accelerometerFromRealm = realm.where(Accelerometer.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
             if (accelerometerFromRealm != null) {
                 accelerometer = realm.copyFromRealm(accelerometerFromRealm);
             }
@@ -159,11 +160,11 @@ public class DatabaseManager {
     }
 
     @NonNull
-    public HeartRateMonitor getHeartRateMonitor(long timestamp) {
-        HeartRateMonitor heartRateMonitor = new HeartRateMonitor();
+    public List<HeartRateMonitor> getHeartRateMonitor(long timestamp) {
+        List<HeartRateMonitor> heartRateMonitor = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            HeartRateMonitor heartRateMonitorFromRealm = realm.where(HeartRateMonitor.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            List<HeartRateMonitor> heartRateMonitorFromRealm = realm.where(HeartRateMonitor.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
             if (heartRateMonitorFromRealm != null) {
                 heartRateMonitor = realm.copyFromRealm(heartRateMonitorFromRealm);
             }
@@ -173,11 +174,11 @@ public class DatabaseManager {
     }
 
     @NonNull
-    public Pedometer getPedometer(long timestamp) {
-        Pedometer pedometer = new Pedometer();
+    public List<Pedometer> getPedometer(long timestamp) {
+        List<Pedometer> pedometer = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            Pedometer pedometerFromRealm = realm.where(Pedometer.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            List<Pedometer> pedometerFromRealm = realm.where(Pedometer.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
             if (pedometerFromRealm != null) {
                 pedometer = realm.copyFromRealm(pedometerFromRealm);
             }
@@ -186,9 +187,9 @@ public class DatabaseManager {
         return pedometer;
     }
 
-    @NonNull
+    @Nullable
     public GPSData getGPSData(long timestamp) {
-        GPSData gpsData = new GPSData();
+        GPSData gpsData = null;
 
         try (Realm realm = Realm.getDefaultInstance()) {
             GPSData gpsDataFromRealm = realm.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
@@ -228,7 +229,7 @@ public class DatabaseManager {
         }
     }
 
-    public void saveToJson(File jsonFile) {
+    void saveToJson(File jsonFile) {
         Gson gson = new GsonBuilder().create(); //... obtain your Gson;
         Realm realm = Realm.getDefaultInstance();
         RealmResults<DailyActivity> results = realm.where(DailyActivity.class).findAll();

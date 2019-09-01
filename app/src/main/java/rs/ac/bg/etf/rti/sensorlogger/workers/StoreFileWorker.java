@@ -6,8 +6,13 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.annimon.stream.Stream;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
@@ -27,39 +32,70 @@ public class StoreFileWorker extends Worker {
     @Override
     public Result doWork() {
         long endTime = System.currentTimeMillis();
-        long startTime = endTime - 15 * 60 * 1000;
+        long timestamp = endTime;
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();
         List<SensorDataProtos.MobileData> mobileDataList = new ArrayList<>();
-        List<SensorDataProtos.DeviceData> deviceDataList = new ArrayList<>();
+        HashMap<String, List<SensorDataProtos.DeviceData>> deviceDataHashMap = new HashMap<>();
 
-        for (long timestamp = startTime; timestamp < endTime; timestamp += 33) {
-            Accelerometer accelerometer = dbManager.getAccelerometer(timestamp);
-            Gyroscope gyroscope = dbManager.getGyroscope(timestamp);
-            Pedometer pedometer = dbManager.getPedometer(timestamp);
-            HeartRateMonitor heartRateMonitor = dbManager.getHeartRateMonitor(timestamp);
+        while (true) {
             GPSData gpsData = dbManager.getGPSData(timestamp);
-            SensorDataProtos.MobileData mobileData = SensorDataProtos.MobileData.newBuilder()
-                    .setGpsAltitude((float) gpsData.getAltitude())
-                    .setGpsLongitude((float) gpsData.getLongitude())
-                    .setGpsLatitude((float) gpsData.getLatitude())
-                    .setHeartRate(heartRateMonitor.getHeartRate())
-                    .setStepCount(pedometer.getStepCount())
-                    .setTimestamp(timestamp)
-                    .build();
-            mobileDataList.add(mobileData);
-            SensorDataProtos.DeviceData deviceData = SensorDataProtos.DeviceData.newBuilder()
-                    .setAccX(accelerometer.getX())
-                    .setAccY(accelerometer.getY())
-                    .setAccZ(accelerometer.getZ())
-                    .setGyrX(gyroscope.getX())
-                    .setGyrY(gyroscope.getY())
-                    .setGyrZ(gyroscope.getZ())
-                    .build();
-            deviceDataList.add(deviceData);
+            List<Accelerometer> accelerometerList = dbManager.getAccelerometer(timestamp);
+            List<Gyroscope> gyroscopeList = dbManager.getGyroscope(timestamp);
+            List<Pedometer> pedometerList = dbManager.getPedometer(timestamp);
+            List<HeartRateMonitor> heartRateMonitorList = dbManager.getHeartRateMonitor(timestamp);
+
+            if (gpsData == null && accelerometerList.isEmpty() && gyroscopeList.isEmpty() && pedometerList.isEmpty() && heartRateMonitorList.isEmpty()) {
+                for (String nodeId: deviceDataHashMap.keySet()) {
+                    persistenceManager.saveDeviceData(deviceDataHashMap.get(nodeId), nodeId, timestamp + 33);
+                }
+                persistenceManager.saveMobileData(mobileDataList, timestamp + 33);
+                break;
+            }
+
+            if (gpsData != null) {
+                SensorDataProtos.MobileData mobileData = SensorDataProtos.MobileData.newBuilder()
+                        .setGpsAltitude((float) gpsData.getAltitude())
+                        .setGpsLongitude((float) gpsData.getLongitude())
+                        .setGpsLatitude((float) gpsData.getLatitude())
+                        .setTimestamp(timestamp)
+                        .build();
+                mobileDataList.add(mobileData);
+            }
+
+            if (!accelerometerList.isEmpty() || !gyroscopeList.isEmpty() || !pedometerList.isEmpty() || !heartRateMonitorList.isEmpty()) {
+
+                Set<String> nodeIds = new HashSet<>();
+                nodeIds.addAll(Stream.of(accelerometerList).map(Accelerometer::getNodeId).toList());
+                nodeIds.addAll(Stream.of(gyroscopeList).map(Gyroscope::getNodeId).toList());
+                nodeIds.addAll(Stream.of(pedometerList).map(Pedometer::getNodeId).toList());
+                nodeIds.addAll(Stream.of(heartRateMonitorList).map(HeartRateMonitor::getNodeId).toList());
+
+                for (String nodeId : nodeIds) {
+                    Accelerometer accelerometer = Stream.of(accelerometerList).filter(value -> value.getNodeId().equals(nodeId)).single();
+                    Gyroscope gyroscope = Stream.of(gyroscopeList).filter(value -> value.getNodeId().equals(nodeId)).single();
+                    Pedometer pedometer = Stream.of(pedometerList).filter(value -> value.getNodeId().equals(nodeId)).single();
+                    HeartRateMonitor heartRateMonitor = Stream.of(heartRateMonitorList).filter(value -> value.getNodeId().equals(nodeId)).single();
+                    SensorDataProtos.DeviceData deviceData = SensorDataProtos.DeviceData.newBuilder()
+                            .setAccX(accelerometer.getX())
+                            .setAccY(accelerometer.getY())
+                            .setAccZ(accelerometer.getZ())
+                            .setGyrX(gyroscope.getX())
+                            .setGyrY(gyroscope.getY())
+                            .setGyrZ(gyroscope.getZ())
+                            .setHeartRate(heartRateMonitor.getHeartRate())
+                            .setStepCount(pedometer.getStepCount())
+                            .setTimestamp(timestamp)
+                            .build();
+                    if (!deviceDataHashMap.containsKey(nodeId)) {
+                        deviceDataHashMap.put(nodeId, new ArrayList<>());
+                    }
+                    deviceDataHashMap.get(nodeId).add(deviceData);
+                }
+            }
+
+            timestamp -= 33;
         }
-        persistenceManager.saveDeviceData(deviceDataList);
-        persistenceManager.saveMobileData(mobileDataList);
         dbManager.deleteDataBefore(endTime);
 
         // Indicate whether the task finished successfully with the Result
