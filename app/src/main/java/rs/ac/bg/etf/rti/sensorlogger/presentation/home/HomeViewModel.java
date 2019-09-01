@@ -10,6 +10,8 @@ import androidx.work.Constraints;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -35,6 +37,12 @@ public class HomeViewModel extends BaseObservable {
     HomeViewModel(Context context) {
         this.context = context;
         listening = getDefaultSharedPreferences(context).getBoolean(IS_LISTENING_KEY, false);
+    }
+
+    public void deleteLastFourHoursOfData() {
+        long timestamp = System.currentTimeMillis();
+        PersistenceManager.getInstance().deleteLastFourHoursOfSensorData(timestamp);
+        DatabaseManager.getInstance().deleteDataBefore(timestamp);
     }
 
     @Bindable

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener {
@@ -63,7 +65,6 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
         WorkManager workManager = WorkManager.getInstance(context);
         workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, workRequest);
     }
-
 
     /**
      * Sends an RPC to start a fullscreen Activity on the wearable.

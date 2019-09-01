@@ -15,7 +15,7 @@ import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 
 public class PersistenceManager {
 
-    private static final long HISTORY_DELETION_PERIOD = 4 * 60 * 60;
+    private static final long HISTORY_DELETION_PERIOD = (4 * 60 + 15) * 60;
 
     private static PersistenceManager instance;
 //    private AtomicInteger mobileFileId = new AtomicInteger(0);
@@ -127,12 +127,13 @@ public class PersistenceManager {
         thread.start();
     }
 
-    public void deleteLastFourHoursOfSensorData() {
+    public void deleteLastFourHoursOfSensorData(long timestamp) {
         File[] files = dataDirectory.listFiles();
         for(int i = 0; i < files.length; i++) {
             File currentFile = files[i];
             String extension = currentFile.getPath().substring(currentFile.getPath().lastIndexOf("."));
-            long fileLifetimeMin = (System.currentTimeMillis() - currentFile.lastModified()) / (1000 * 60);
+            long fileTimestamp = Long.parseLong(currentFile.getPath().substring(currentFile.getPath().indexOf("-")));
+            long fileLifetimeMin = (timestamp - fileTimestamp) / (1000 * 60);
 
             if (extension.equals("bin") && fileLifetimeMin <= HISTORY_DELETION_PERIOD) {
                 currentFile.delete();
