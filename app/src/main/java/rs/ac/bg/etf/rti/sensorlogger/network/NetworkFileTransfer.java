@@ -131,7 +131,7 @@ public class NetworkFileTransfer {
             fileType = 2;
         }
 
-        HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 20000);
         HttpClient httpclient = new DefaultHttpClient(httpParams);
         HttpPost httppost = new HttpPost(serverURL + "/upload?fileType=" + fileType);
         FileInputStream fIn = new FileInputStream(file);
