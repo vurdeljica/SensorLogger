@@ -79,7 +79,7 @@ public class SensorLoggerApplication extends Application {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 //TODO: change to app icon when you find it
-                .setSmallIcon(R.drawable.ic_add_black_24dp)
+                .setSmallIcon(R.drawable.ic_add)
                 .setContentTitle(getString(R.string.notification_title))
                 .setContentText(getString(R.string.notification_text))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

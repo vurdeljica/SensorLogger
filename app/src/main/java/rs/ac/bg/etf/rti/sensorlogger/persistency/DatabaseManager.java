@@ -105,7 +105,6 @@ public class DatabaseManager {
             }
 
             realm.executeTransaction(realm1 -> realm1.insertOrUpdate(dailyActivity));
-
         }
     }
 
@@ -304,28 +303,27 @@ public class DatabaseManager {
     }
 
     void saveToJson(File jsonFile) {
-        Gson gson = new GsonBuilder().create(); //... obtain your Gson;
-        Realm realm = Realm.getDefaultInstance();
-        RealmResults<DailyActivity> results = realm.where(DailyActivity.class).findAll();
-        List<DailyActivity> dailyActivities = new ArrayList<>(realm.copyFromRealm(results));
+        Gson gson = new GsonBuilder().create();//... obtain your Gson;
+        try (Realm realm = Realm.getDefaultInstance()) {
+            RealmResults<DailyActivity> results = realm.where(DailyActivity.class).findAll();
+            List<DailyActivity> dailyActivities = new ArrayList<>(realm.copyFromRealm(results));
 
-        try {
-            FileWriter writer = new FileWriter(jsonFile);
-            writer.append("{\"activities\":[");
-            for (int i = 0; i < dailyActivities.size(); i++) {
-                DailyActivity dailyActivity = dailyActivities.get(i);
+            try (FileWriter writer = new FileWriter(jsonFile)) {
+                writer.append("{\"activities\":[");
+                for (int i = 0; i < dailyActivities.size(); i++) {
+                    DailyActivity dailyActivity = dailyActivities.get(i);
 
-                String json = gson.toJson(dailyActivity);
-                writer.append(json);
-                if (i != dailyActivities.size() - 1) {
-                    writer.append(",");
+                    String json = gson.toJson(dailyActivity);
+                    writer.append(json);
+                    if (i != dailyActivities.size() - 1) {
+                        writer.append(",");
+                    }
                 }
+                writer.append("]}");
+                writer.flush();
+            } catch (IOException ex) {
+                Log.e(TAG, "saveToJson: error while making JSON");
             }
-            writer.append("]}");
-            writer.flush();
-            writer.close();
-        } catch (IOException ex) {
-            Log.e(TAG, "saveToJson: error while making JSON");
         }
     }
 

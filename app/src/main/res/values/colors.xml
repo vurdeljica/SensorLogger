@@ -7,4 +7,5 @@
     <color name="colorRed">#F44336</color>
     <color name="textDark">#1A1818</color>
     <color name="textLight">#D1D1D1</color>
+    <color name="white">#FFFFFF</color>
 </resources>

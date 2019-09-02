@@ -99,7 +99,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/date"
                         android:paddingBottom="15dp"
-                        app:endIconDrawable="@drawable/ic_arrow_drop_down_black_24dp"
+                        app:endIconDrawable="@drawable/ic_arrow_drop_down"
                         app:endIconMode="custom">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -118,7 +118,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/start_time"
                         android:paddingBottom="@dimen/vertical_padding"
-                        app:endIconDrawable="@drawable/ic_arrow_drop_down_black_24dp"
+                        app:endIconDrawable="@drawable/ic_arrow_drop_down"
                         app:endIconMode="custom">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -138,7 +138,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/end_time"
                         android:paddingBottom="15dp"
-                        app:endIconDrawable="@drawable/ic_arrow_drop_down_black_24dp"
+                        app:endIconDrawable="@drawable/ic_arrow_drop_down"
                         app:endIconMode="custom"
                         app:errorEnabled="true">
 

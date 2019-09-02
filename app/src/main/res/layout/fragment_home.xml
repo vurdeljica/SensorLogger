@@ -1,22 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <data>
-
-        <variable
-            name="vm"
-            type="rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel" />
-    </data>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.button.MaterialButton
+        <TextView
+            android:id="@+id/tv_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="delete"
-            android:onClick="@{() -> vm.deleteLastFourHoursOfData()}"/>
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="88dp"
+            android:layout_marginBottom="186dp"
+            android:background="@color/white"
+            android:elevation="10dp"
+            android:padding="8dp"
+            android:text="@string/delete"
+            android:textColor="@color/colorPrimary"
+            android:visibility="@{vm.isFabMenuOpen ? View.VISIBLE : View.INVISIBLE}" />
+
+        <TextView
+            android:id="@+id/tv_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="88dp"
+            android:layout_marginBottom="116dp"
+            android:background="@color/white"
+            android:elevation="10dp"
+            android:padding="8dp"
+            android:text="@string/send"
+            android:textColor="@color/colorPrimary"
+            android:visibility="@{vm.isFabMenuOpen ? View.VISIBLE : View.INVISIBLE}" />
 
         <androidx.appcompat.widget.AppCompatToggleButton
             android:id="@+id/material_button"
@@ -24,11 +42,61 @@
             android:layout_height="300dp"
             android:layout_centerInParent="true"
             android:background="@drawable/circular_shape"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
-            android:textOn="@string/start"
-            android:textOff="@string/stop"
             android:checked="@={vm.listening}"
-            android:onCheckedChanged="@{vm.onCheckedChangeListener}"/>
+            android:onCheckedChanged="@{vm.onCheckedChangeListener}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
+            android:textOff="@string/stop"
+            android:textOn="@string/start" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:onClick="@{vm.menuFabOnClickListener}"
+            android:src="@drawable/ic_more"
+            app:backgroundTint="@color/white"
+            app:tint="@color/colorPrimary" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="176dp"
+            android:onClick="@{() -> vm.showDeletionConfirmationDialog()}"
+            android:src="@drawable/ic_delete"
+            android:visibility="@{vm.isFabMenuOpen ? View.VISIBLE : View.INVISIBLE}"
+            app:backgroundTint="@color/white"
+            app:tint="@color/colorPrimary" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="106dp"
+            android:onClick="@{() -> vm.showTransferDialog()}"
+            android:src="@drawable/ic_send"
+            android:visibility="@{vm.isFabMenuOpen ? View.VISIBLE : View.INVISIBLE}"
+            app:backgroundTint="@color/white"
+            app:tint="@color/colorPrimary" />
 
     </RelativeLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="vm"
+            type="rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel" />
+    </data>
 </layout>
