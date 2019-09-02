@@ -110,7 +110,6 @@ public class DatabaseManager {
     }
 
     public void deleteDailyActivity(long dailyActivityId) {
-
         try (Realm realm = Realm.getDefaultInstance()) {
             final long id = dailyActivityId;
             realm.executeTransaction(realm1 -> {
@@ -131,12 +130,44 @@ public class DatabaseManager {
         return dailyActivity;
     }
 
-    @NonNull
-    public List<Gyroscope> getGyroscope(long timestamp) {
-        List<Gyroscope> gyroscope = new ArrayList<>();
+    @Nullable
+    public String getLatestSensorDataNodeId() {
+        String nodeId = null;
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            List<Gyroscope> gyroscopeFromRealm = realm.where(Gyroscope.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
+            Accelerometer accelerometer = realm.where(Accelerometer.class).sort("timestamp", Sort.DESCENDING).findFirst();
+            Gyroscope gyroscope = realm.where(Gyroscope.class).sort("timestamp", Sort.DESCENDING).findFirst();
+            HeartRateMonitor heartRateMonitor = realm.where(HeartRateMonitor.class).sort("timestamp", Sort.DESCENDING).findFirst();
+            Pedometer pedometer = realm.where(Pedometer.class).sort("timestamp", Sort.DESCENDING).findFirst();
+
+            long maxTimestamp = 0;
+
+            if (accelerometer != null) {
+                nodeId = accelerometer.getNodeId();
+                maxTimestamp = accelerometer.getTimestamp();
+            }
+            if (gyroscope != null && gyroscope.getTimestamp() > maxTimestamp) {
+                nodeId = gyroscope.getNodeId();
+                maxTimestamp = gyroscope.getTimestamp();
+            }
+            if (heartRateMonitor != null && heartRateMonitor.getTimestamp() > maxTimestamp) {
+                nodeId = heartRateMonitor.getNodeId();
+                maxTimestamp = heartRateMonitor.getTimestamp();
+            }
+            if (pedometer != null && pedometer.getTimestamp() > maxTimestamp) {
+                nodeId = pedometer.getNodeId();
+            }
+        }
+
+        return nodeId;
+    }
+
+    @Nullable
+    public Gyroscope getLatestGyroscope(String nodeId) {
+        Gyroscope gyroscope = null;
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            Gyroscope gyroscopeFromRealm = realm.where(Gyroscope.class).equalTo("nodeId", nodeId).sort("timestamp", Sort.DESCENDING).findFirst();
             if (gyroscopeFromRealm != null) {
                 gyroscope = realm.copyFromRealm(gyroscopeFromRealm);
             }
@@ -145,12 +176,21 @@ public class DatabaseManager {
         return gyroscope;
     }
 
-    @NonNull
-    public List<Accelerometer> getAccelerometer(long timestamp) {
-        List<Accelerometer> accelerometer = new ArrayList<>();
+    public void deleteGyroscope(long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<Gyroscope> result = realm1.where(Gyroscope.class).equalTo("timestamp", timestamp).findAll();
+                result.deleteAllFromRealm();
+            });
+        }
+    }
+
+    @Nullable
+    public Accelerometer getLatestAccelerometer(String nodeId) {
+        Accelerometer accelerometer = null;
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            List<Accelerometer> accelerometerFromRealm = realm.where(Accelerometer.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
+            Accelerometer accelerometerFromRealm = realm.where(Accelerometer.class).equalTo("nodeId", nodeId).sort("timestamp", Sort.DESCENDING).findFirst();
             if (accelerometerFromRealm != null) {
                 accelerometer = realm.copyFromRealm(accelerometerFromRealm);
             }
@@ -159,12 +199,21 @@ public class DatabaseManager {
         return accelerometer;
     }
 
-    @NonNull
-    public List<HeartRateMonitor> getHeartRateMonitor(long timestamp) {
-        List<HeartRateMonitor> heartRateMonitor = new ArrayList<>();
+    public void deleteAccelerometer(long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<Accelerometer> result = realm1.where(Accelerometer.class).equalTo("timestamp", timestamp).findAll();
+                result.deleteAllFromRealm();
+            });
+        }
+    }
+
+    @Nullable
+    public HeartRateMonitor getLatestHeartRateMonitor(String nodeId) {
+        HeartRateMonitor heartRateMonitor = null;
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            List<HeartRateMonitor> heartRateMonitorFromRealm = realm.where(HeartRateMonitor.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
+            HeartRateMonitor heartRateMonitorFromRealm = realm.where(HeartRateMonitor.class).equalTo("nodeId", nodeId).sort("timestamp", Sort.DESCENDING).findFirst();
             if (heartRateMonitorFromRealm != null) {
                 heartRateMonitor = realm.copyFromRealm(heartRateMonitorFromRealm);
             }
@@ -173,12 +222,21 @@ public class DatabaseManager {
         return heartRateMonitor;
     }
 
-    @NonNull
-    public List<Pedometer> getPedometer(long timestamp) {
-        List<Pedometer> pedometer = new ArrayList<>();
+    public void deleteHeartRateMonitor(long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<HeartRateMonitor> result = realm1.where(HeartRateMonitor.class).equalTo("timestamp", timestamp).findAll();
+                result.deleteAllFromRealm();
+            });
+        }
+    }
+
+    @Nullable
+    public Pedometer getLatestPedometer(String nodeId) {
+        Pedometer pedometer = null;
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            List<Pedometer> pedometerFromRealm = realm.where(Pedometer.class).between("timestamp", timestamp, timestamp + 32).distinct("nodeId").findAll();
+            Pedometer pedometerFromRealm = realm.where(Pedometer.class).equalTo("nodeId", nodeId).sort("timestamp", Sort.DESCENDING).findFirst();
             if (pedometerFromRealm != null) {
                 pedometer = realm.copyFromRealm(pedometerFromRealm);
             }
@@ -187,14 +245,23 @@ public class DatabaseManager {
         return pedometer;
     }
 
-    @Nullable
-    public GPSData getGPSData(long timestamp) {
-        GPSData gpsData = null;
+    public void deletePedometer(long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<Pedometer> result = realm1.where(Pedometer.class).equalTo("timestamp", timestamp).findAll();
+                result.deleteAllFromRealm();
+            });
+        }
+    }
+
+    @NonNull
+    public List<GPSData> getGPSData() {
+        List<GPSData> gpsData = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            GPSData gpsDataFromRealm = realm.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findFirst();
+            List<GPSData> gpsDataFromRealm = realm.where(GPSData.class).findAll();
             if (gpsDataFromRealm != null) {
-                gpsData = realm.copyFromRealm(gpsDataFromRealm);
+                gpsData.addAll(realm.copyFromRealm(gpsDataFromRealm));
             }
         }
 
@@ -212,19 +279,26 @@ public class DatabaseManager {
         return dailyActivities;
     }
 
-    public void deleteDataBefore(long timestamp) {
+    public void deleteGPSDataBefore(long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
-                RealmResults<Gyroscope> result1 = realm1.where(Gyroscope.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                RealmResults<GPSData> result = realm1.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                result.deleteAllFromRealm();
+            });
+        }
+    }
+
+    public void deleteSensorDataBefore(long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<Accelerometer> result1 = realm1.where(Accelerometer.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
                 result1.deleteAllFromRealm();
-                RealmResults<Accelerometer> result2 = realm1.where(Accelerometer.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                RealmResults<HeartRateMonitor> result2 = realm1.where(HeartRateMonitor.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
                 result2.deleteAllFromRealm();
-                RealmResults<Pedometer> result3 = realm1.where(Pedometer.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                RealmResults<Gyroscope> result3 = realm1.where(Gyroscope.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
                 result3.deleteAllFromRealm();
-                RealmResults<HeartRateMonitor> result4 = realm1.where(HeartRateMonitor.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                RealmResults<Pedometer> result4 = realm1.where(Pedometer.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
                 result4.deleteAllFromRealm();
-                RealmResults<GPSData> result5 = realm1.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
-                result5.deleteAllFromRealm();
             });
         }
     }
