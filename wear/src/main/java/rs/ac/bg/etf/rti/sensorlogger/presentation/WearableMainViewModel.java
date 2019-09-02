@@ -2,7 +2,6 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.hardware.SensorManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,11 +14,9 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Wearable;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
-import rs.ac.bg.etf.rti.sensorlogger.managers.WearableSensorManager;
 import rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static androidx.core.content.ContextCompat.getSystemService;
 
 public class WearableMainViewModel extends BaseObservable implements CapabilityClient.OnCapabilityChangedListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -28,7 +25,6 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
     private static final String NODE_ID_KEY = "nodeId";
 
     private final Context context;
-    private WearableSensorManager wearableSensorManager;
     public ObservableBoolean listening = new ObservableBoolean();
 
     WearableMainViewModel(Context context) {
@@ -36,14 +32,7 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
 
         getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(this);
 
-        wearableSensorManager = new WearableSensorManager(getSystemService(context, SensorManager.class));
-
         listening.set(getDefaultSharedPreferences(context).getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false));
-        if (listening.get()) {
-            wearableSensorManager.startListening(context);
-        } else {
-            wearableSensorManager.stopListening();
-        }
 
         Wearable.getNodeClient(context).getLocalNode()
                 .addOnSuccessListener(node -> getDefaultSharedPreferences(context).edit().putString(NODE_ID_KEY, node.getId()).apply());
@@ -68,11 +57,6 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(WearableDataLayerListenerService.IS_LISTENING_KEY)) {
             listening.set(sharedPreferences.getBoolean(key, false));
-            if (listening.get()) {
-                wearableSensorManager.startListening(context);
-            } else {
-                wearableSensorManager.stopListening();
-            }
         }
     }
 

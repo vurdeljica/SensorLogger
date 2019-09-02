@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.model;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class Accelerometer extends RealmObject {
@@ -11,6 +12,7 @@ public class Accelerometer extends RealmObject {
     private float y;
     private float z;
 
+    @Index
     private String nodeId;
 
     public Accelerometer() {

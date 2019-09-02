@@ -33,8 +33,6 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.MainActivity;
 
 public class LocationListenerService extends Service {
-    private static final String PACKAGE_NAME =
-            "rs.ac.bg.etf.rti.sensorlogger.services";
 
     private static final String TAG = LocationListenerService.class.getSimpleName();
 
@@ -42,12 +40,6 @@ public class LocationListenerService extends Service {
      * The name of the channel for notifications.
      */
     private static final String CHANNEL_ID = "channel_01";
-
-    public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
-
-    public static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
-    private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
-            ".started_from_notification";
 
     private final IBinder mBinder = new LocalBinder();
 
@@ -75,8 +67,6 @@ public class LocationListenerService extends Service {
      */
     private boolean mChangingConfiguration = false;
 
-    private NotificationManager mNotificationManager;
-
     /**
      * Contains parameters used by {@link com.google.android.gms.location.FusedLocationProviderApi}.
      */
@@ -94,11 +84,6 @@ public class LocationListenerService extends Service {
 
     private Handler mServiceHandler;
 
-    /**
-     * The current location.
-     */
-    private Location mLocation;
-
     public LocationListenerService() {
     }
 
@@ -115,12 +100,11 @@ public class LocationListenerService extends Service {
         };
 
         createLocationRequest();
-        getLastLocation();
 
         HandlerThread handlerThread = new HandlerThread(TAG);
         handlerThread.start();
         mServiceHandler = new Handler(handlerThread.getLooper());
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         // Android O requires a Notification Channel.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -137,14 +121,7 @@ public class LocationListenerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
-        boolean startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION,
-                false);
 
-        // We got here because the user decided to remove location updates from the notification.
-        if (startedFromNotification) {
-            removeLocationUpdates();
-            stopSelf();
-        }
         // Tells the system to not try to recreate the service after it has been killed.
         return START_NOT_STICKY;
     }
@@ -206,7 +183,7 @@ public class LocationListenerService extends Service {
         startService(new Intent(getApplicationContext(), LocationListenerService.class));
         try {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                    mLocationCallback, Looper.myLooper());
+                    mLocationCallback, mServiceHandler.getLooper());
         } catch (SecurityException e) {
             Utils.setRequestingLocationUpdates(this, false);
             Log.e(TAG, "Lost location permission. Could not request updates. " + e);
@@ -232,12 +209,7 @@ public class LocationListenerService extends Service {
      * Returns the {@link NotificationCompat} used as part of the foreground service.
      */
     private Notification getNotification() {
-        Intent intent = new Intent(this, LocationListenerService.class);
-
         CharSequence text = getString(R.string.recording_location);
-
-        // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
-        intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
         // The PendingIntent to launch activity.
         PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
@@ -256,25 +228,9 @@ public class LocationListenerService extends Service {
         return builder.build();
     }
 
-    private void getLastLocation() {
-        try {
-            mFusedLocationClient.getLastLocation()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            mLocation = task.getResult();
-                        } else {
-                            Log.w(TAG, "Failed to get location.");
-                        }
-                    });
-        } catch (SecurityException e) {
-            Log.e(TAG, "Lost location permission." + e);
-        }
-    }
-
     private void onNewLocation(Location location) {
         Log.i(TAG, "New location: " + location);
 
-        mLocation = location;
         GPSData gpsData = new GPSData(location.getTime(), location.getLongitude(), location.getLatitude(), location.getAltitude());
         DatabaseManager.getInstance().insertOrUpdateGPSData(gpsData);
     }

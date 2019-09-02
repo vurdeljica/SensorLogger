@@ -131,11 +131,11 @@ public class PersistenceManager {
         File[] files = dataDirectory.listFiles();
         for(int i = 0; i < files.length; i++) {
             File currentFile = files[i];
-            String extension = currentFile.getPath().substring(currentFile.getPath().lastIndexOf("."));
-            long fileTimestamp = Long.parseLong(currentFile.getPath().substring(currentFile.getPath().indexOf("-")));
-            long fileLifetimeMin = (timestamp - fileTimestamp) / (1000 * 60);
+            String extension = currentFile.getName().substring(currentFile.getName().lastIndexOf("."));
+            long fileTimestamp = Long.parseLong(currentFile.getName().substring(0, currentFile.getName().indexOf("-")));
+            long fileLifetimeMin = (timestamp - fileTimestamp) / 1000;
 
-            if (extension.equals("bin") && fileLifetimeMin <= HISTORY_DELETION_PERIOD) {
+            if (extension.equals(".bin") && fileLifetimeMin <= HISTORY_DELETION_PERIOD) {
                 currentFile.delete();
             }
         }

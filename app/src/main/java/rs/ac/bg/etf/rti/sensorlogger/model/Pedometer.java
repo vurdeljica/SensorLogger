@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.model;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class Pedometer extends RealmObject {
@@ -9,6 +10,7 @@ public class Pedometer extends RealmObject {
 
     private int stepCount;
 
+    @Index
     private String nodeId;
 
     public Pedometer() {

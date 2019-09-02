@@ -19,7 +19,7 @@
     <string name="start_app">Start application</string>
     <string name="location_unknown">Location unknown</string>
     <string name="location_updates_label">Location Updates</string>
-    <string name="recording_location">This app is using GPS</string>
+    <string name="recording_location">This App is using GPS</string>
 
     <string name="permission_rationale">Location permission is needed for core functionality</string>
     <string name="permission_denied_explanation">Permission was denied, but is needed for core
