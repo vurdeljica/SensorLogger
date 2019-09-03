@@ -10,7 +10,6 @@ import com.annimon.stream.Stream;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
@@ -30,22 +29,19 @@ class ServerInfoListAdapter extends ArrayAdapter<String> {
         }
     };
 
-    private static String apply(ServerInfo serverInfo) {
-        return String.format(Locale.getDefault(), "%s:%d", serverInfo.getIpAddress(), serverInfo.getPort());
-    }
-
     private void updateServerInfoList() {
         serverInfoList.clear();
         clear();
         serverInfoList.addAll(networkManager.getServersInformation());
-        addAll(Stream.of(serverInfoList).map(ServerInfoListAdapter::apply).toList());
+        addAll(Stream.of(serverInfoList).map(ServerInfo::toString).toList());
         notifyDataSetChanged();
     }
 
     ServerInfoListAdapter(@NonNull Context context, int resource, @NonNull List<ServerInfo> objects) {
-        super(context, resource, Stream.of(objects).map(ServerInfoListAdapter::apply).toList());
+        super(context, resource, Stream.of(objects).map(ServerInfo::toString).toList());
         serverInfoList = new ArrayList<>();
         networkManager = NetworkManager.getInstance(context);
+        setNotifyOnChange(true);
         updateServerInfoList();
         startUpdates();
     }

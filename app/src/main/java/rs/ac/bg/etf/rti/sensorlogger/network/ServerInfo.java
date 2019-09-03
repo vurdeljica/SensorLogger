@@ -1,5 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.network;
 
+import androidx.annotation.NonNull;
+
 public class ServerInfo {
     private String hostname;
     private String ipAddress;
@@ -64,9 +66,10 @@ public class ServerInfo {
         return hostname.equals(serverInfo.getHostname()) && ipAddress.equals(serverInfo.getIpAddress()) && port == serverInfo.getPort() && instanceName.equals(serverInfo.getInstanceName());
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return hostname + "[" + ipAddress + ":" + port + "]" + " with instance name: " + instanceName;
+        return hostname + "[" + ipAddress + ":" + port + "]";
     }
 
 }

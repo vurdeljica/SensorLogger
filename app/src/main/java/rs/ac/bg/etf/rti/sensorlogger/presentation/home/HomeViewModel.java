@@ -88,7 +88,6 @@ public class HomeViewModel extends BaseObservable {
             transferDataToServer(adapter.getServerInfoAt(i));
             dialogInterface.dismiss();
         });
-        materialAlertDialogBuilder.setMessage(R.string.no_servers);
 
         materialAlertDialogBuilder.show();
     }
