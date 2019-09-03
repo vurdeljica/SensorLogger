@@ -24,15 +24,13 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
-import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
     private static final String STORE_WORKER_ID = "StoreFileWorker";
 
-    private static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
+    public static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
 

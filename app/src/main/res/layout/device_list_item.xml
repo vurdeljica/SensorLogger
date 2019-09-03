@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/device_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="@dimen/vertical_padding"
+            android:layout_marginEnd="@dimen/vertical_padding"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@{vm.nodeName}"
+            android:textColor="@color/textDark"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="@dimen/vertical_padding"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@{vm.nodeId}" />
+
+    </FrameLayout>
+
+    <data>
+
+        <variable
+            name="vm"
+            type="rs.ac.bg.etf.rti.sensorlogger.presentation.devices.DeviceListItemViewModel" />
+    </data>
+</layout>

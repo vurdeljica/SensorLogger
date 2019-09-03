@@ -102,7 +102,7 @@ public class WearableSensorBackgroundService extends Service {
         sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                Log.d(TAG, prettyPrintFloatArray(event.values));
+//                Log.d(TAG, prettyPrintFloatArray(event.values));
 
                 event.timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
 

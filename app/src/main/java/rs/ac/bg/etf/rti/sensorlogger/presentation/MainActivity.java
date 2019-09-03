@@ -27,7 +27,7 @@ import rs.ac.bg.etf.rti.sensorlogger.Utils;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.logs.LogsFragment;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.devices.DevicesFragment;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -257,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         selectedFragment = new HomeFragment();
                         break;
                     case R.id.nav_logs:
-                        selectedFragment = new LogsFragment();
+                        selectedFragment = new DevicesFragment();
                         break;
                     case R.id.nav_journal:
                         selectedFragment = new JournalFragment();

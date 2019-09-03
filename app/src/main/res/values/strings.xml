@@ -3,7 +3,7 @@
     <string name="start">TRACKING</string>
     <string name="stop">NOT TRACKING</string>
     <string name="home">Home</string>
-    <string name="logs">Logs</string>
+    <string name="devices">Devices</string>
     <string name="journal">Journal</string>
     <string name="activity_title">Activity title</string>
     <string name="activity_type">Activity type</string>
