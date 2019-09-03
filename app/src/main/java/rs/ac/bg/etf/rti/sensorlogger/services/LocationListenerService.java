@@ -30,6 +30,9 @@ import rs.ac.bg.etf.rti.sensorlogger.Utils;
 import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.MainActivity;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
+
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class LocationListenerService extends Service {
 
@@ -121,8 +124,12 @@ public class LocationListenerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
 
+        if (intent == null && getDefaultSharedPreferences(this).getBoolean(HomeViewModel.IS_LISTENING_KEY, false)) {
+            requestLocationUpdates();
+        }
+
         // Tells the system to not try to recreate the service after it has been killed.
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
@@ -136,7 +143,6 @@ public class LocationListenerService extends Service {
         // Called when a client (MainActivity) comes to the foreground
         // and binds with this service. The service should cease to be a foreground service
         // when that happens.
-        Log.i(TAG, "in onBind()");
         stopForeground(true);
         mChangingConfiguration = false;
         return mBinder;
@@ -147,7 +153,6 @@ public class LocationListenerService extends Service {
         // Called when a client (MainActivity) returns to the foreground
         // and binds once again with this service. The service should cease to be a foreground
         // service when that happens.
-        Log.i(TAG, "in onRebind()");
         stopForeground(true);
         mChangingConfiguration = false;
         super.onRebind(intent);
@@ -161,8 +166,6 @@ public class LocationListenerService extends Service {
         // service. If this method is called due to a configuration change in MainActivity, we
         // do nothing. Otherwise, we make this service a foreground service.
         if (!mChangingConfiguration && Utils.requestingLocationUpdates(this)) {
-            Log.i(TAG, "Starting foreground service");
-
             startForeground(NOTIFICATION_ID, getNotification());
         }
         return true; // Ensures onRebind() is called when a client re-binds.

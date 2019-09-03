@@ -179,8 +179,12 @@ public class WearableSensorBackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
 
+        if (intent == null && getDefaultSharedPreferences(this).getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false)) {
+            requestSensorEventUpdates();
+        }
+
         // Tells the system to not try to recreate the service after it has been killed.
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
