@@ -32,4 +32,6 @@
     <string name="send_alert_title">Send data to the server</string>
     <string name="refresh">Refresh</string>
     <string name="no_servers">No servers found.</string>
+    <string name="save">Save</string>
+    <string name="new_activity">New Activity</string>
 </resources>

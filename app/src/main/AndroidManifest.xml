@@ -72,7 +72,6 @@
         <service android:name=".services.LocationListenerService"
             android:enabled="true"
             android:exported="false" />
-<!--        android:foregroundServiceType="location"-->
     </application>
 
 </manifest>

@@ -2,9 +2,9 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation.journalEntry;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.view.View;
-import android.widget.DatePicker;
-import android.widget.TimePicker;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
@@ -12,15 +12,17 @@ import androidx.databinding.adapters.TextViewBindingAdapter;
 
 import java.util.Calendar;
 
-import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
 public class JournalEntryViewModel extends BaseObservable {
 
     private DailyActivity journalEntry;
     private JournalEntryHandler handler;
+    private long diff = 60L;
+    private String[] intensities = new String[]{"Low intensity", "Medium Intensity", "High intensity"};
 
-    public JournalEntryViewModel(JournalEntryHandler handler, @NonNull DailyActivity journalEntry) {
+    JournalEntryViewModel(JournalEntryHandler handler, @NonNull DailyActivity journalEntry) {
         this.journalEntry = journalEntry;
         this.handler = handler;
     }
@@ -65,14 +67,22 @@ public class JournalEntryViewModel extends BaseObservable {
             calendar.set(0, 0, 0, hour, minute);
             if (isStartTime) {
                 journalEntry.setStartTime(calendar.getTime());
+                calendar.add(Calendar.MINUTE, (int) diff);
+                journalEntry.setEndTime(calendar.getTime());
             } else {
                 journalEntry.setEndTime(calendar.getTime());
+                if (journalEntry.getStartTime().after(journalEntry.getEndTime())) {
+                    calendar.add(Calendar.MINUTE, (int) -diff);
+                    journalEntry.setStartTime(calendar.getTime());
+                } else {
+                    diff = ((journalEntry.getEndTime().getTime() - journalEntry.getStartTime().getTime()) / (1000L * 60L));
+                }
             }
             JournalEntryViewModel.this.notifyChange();
         };
     }
 
-    public void saveJournalEntry() {
+    void saveJournalEntry() {
         if (activityValidation()) {
             DatabaseManager dbManager = DatabaseManager.getInstance();
             dbManager.insertOrUpdateDailyActivity(journalEntry);
@@ -81,17 +91,21 @@ public class JournalEntryViewModel extends BaseObservable {
     }
 
     private boolean activityValidation() {
-        boolean timeValid = journalEntry.getStartTime().before(journalEntry.getEndTime());
         boolean typeValid = journalEntry.getActivityType() != null && !journalEntry.getActivityType().isEmpty();
-        if (!timeValid)
-            handler.onEndTimeValidationFailed();
         if (!typeValid)
             handler.onActivityTypeValidationFailed();
-        return timeValid && typeValid;
+        return typeValid;
     }
 
-    public void deleteJournalEntry() {
+    void deleteJournalEntry() {
         DatabaseManager.getInstance().deleteDailyActivity(journalEntry.getId());
         handler.onJournalEntryDeleted();
+    }
+
+    ArrayAdapter<String> getIntensityAdapter(Context context) {
+        return new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_dropdown_item_1line,
+                intensities);
     }
 }

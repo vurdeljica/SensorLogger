@@ -39,6 +39,7 @@ public class DailyActivity extends RealmObject {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.SECOND, 0);
+        calendar.set(0, 0, 0);
 
         endTime = calendar.getTime();
 
@@ -130,7 +131,7 @@ public class DailyActivity extends RealmObject {
     }
 
     public String getActivityTitle() {
-        return activityTitle;
+        return activityTitle != null && !activityTitle.isEmpty() ? activityTitle : activityType;
     }
 
     public void setActivityTitle(String activityTitle) {

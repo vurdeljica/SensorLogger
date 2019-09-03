@@ -30,13 +30,16 @@ public class JournalEntryActivity extends AppCompatActivity implements JournalEn
             long dailyActivityId = getIntent().getExtras().getLong("id");
             activity = dbManager.getDailyActivity(dailyActivityId);
             String dailyActivityTitle = activity.getActivityTitle();
-            setTitle(dailyActivityTitle != null ? dailyActivityTitle : activity.getActivityType());
+            setTitle(dailyActivityTitle);
         } else {
             activity = new DailyActivity();
+            setTitle(R.string.new_activity);
         }
 
         journalEntryViewModel = new JournalEntryViewModel(this, activity);
         binding.setVm(journalEntryViewModel);
+
+        binding.journalActivityType.setAdapter(journalEntryViewModel.getIntensityAdapter(this));
     }
 
     private void setupToolbar() {
@@ -88,18 +91,12 @@ public class JournalEntryActivity extends AppCompatActivity implements JournalEn
     }
 
     @Override
-    public void onEndTimeValidationFailed() {
-        binding.journalTimeToWrapper.setError("End time can't be before start time");
-    }
-
-    @Override
     public void onActivityTypeValidationFailed() {
         binding.journalActivityTypeWrapper.setError("Activity must have a type");
     }
 
     @Override
     public void clearErrors() {
-        binding.journalTimeToWrapper.setError(null);
         binding.journalActivityTypeWrapper.setError(null);
     }
 }
