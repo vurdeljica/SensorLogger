@@ -17,7 +17,7 @@ import androidx.work.WorkManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
-import java.util.List;
+import java.util.ArrayList;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
@@ -80,30 +80,17 @@ public class HomeViewModel extends BaseObservable {
     }
 
     public void showTransferDialog() {
-        List<ServerInfo> sInfoList = networkManager.getServersInformation();
-        CharSequence[] serverIpAddresses;
-        if (sInfoList.size() > 0) {
-            serverIpAddresses = new CharSequence[sInfoList.size()];
-            for (int i = 0; i < sInfoList.size(); i++) {
-                serverIpAddresses[i] = sInfoList.get(i).getIpAddress();
-            }
-        } else {
-            serverIpAddresses = new CharSequence[0];
-        }
-        int selectedIndex = -1;
-        new MaterialAlertDialogBuilder(context, R.style.AlertDialogStyle)
-                .setTitle(context.getString(R.string.send_alert_title))
-                .setSingleChoiceItems(serverIpAddresses, selectedIndex, (dialogInterface, i) -> {
-                    if (sInfoList.size() > 0) {
-                        transferDataToServer(sInfoList.get(i));
-                        dialogInterface.dismiss();
-                    }
-                })
-                .setMessage(sInfoList.size() > 0 ? 0 : R.string.no_servers)
-                .setNegativeButton(context.getString(android.R.string.cancel),
-                        (dialog, which) -> dialog.dismiss())
-                .setNeutralButton(R.string.refresh, (dialogInterface, i) -> showTransferDialog())
-                .show();
+        MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(context, R.style.AlertDialogStyle)
+                .setTitle(context.getString(R.string.send_alert_title)).setNegativeButton(context.getString(android.R.string.cancel),
+                        (dialog, which) -> dialog.dismiss());
+        ServerInfoListAdapter adapter = new ServerInfoListAdapter(context, android.R.layout.simple_list_item_single_choice, new ArrayList<>());
+        materialAlertDialogBuilder.setSingleChoiceItems(adapter, -1, (dialogInterface, i) -> {
+            transferDataToServer(adapter.getServerInfoAt(i));
+            dialogInterface.dismiss();
+        });
+        materialAlertDialogBuilder.setMessage(R.string.no_servers);
+
+        materialAlertDialogBuilder.show();
     }
 
     private void transferDataToServer(ServerInfo serverInfo) {
