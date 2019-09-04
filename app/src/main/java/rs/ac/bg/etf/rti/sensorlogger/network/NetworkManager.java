@@ -32,7 +32,9 @@ public class NetworkManager {
             @Override
             public void onServiceFound(String hostname, String ipAddress, int port, String instanceName) {
                 ServerInfo serverInfo = new ServerInfo(hostname, ipAddress, port, instanceName);
-                localServersInfo.add(serverInfo);
+                if (!localServersInfo.contains(serverInfo)) {
+                    localServersInfo.add(serverInfo);
+                }
             }
 
             @Override
