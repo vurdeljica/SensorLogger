@@ -3,6 +3,7 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation.home;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
 
@@ -15,9 +16,11 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
@@ -79,7 +82,7 @@ public class HomeViewModel extends BaseObservable {
         DatabaseManager.getInstance().deleteGPSDataBefore(timestamp);
     }
 
-    public void showTransferDialog() {
+    public void showAutomaticTransferDialog() {
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(context, R.style.AlertDialogStyle)
                 .setTitle(context.getString(R.string.send_alert_title)).setNegativeButton(context.getString(android.R.string.cancel),
                         (dialog, which) -> dialog.dismiss());
@@ -87,9 +90,48 @@ public class HomeViewModel extends BaseObservable {
         materialAlertDialogBuilder.setSingleChoiceItems(adapter, -1, (dialogInterface, i) -> {
             transferDataToServer(adapter.getServerInfoAt(i));
             dialogInterface.dismiss();
-        });
+        })
+                .setNeutralButton(R.string.manual, (dialogInterface, i) -> {
+                    showManualTransferDialog();
+                    dialogInterface.dismiss();
+                });
 
         materialAlertDialogBuilder.show();
+    }
+
+    private void showManualTransferDialog() {
+        LayoutInflater li = context.getSystemService(LayoutInflater.class);
+        View v = li.inflate(R.layout.dialog_manual_server_entry, null);
+        new MaterialAlertDialogBuilder(context, R.style.AlertDialogStyle)
+                .setTitle(context.getString(R.string.send_alert_title))
+                .setNegativeButton(context.getString(android.R.string.cancel),
+                        (dialog, which) -> dialog.dismiss())
+                .setNeutralButton(R.string.automatic, (dialogInterface, i) -> {
+                    showAutomaticTransferDialog();
+                    dialogInterface.dismiss();
+                })
+                .setPositiveButton(context.getString(R.string.send), (dialogInterface, i) -> {
+                    String ipAddress = "";
+                    int port = 8000;
+
+                    TextInputEditText ipAddressEditText = v.findViewById(R.id.ip_address_et);
+                    TextInputEditText portEditText = v.findViewById(R.id.port_et);
+                    if (ipAddressEditText != null && ipAddressEditText.getText() != null) {
+                        ipAddress = ipAddressEditText.getText().toString();
+                    }
+                    if (portEditText != null && portEditText.getText() != null) {
+                        try {
+                            port = Integer.valueOf(portEditText.getText().toString());
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    transferDataToServer(new ServerInfo("", ipAddress, port, ""));
+                    dialogInterface.dismiss();
+                })
+                .setView(v)
+                .show();
     }
 
     private void transferDataToServer(ServerInfo serverInfo) {

@@ -63,7 +63,7 @@ public class NetworkManager {
     }
 
     public void uploadDirectoryContentToServer(ServerInfo serverInfo, File directory) {
-        if(!isServerInfoValid(serverInfo)) return;
+//        if(!isServerInfoValid(serverInfo)) return;
 
         String serverURL = ServerInfo.makeURL(serverInfo);
         networkFileTransfer.sendAllFilesInDirectory(serverURL, directory);

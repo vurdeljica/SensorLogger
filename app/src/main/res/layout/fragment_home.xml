@@ -83,7 +83,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="106dp"
-            android:onClick="@{() -> vm.showTransferDialog()}"
+            android:onClick="@{() -> vm.showAutomaticTransferDialog()}"
             android:src="@drawable/ic_send"
             android:visibility="@{vm.isFabMenuOpen ? View.VISIBLE : View.INVISIBLE}"
             app:backgroundTint="@color/white"

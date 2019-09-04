@@ -31,7 +31,10 @@
     <string name="delete_alert_text">Are you sure you want to delete the last 4 hours of collected data\?</string>
     <string name="send_alert_title">Send data to the server</string>
     <string name="refresh">Refresh</string>
-    <string name="no_servers">Servers found:</string>
     <string name="save">Save</string>
     <string name="new_activity">New Activity</string>
+    <string name="ip_address">Ip Address</string>
+    <string name="port">Port</string>
+    <string name="automatic">Find automatically</string>
+    <string name="manual">Enter manually</string>
 </resources>
