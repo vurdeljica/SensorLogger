@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.workers;
 
 import android.content.Context;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -28,7 +29,6 @@ public class StoreFileWorker extends Worker {
     @Override
     public Result doWork() {
         long endTime = System.currentTimeMillis();
-        long timestamp = endTime - 16L * 60L * 1000L;
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();
         List<SensorDataProtos.MobileData> mobileDataList = new ArrayList<>();
@@ -44,40 +44,56 @@ public class StoreFileWorker extends Worker {
             mobileDataList.add(mobileData);
         }
 
-        persistenceManager.saveMobileData(mobileDataList, timestamp);
-        dbManager.deleteGPSDataBefore(endTime);
+        if (!mobileDataList.isEmpty()) {
+            persistenceManager.saveMobileData(mobileDataList, dbManager.getGPSTimestamp());
+            dbManager.deleteGPSDataBefore(endTime);
+        }
 
-        String nodeId = dbManager.getLatestSensorDataNodeId();
-        while (nodeId != null) {
-
+        Pair<String, Long> latestSensorData = dbManager.getLatestSensorData();
+        String nodeId = latestSensorData.first;
+        long timestamp = latestSensorData.second;
+        if (timestamp == 0) {
+            return Result.success();
+        }
+        while (true) {
             Accelerometer accelerometer = dbManager.getLatestAccelerometer(nodeId);
             Gyroscope gyroscope = dbManager.getLatestGyroscope(nodeId);
             Pedometer pedometer = dbManager.getLatestPedometer(nodeId);
             HeartRateMonitor heartRateMonitor = dbManager.getLatestHeartRateMonitor(nodeId);
 
-            SensorDataProtos.DeviceData.Builder deviceDataBuilder = SensorDataProtos.DeviceData.newBuilder().setTimestamp(timestamp);
+            SensorDataProtos.DeviceData.Builder deviceDataBuilder = SensorDataProtos.DeviceData.newBuilder()
+                    .setTimestamp(timestamp)
+                    .setNodeId(nodeId);
 
             if (accelerometer != null) {
                 deviceDataBuilder
                         .setAccX(accelerometer.getX())
                         .setAccY(accelerometer.getY())
                         .setAccZ(accelerometer.getZ());
-                dbManager.deleteAccelerometer(accelerometer.getTimestamp());
+                if (accelerometer.getTimestamp() == timestamp) {
+                    dbManager.deleteAccelerometer(accelerometer.getTimestamp());
+                }
             }
             if (gyroscope != null) {
                 deviceDataBuilder
                         .setGyrX(gyroscope.getX())
                         .setGyrY(gyroscope.getY())
                         .setGyrZ(gyroscope.getZ());
-                dbManager.deleteGyroscope(gyroscope.getTimestamp());
+                if (gyroscope.getTimestamp() == timestamp) {
+                    dbManager.deleteGyroscope(gyroscope.getTimestamp());
+                }
             }
             if (pedometer != null) {
                 deviceDataBuilder.setStepCount(pedometer.getStepCount());
-                dbManager.deletePedometer(pedometer.getTimestamp());
+                if (pedometer.getTimestamp() == timestamp) {
+                    dbManager.deletePedometer(pedometer.getTimestamp());
+                }
             }
             if (heartRateMonitor != null) {
                 deviceDataBuilder.setHeartRate(heartRateMonitor.getHeartRate());
-                dbManager.deleteHeartRateMonitor(heartRateMonitor.getTimestamp());
+                if (heartRateMonitor.getTimestamp() == timestamp) {
+                    dbManager.deleteHeartRateMonitor(heartRateMonitor.getTimestamp());
+                }
             }
 
             SensorDataProtos.DeviceData deviceData = deviceDataBuilder.build();
@@ -86,14 +102,19 @@ public class StoreFileWorker extends Worker {
             }
             deviceDataHashMap.get(nodeId).add(deviceData);
 
-            nodeId = dbManager.getLatestSensorDataNodeId();
+            latestSensorData = dbManager.getLatestSensorData();
+            if (latestSensorData.second == 0) {
+                break;
+            }
+            nodeId = latestSensorData.first;
+            timestamp = latestSensorData.second;
         }
 
         for (String node : deviceDataHashMap.keySet()) {
             persistenceManager.saveDeviceData(deviceDataHashMap.get(node), node, timestamp);
         }
 
-        dbManager.deleteSensorDataBefore(endTime);
+//        dbManager.deleteSensorDataBefore(endTime);
 
         // Indicate whether the task finished successfully with the Result
         return Result.success();

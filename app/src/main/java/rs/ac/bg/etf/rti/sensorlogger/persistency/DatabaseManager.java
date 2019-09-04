@@ -2,6 +2,7 @@ package rs.ac.bg.etf.rti.sensorlogger.persistency;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -129,16 +130,15 @@ public class DatabaseManager {
         return dailyActivity;
     }
 
-    @Nullable
-    public String getLatestSensorDataNodeId() {
-        String nodeId = null;
-
+    @NonNull
+    public Pair<String, Long> getLatestSensorData() {
         try (Realm realm = Realm.getDefaultInstance()) {
             Accelerometer accelerometer = realm.where(Accelerometer.class).sort("timestamp", Sort.DESCENDING).findFirst();
             Gyroscope gyroscope = realm.where(Gyroscope.class).sort("timestamp", Sort.DESCENDING).findFirst();
             HeartRateMonitor heartRateMonitor = realm.where(HeartRateMonitor.class).sort("timestamp", Sort.DESCENDING).findFirst();
             Pedometer pedometer = realm.where(Pedometer.class).sort("timestamp", Sort.DESCENDING).findFirst();
 
+            String nodeId = null;
             long maxTimestamp = 0;
 
             if (accelerometer != null) {
@@ -155,10 +155,35 @@ public class DatabaseManager {
             }
             if (pedometer != null && pedometer.getTimestamp() > maxTimestamp) {
                 nodeId = pedometer.getNodeId();
+                maxTimestamp = pedometer.getTimestamp();
             }
+            return new Pair<>(nodeId, maxTimestamp);
         }
+    }
 
-        return nodeId;
+    public long getSensorDataTimestamp(String nodeId) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            long accelerometer = (long) realm.where(Accelerometer.class).equalTo("nodeId", nodeId).min("timestamp");
+            long gyroscope = (long) realm.where(Gyroscope.class).equalTo("nodeId", nodeId).min("timestamp");
+            long heartRateMonitor = (long) realm.where(HeartRateMonitor.class).equalTo("nodeId", nodeId).min("timestamp");
+            long pedometer = (long) realm.where(Pedometer.class).equalTo("nodeId", nodeId).min("timestamp");
+
+            long minTimestamp = 0;
+
+            if (accelerometer != 0) {
+                minTimestamp = accelerometer;
+            }
+            if (gyroscope != 0 && gyroscope < minTimestamp) {
+                minTimestamp = gyroscope;
+            }
+            if (heartRateMonitor != 0 && heartRateMonitor < minTimestamp) {
+                minTimestamp = heartRateMonitor;
+            }
+            if (pedometer != 0 && pedometer < minTimestamp) {
+                minTimestamp = pedometer;
+            }
+            return minTimestamp;
+        }
     }
 
     @Nullable
@@ -265,6 +290,13 @@ public class DatabaseManager {
         }
 
         return gpsData;
+    }
+
+    public long getGPSTimestamp() {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            Number timestamp = realm.where(GPSData.class).min("timestamp");
+            return timestamp != null ? timestamp.longValue() : 0;
+        }
     }
 
     public List<DailyActivity> getDailyActivities() {
