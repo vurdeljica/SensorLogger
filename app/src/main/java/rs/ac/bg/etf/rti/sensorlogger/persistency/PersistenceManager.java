@@ -132,10 +132,13 @@ public class PersistenceManager {
         for(int i = 0; i < files.length; i++) {
             File currentFile = files[i];
             String extension = currentFile.getName().substring(currentFile.getName().lastIndexOf("."));
+            if (!extension.equals(".bin")) {
+                continue;
+            }
             long fileTimestamp = Long.parseLong(currentFile.getName().substring(0, currentFile.getName().indexOf("-")));
             long fileLifetimeMin = (timestamp - fileTimestamp) / 1000;
 
-            if (extension.equals(".bin") && fileLifetimeMin <= HISTORY_DELETION_PERIOD) {
+            if (fileLifetimeMin <= HISTORY_DELETION_PERIOD) {
                 currentFile.delete();
             }
         }
