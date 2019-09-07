@@ -48,8 +48,8 @@ public class PersistenceManager {
             @Override
             public void run() {
 //                int fileId = mobileFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile.bin";
-                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile-compressed.bin";
+                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile.txt";
+                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile-compressed.txt";
 
                 try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
                     for (SensorDataProtos.MobileData mobileSensorData : mobileData) {
@@ -74,8 +74,8 @@ public class PersistenceManager {
             @Override
             public void run() {
 //                int fileId = deviceFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".bin";
-                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.bin";
+                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".txt";
+                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.txt";
 
                 try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
                     for (SensorDataProtos.DeviceData mobileDeviceData : deviceData) {
