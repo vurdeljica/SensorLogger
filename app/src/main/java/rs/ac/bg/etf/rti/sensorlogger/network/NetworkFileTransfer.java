@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,14 +55,15 @@ public class NetworkFileTransfer {
             public void run() {
                 try {
                     File[] files = directory.listFiles();
-
-                    sendGeneralInformation(serverURL, files.length);
+                    Random rand = new Random();
+                    int id = rand.nextInt();
+                    sendGeneralInformation(serverURL, files.length, id);
 
                     List<Future<?>> futures = new ArrayList<>();
                     executor = Executors.newFixedThreadPool(10);//creating a pool of 10 threads
 
                     for(int i = 0; i < files.length; i++) {
-                        Callable<?> worker = makeCallableTaskForFileUpload(serverURL, files[i]);
+                        Callable<?> worker = makeCallableTaskForFileUpload(serverURL, files[i], id);
                         Future<?> f = executor.submit(worker);
                         futures.add(f);
                     }
@@ -84,10 +86,11 @@ public class NetworkFileTransfer {
         thread.start();
     }
 
-    private void sendGeneralInformation(String serverURL, int numOfFiles) {
+    private void sendGeneralInformation(String serverURL, int numOfFiles, int id) {
         try {
             List<NameValuePair> nameValuePairs = new ArrayList<>();
             nameValuePairs.add(new BasicNameValuePair("numOfFiles", Integer.toString(numOfFiles)));
+            nameValuePairs.add(new BasicNameValuePair("id", Integer.toString(id)));
 
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(serverURL);
@@ -101,13 +104,14 @@ public class NetworkFileTransfer {
         }
     }
 
-    private Callable<Boolean> makeCallableTaskForFileUpload(String _serverURL, File _file) {
+    private Callable<Boolean> makeCallableTaskForFileUpload(String _serverURL, File _file, int _id) {
         final File file = _file;
         final String serverURL = _serverURL;
+        final int id = _id;
         Callable<Boolean> callableTask = () -> {
             try {
                 Log.d("PERFORMANCE", System.currentTimeMillis() + "");
-                uploadFileToServer(serverURL, file);
+                uploadFileToServer(serverURL, file, id);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -118,7 +122,7 @@ public class NetworkFileTransfer {
         return callableTask;
     }
 
-    public void uploadFileToServer(String serverURL, File file) throws IOException {
+    public void uploadFileToServer(String serverURL, File file, int id) throws IOException {
         final HttpParams httpParams = new BasicHttpParams();
         int fileType = -1;
         if (file.getName().contains("json")) {
@@ -133,7 +137,7 @@ public class NetworkFileTransfer {
 
         HttpConnectionParams.setConnectionTimeout(httpParams, 20000);
         HttpClient httpclient = new DefaultHttpClient(httpParams);
-        HttpPost httppost = new HttpPost(serverURL + "/upload?fileType=" + fileType);
+        HttpPost httppost = new HttpPost(serverURL + "/upload?fileType="+ fileType + "&id=" +id);
         FileInputStream fIn = new FileInputStream(file);
         InputStreamEntity reqEntity = new InputStreamEntity(fIn, -1);
         reqEntity.setContentType("binary/octet-stream");
