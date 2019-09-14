@@ -9,6 +9,7 @@ public class DeviceSensorData extends RealmObject {
     private Gyroscope gyroscope;
     private HeartRateMonitor heartRateMonitor;
     private Pedometer pedometer;
+    private Magnetometer magnetometer;
 
     @Index
     private String nodeId;
@@ -19,11 +20,13 @@ public class DeviceSensorData extends RealmObject {
     public DeviceSensorData() {
     }
 
-    public DeviceSensorData(Accelerometer accelerometer, Gyroscope gyroscope, HeartRateMonitor heartRateMonitor, Pedometer pedometer, String nodeId, long timestamp) {
+    public DeviceSensorData(Accelerometer accelerometer, Gyroscope gyroscope, HeartRateMonitor heartRateMonitor,
+                            Pedometer pedometer, Magnetometer magnetometer, String nodeId, long timestamp) {
         this.accelerometer = accelerometer;
         this.gyroscope = gyroscope;
         this.heartRateMonitor = heartRateMonitor;
         this.pedometer = pedometer;
+        this.magnetometer = magnetometer;
         this.nodeId = nodeId;
         this.timestamp = timestamp;
     }
@@ -42,6 +45,10 @@ public class DeviceSensorData extends RealmObject {
 
     public Pedometer getPedometer() {
         return pedometer;
+    }
+
+    public Magnetometer getMagnetometer() {
+        return magnetometer;
     }
 
     public String getNodeId() {
@@ -68,6 +75,10 @@ public class DeviceSensorData extends RealmObject {
         this.pedometer = pedometer;
     }
 
+    public void setMagnetometer(Magnetometer magnetometer) {
+        this.magnetometer = magnetometer;
+    }
+
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
@@ -84,6 +95,9 @@ public class DeviceSensorData extends RealmObject {
         }
         if (pedometer != null) {
             pedometer.deleteFromRealm();
+        }
+        if (magnetometer != null) {
+            magnetometer.deleteFromRealm();
         }
         deleteFromRealm();
     }

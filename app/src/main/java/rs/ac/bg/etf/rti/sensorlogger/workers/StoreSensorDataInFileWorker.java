@@ -13,9 +13,9 @@ import java.util.List;
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
-import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
+import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
@@ -54,6 +54,14 @@ public class StoreSensorDataInFileWorker extends Worker {
                         .setGyrX(gyroscope.getX())
                         .setGyrY(gyroscope.getY())
                         .setGyrZ(gyroscope.getZ());
+            }
+
+            Magnetometer magnetometer = deviceSensorData.getMagnetometer();
+            if (magnetometer != null) {
+                deviceDataBuilder
+                        .setMagX(magnetometer.getX())
+                        .setMagY(magnetometer.getY())
+                        .setMagZ(magnetometer.getZ());
             }
 
             Pedometer pedometer = deviceSensorData.getPedometer();

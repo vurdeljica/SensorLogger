@@ -21,4 +21,7 @@ message DeviceData {
     int32 step_count = 8;
     int32 heart_rate = 9;
     int64 timestamp = 10;
+    float mag_x = 11;
+    float mag_y = 12;
+    float mag_z = 13;
 }

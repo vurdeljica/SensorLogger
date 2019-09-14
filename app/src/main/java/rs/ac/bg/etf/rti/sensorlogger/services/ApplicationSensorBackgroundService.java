@@ -25,6 +25,7 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
+import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
@@ -88,7 +89,7 @@ public class ApplicationSensorBackgroundService extends Service {
                 DatabaseManager databaseManager = DatabaseManager.getInstance();
                 DeviceSensorData deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
                 if (deviceSensorData == null) {
-                    deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                    deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
                 } else {
                     deviceSensorData.setTimestamp(timestamp);
                 }
@@ -112,6 +113,11 @@ public class ApplicationSensorBackgroundService extends Service {
                     case Sensor.TYPE_STEP_COUNTER: {
                         Pedometer pedometer = new Pedometer((int) event.values[0]);
                         deviceSensorData.setPedometer(pedometer);
+                        break;
+                    }
+                    case Sensor.TYPE_MAGNETIC_FIELD: {
+                        Magnetometer magnetometer = new Magnetometer(event.values[0], event.values[1], event.values[2]);
+                        deviceSensorData.setMagnetometer(magnetometer);
                         break;
                     }
                     default: {
@@ -252,6 +258,17 @@ public class ApplicationSensorBackgroundService extends Service {
                     stepCountSensor,
                     SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    mServiceHandler
+            );
+        }
+
+        Sensor magnetometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (magnetometerSensor != null) {
+            sensorManager.registerListener(
+                    sensorEventListener,
+                    magnetometerSensor,
+                    SAMPLING_PERIOD,
+                    LATENCY_PERIOD,
                     mServiceHandler
             );
         }

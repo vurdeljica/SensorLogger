@@ -46,6 +46,11 @@ public class WearableSensorBackgroundService extends Service {
     private final static String DATA_ACCELEROMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
     private final static String DATA_ACCELEROMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.node";
 
+    private final static String DATA_MAGNETOMETER_PATH = "/magnetometer";
+    private final static String DATA_MAGNETOMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.data";
+    private final static String DATA_MAGNETOMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.timestamp";
+    private final static String DATA_MAGNETOMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.node";
+
     private final static String DATA_GYROSCOPE_PATH = "/gyroscope";
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
     private final static String DATA_GYROSCOPE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
@@ -139,6 +144,14 @@ public class WearableSensorBackgroundService extends Service {
                         putDataMapReq.getDataMap().putFloatArray(DATA_STEPS_DATA_KEY, event.values);
                         putDataMapReq.getDataMap().putLong(DATA_STEPS_TIMESTAMP_KEY, event.timestamp);
                         putDataMapReq.getDataMap().putString(DATA_STEPS_NODE_KEY, nodeId);
+                        putDataReq = putDataMapReq.asPutDataRequest();
+                        break;
+                    }
+                    case Sensor.TYPE_MAGNETIC_FIELD: {
+                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(DATA_MAGNETOMETER_PATH);
+                        putDataMapReq.getDataMap().putFloatArray(DATA_MAGNETOMETER_DATA_KEY, event.values);
+                        putDataMapReq.getDataMap().putLong(DATA_MAGNETOMETER_TIMESTAMP_KEY, event.timestamp);
+                        putDataMapReq.getDataMap().putString(DATA_MAGNETOMETER_NODE_KEY, nodeId);
                         putDataReq = putDataMapReq.asPutDataRequest();
                         break;
                     }
@@ -281,6 +294,17 @@ public class WearableSensorBackgroundService extends Service {
                     stepCountSensor,
                     SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    mServiceHandler
+            );
+        }
+
+        Sensor magnetometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (magnetometerSensor != null) {
+            sensorManager.registerListener(
+                    sensorEventListener,
+                    magnetometerSensor,
+                    SAMPLING_PERIOD,
+                    LATENCY_PERIOD,
                     mServiceHandler
             );
         }

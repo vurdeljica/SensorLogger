@@ -14,6 +14,7 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
+import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
@@ -30,6 +31,11 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_ACCELEROMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.data";
     private final static String DATA_ACCELEROMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
     private final static String DATA_ACCELEROMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.node";
+
+    private final static String DATA_MAGNETOMETER_PATH = "/magnetometer";
+    private final static String DATA_MAGNETOMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.data";
+    private final static String DATA_MAGNETOMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.timestamp";
+    private final static String DATA_MAGNETOMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.node";
 
     private final static String DATA_GYROSCOPE_PATH = "/gyroscope";
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
@@ -60,7 +66,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     HeartRateMonitor heartRate = new HeartRateMonitor((int) data);
                     deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
                     if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
                     } else {
                         deviceSensorData.setTimestamp(timestamp);
                     }
@@ -75,7 +81,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     Accelerometer accelerometer = new Accelerometer(data[0], data[1], data[2]);
                     deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
                     if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
                     } else {
                         deviceSensorData.setTimestamp(timestamp);
                     }
@@ -90,7 +96,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     Gyroscope gyroscope = new Gyroscope(data[0], data[1], data[2]);
                     deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
                     if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
                     } else {
                         deviceSensorData.setTimestamp(timestamp);
                     }
@@ -105,11 +111,26 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     Pedometer pedometer = new Pedometer((int) data[0]);
                     deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
                     if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
                     } else {
                         deviceSensorData.setTimestamp(timestamp);
                     }
                     deviceSensorData.setPedometer(pedometer);
+                    break;
+                }
+                case DATA_MAGNETOMETER_PATH: {
+                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
+                    float[] data = dataMap.getFloatArray(DATA_MAGNETOMETER_DATA_KEY);
+                    long timestamp = dataMap.getLong(DATA_MAGNETOMETER_TIMESTAMP_KEY);
+                    String nodeId = dataMap.getString(DATA_MAGNETOMETER_NODE_KEY);
+                    Magnetometer magnetometer = new Magnetometer(data[0], data[1], data[2]);
+                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+                    if (deviceSensorData == null) {
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
+                    } else {
+                        deviceSensorData.setTimestamp(timestamp);
+                    }
+                    deviceSensorData.setMagnetometer(magnetometer);
                     break;
                 }
                 default: {

@@ -67,6 +67,13 @@
                     android:path="/heart_rate"
                     android:scheme="wear" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:path="/magnetometer"
+                    android:scheme="wear" />
+            </intent-filter>
         </service>
 
         <service android:name=".services.LocationListenerService"
