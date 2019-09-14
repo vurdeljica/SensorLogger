@@ -85,6 +85,7 @@ public class HomeViewModel extends BaseObservable {
         long timestamp = System.currentTimeMillis();
         PersistenceManager.getInstance().deleteLastFourHoursOfSensorData(timestamp);
         DatabaseManager.getInstance().deleteGPSDataBefore(timestamp);
+        DatabaseManager.getInstance().deleteSensorDataBefore(timestamp);
     }
 
     public void showAutomaticTransferDialog() {

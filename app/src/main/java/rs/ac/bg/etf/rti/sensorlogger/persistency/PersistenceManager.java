@@ -129,10 +129,12 @@ public class PersistenceManager {
 
     public void deleteLastFourHoursOfSensorData(long timestamp) {
         File[] files = dataDirectory.listFiles();
-        for(int i = 0; i < files.length; i++) {
-            File currentFile = files[i];
+        if (files == null) {
+            return;
+        }
+        for (File currentFile : files) {
             String extension = currentFile.getName().substring(currentFile.getName().lastIndexOf("."));
-            if (!extension.equals(".bin")) {
+            if (extension.equals(".json")) {
                 continue;
             }
             long fileTimestamp = Long.parseLong(currentFile.getName().substring(0, currentFile.getName().indexOf("-")));
