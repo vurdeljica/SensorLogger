@@ -18,16 +18,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.wearable.Wearable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 import rs.ac.bg.etf.rti.sensorlogger.BuildConfig;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.Utils;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.devices.DevicesFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.devices.DevicesFragment;
+import rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -35,6 +37,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainActivity";
+    private static final String NODE_ID_KEY = "nodeId";
 
     private MainViewModel viewModel;
 
@@ -47,28 +50,54 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
     // A reference to the service used to get location updates.
-    private LocationListenerService mService = null;
+    private LocationListenerService mLocationService = null;
 
-    // Tracks the bound state of the service.
-    private boolean mBound = false;
+    // A reference to the service used to get sensor updates.
+    private ApplicationSensorBackgroundService mSensorService = null;
 
-    // Monitors the state of the connection to the service.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+    // Tracks the bound state of the location service.
+    private boolean mLocationServiceBound = false;
+
+    // Tracks the bound state of the sensor service.
+    private boolean mSensorServiceBound = false;
+
+    // Monitors the state of the connection to the location service.
+    private final ServiceConnection mLocationServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LocationListenerService.LocalBinder binder = (LocationListenerService.LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
+            mLocationService = binder.getService();
+            mLocationServiceBound = true;
             if (isListening) {
-                mService.requestLocationUpdates();
+                mLocationService.requestLocationUpdates();
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-            mBound = false;
+            mLocationService = null;
+            mLocationServiceBound = false;
+        }
+    };
+
+    // Monitors the state of the connection to the sensor service.
+    private final ServiceConnection mSensorServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ApplicationSensorBackgroundService.LocalBinder binder = (ApplicationSensorBackgroundService.LocalBinder) service;
+            mSensorService = binder.getService();
+            mSensorServiceBound = true;
+            if (isListening) {
+                mSensorService.requestSensorEventUpdates();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mSensorService = null;
+            mSensorServiceBound = false;
         }
     };
 
@@ -98,6 +127,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         viewModel.startStoreWorker();
 
         isListening = getDefaultSharedPreferences(getApplicationContext()).getBoolean(HomeViewModel.IS_LISTENING_KEY, false);
+
+        Wearable.getNodeClient(this).getLocalNode()
+                .addOnSuccessListener(node -> getDefaultSharedPreferences(this).edit().putString(NODE_ID_KEY, node.getId()).apply());
     }
 
     @Override
@@ -108,7 +140,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         // Bind to the service. If the service is in foreground mode, this signals to the service
         // that since this activity is in the foreground, the service can exit foreground mode.
-        bindService(new Intent(this, LocationListenerService.class), mServiceConnection,
+        bindService(new Intent(this, LocationListenerService.class), mLocationServiceConnection,
+                Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, ApplicationSensorBackgroundService.class), mSensorServiceConnection,
                 Context.BIND_AUTO_CREATE);
 
         if (!checkPermissions()) {
@@ -138,12 +172,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     protected void onStop() {
-        if (mBound) {
+        if (mLocationServiceBound) {
             // Unbind from the service. This signals to the service that this activity is no longer
             // in the foreground, and the service can respond by promoting itself to a foreground
             // service.
-            unbindService(mServiceConnection);
-            mBound = false;
+            unbindService(mLocationServiceConnection);
+            mLocationServiceBound = false;
+        }
+        if (mSensorServiceBound) {
+            // Unbind from the service. This signals to the service that this activity is no longer
+            // in the foreground, and the service can respond by promoting itself to a foreground
+            // service.
+            unbindService(mSensorServiceConnection);
+            mSensorServiceBound = false;
         }
         getDefaultSharedPreferences(getApplicationContext())
                 .unregisterOnSharedPreferenceChangeListener(this);
@@ -207,7 +248,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[1] == PackageManager.PERMISSION_GRANTED && isListening) {
                 // Permission was granted.
-                mService.requestLocationUpdates();
+                mLocationService.requestLocationUpdates();
+                mSensorService.requestSensorEventUpdates();
             } else {
                 // Permission denied.
                 Snackbar.make(
@@ -239,11 +281,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if (s.equals(HomeViewModel.IS_LISTENING_KEY)) {
             if (sharedPreferences.getBoolean(s, true)) {
                 isListening = true;
-                mService.requestLocationUpdates();
+                mLocationService.requestLocationUpdates();
+                mSensorService.requestSensorEventUpdates();
             } else {
                 isListening = false;
-                if (mService != null) {
-                    mService.removeLocationUpdates();
+                if (mLocationService != null) {
+                    mLocationService.removeLocationUpdates();
+                }
+                if (mSensorService != null) {
+                    mSensorService.removeSensorEventUpdates();
                 }
             }
             viewModel.setWearableShouldStartListeners(isListening);

@@ -71,7 +71,6 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
 
         Wearable.getNodeClient(context).getLocalNode()
                 .addOnSuccessListener(node -> getDefaultSharedPreferences(context).edit().putString(NODE_ID_KEY, node.getId()).apply());
-
     }
 
     void startCapabilityListener() {

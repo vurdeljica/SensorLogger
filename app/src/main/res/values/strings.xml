@@ -37,4 +37,6 @@
     <string name="port">Port</string>
     <string name="automatic">Find automatically</string>
     <string name="manual">Enter manually</string>
+    <string name="unknown">unknown</string>
+    <string name="collecting_data">Collecting data</string>
 </resources>

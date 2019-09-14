@@ -72,6 +72,9 @@
         <service android:name=".services.LocationListenerService"
             android:enabled="true"
             android:exported="false" />
+        <service android:name=".services.ApplicationSensorBackgroundService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>
