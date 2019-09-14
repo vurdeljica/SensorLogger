@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * NetworkManager represents external interface to the rest of the system.
+ * NetworkManager is Singleton that provides api for getting information about
+ * local servers and sending data to server.
+ */
 public class NetworkManager {
 
     private static NetworkManager instance;
@@ -16,6 +21,10 @@ public class NetworkManager {
 
     private List<ServerInfo> localServersInfo = new ArrayList<>();
 
+    /**
+     * Classic Singleton method for getting instance.
+     * @return NetworkManager instance
+     */
     public static NetworkManager getInstance(Context context) {
         if (instance == null) {
             instance = new NetworkManager(context);
@@ -44,6 +53,10 @@ public class NetworkManager {
         });
     }
 
+    /**
+     * Remove information about local server based on instance name
+     * @param instanceName
+     */
     public void removeLocalServerInfo(String instanceName) {
         for (Iterator<ServerInfo> iter = localServersInfo.listIterator(); iter.hasNext(); ) {
             ServerInfo sInfo = iter.next();
@@ -53,6 +66,10 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Return list of all found local servers
+     * @return list of all found local servers
+     */
     public List<ServerInfo> getServersInformation() {
         List<ServerInfo> retServerInfo = new ArrayList<>();
 
@@ -64,6 +81,11 @@ public class NetworkManager {
         return retServerInfo;
     }
 
+    /**
+     * Send all files from given directory to server
+     * @param serverInfo
+     * @param directory
+     */
     public void uploadDirectoryContentToServer(ServerInfo serverInfo, File directory) {
 //        if(!isServerInfoValid(serverInfo)) return;
 
