@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.rti.sensorlogger.presentation;
+package rs.ac.bg.etf.rti.sensorlogger.presentation.main;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
+import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 

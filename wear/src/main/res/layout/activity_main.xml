@@ -33,7 +33,7 @@
                 android:textColor="@{vm.listening ? @color/green : @color/dark_red}"
                 android:textAlignment="center"
                 android:textSize="15sp"
-                android:text="@{vm.listening ? @string/collecting_data : @string/not_collecting_data}" />
+                android:text="@{vm.listening ? @string/tracking : @string/not_tracking}" />
 
             <TextView
                 android:id="@+id/node_tv"

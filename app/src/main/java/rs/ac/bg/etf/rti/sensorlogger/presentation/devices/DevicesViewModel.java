@@ -11,7 +11,7 @@ import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Wearable;
 
-import static rs.ac.bg.etf.rti.sensorlogger.presentation.MainViewModel.CLIENT_APP_CAPABILITY;
+import static rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainViewModel.CLIENT_APP_CAPABILITY;
 
 public class DevicesViewModel extends BaseObservable implements CapabilityClient.OnCapabilityChangedListener {
 

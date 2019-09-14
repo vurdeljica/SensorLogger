@@ -15,7 +15,7 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.MainActivity;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 
 public class ApplicationDataListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerService";

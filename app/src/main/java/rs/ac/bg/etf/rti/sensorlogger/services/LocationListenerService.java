@@ -29,7 +29,7 @@ import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.Utils;
 import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.MainActivity;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
