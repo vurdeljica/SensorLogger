@@ -16,6 +16,10 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
+/**
+ * FileTransferServiceDiscovery is Singleton which gives api for
+ * working with DNS-SD
+ */
 public class FileTransferServiceDiscovery {
     private static final String REGISTRATION_TYPE = "_hap._tcp";
     private static final String DOMAIN = "local.";
@@ -30,6 +34,10 @@ public class FileTransferServiceDiscovery {
     Rx2Dnssd rxdnssd;
     Subscription fileTransferSubscription;
 
+    /**
+     * Classic Singleton method for getting instance.
+     * @return ServiceDiscoveryListener instance
+     */
     public static FileTransferServiceDiscovery getInstance(Context context) {
         if (instance == null) {
             instance = new FileTransferServiceDiscovery(context);
@@ -43,6 +51,10 @@ public class FileTransferServiceDiscovery {
         rxdnssd = new Rx2DnssdBindable(context);
     }
 
+    /**
+     * Start DNS-SD service discovery
+     * @param clientCallbacks callbacks that will be called when service is found or lost
+     */
     public void discoverServices(ServiceDiscoveryListener clientCallbacks) {
         this.clientCallbacks = clientCallbacks;
 
@@ -51,6 +63,9 @@ public class FileTransferServiceDiscovery {
         subscribeToFileTransferService();
     }
 
+    /**
+     * Stop discovery. Callbacks will not be triggered anymore.
+     */
     public void stopDiscovery() {
         if (fileTransferSubscription != null) {
             try {
@@ -118,30 +133,4 @@ public class FileTransferServiceDiscovery {
                     }
                 });
     }
-
-    //BonjourService bs = new BonjourService.Builder(0, 0, Build.DEVICE, "_hap._tcp", "local.").port(123).build();
-
-    /*public void registerService(int port) {
-        tearDown();  // Cancel any previous registration request
-        initializeRegistrationListener();
-        NsdServiceInfo serviceInfo = new NsdServiceInfo();
-        serviceInfo.setPort(port);
-        serviceInfo.setServiceName(mServiceName);
-        serviceInfo.setServiceType(SERVICE_TYPE);
-        //Log.d(TAG,serviceInfo.getServiceType() + "");
-
-        mNsdManager.registerService(
-                serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
-
-    }*/
-
-    /*public void tearDown() {
-        if (mRegistrationListener != null) {
-            try {
-                mNsdManager.unregisterService(mRegistrationListener);
-            } finally {
-            }
-            mRegistrationListener = null;
-        }
-    }*/
 }

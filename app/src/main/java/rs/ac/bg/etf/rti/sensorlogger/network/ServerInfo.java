@@ -2,6 +2,9 @@ package rs.ac.bg.etf.rti.sensorlogger.network;
 
 import androidx.annotation.NonNull;
 
+/**
+ * This class holds data about found servers
+ */
 public class ServerInfo {
     private String hostname;
     private String ipAddress;

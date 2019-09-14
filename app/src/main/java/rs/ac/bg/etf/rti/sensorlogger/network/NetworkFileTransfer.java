@@ -28,10 +28,18 @@ import java.util.concurrent.Executors;
 import java.io.File;
 import java.util.concurrent.Future;
 
+/**
+ * NetworkFileTransfer is Singleton which gives api for
+ * sending files over network to server
+ */
 public class NetworkFileTransfer {
 
     private static NetworkFileTransfer instance;
 
+    /**
+     * Classic Singleton method for getting instance.
+     * @return NetworkFileTransfer instance
+     */
     public static NetworkFileTransfer getInstance() {
         if (instance == null) {
             instance = new NetworkFileTransfer();
@@ -44,6 +52,11 @@ public class NetworkFileTransfer {
 
     }
 
+    /**
+     * Send all files from given directory to server
+     * @param _serverURL server uri in form: "http://<ipAddress>:<port>;
+     * @param _directory directory which files will be sent to server
+     */
     public void sendAllFilesInDirectory(String _serverURL, File _directory) {
         final String serverURL = _serverURL;
         final File directory = _directory;
@@ -122,7 +135,7 @@ public class NetworkFileTransfer {
         return callableTask;
     }
 
-    public void uploadFileToServer(String serverURL, File file, int id) throws IOException {
+    private void uploadFileToServer(String serverURL, File file, int id) throws IOException {
         final HttpParams httpParams = new BasicHttpParams();
         int fileType = -1;
         if (file.getName().contains("json")) {

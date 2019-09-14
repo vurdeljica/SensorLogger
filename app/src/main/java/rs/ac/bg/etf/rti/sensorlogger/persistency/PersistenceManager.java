@@ -13,6 +13,10 @@ import java.util.zip.DeflaterOutputStream;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 
+/**
+ * PersistenceManager is Singleton which gives api for
+ * storing and deleting data gathered from sensors.
+ */
 public class PersistenceManager {
 
     private static final long HISTORY_DELETION_PERIOD = (4 * 60 + 15) * 60;
@@ -34,6 +38,10 @@ public class PersistenceManager {
         }
     }
 
+    /**
+     * Classic Singleton method for getting instance.
+     * @return PersistenceManager instance
+     */
     public static PersistenceManager getInstance() {
         if (instance == null) {
             instance = new PersistenceManager();
@@ -42,6 +50,11 @@ public class PersistenceManager {
         return instance;
     }
 
+    /**
+     * Create and run separate thread for storing data gathered from mobile device
+     * @param _mobileData list of objects that represent sensor data gathered from mobile device
+     * @param timestamp timestamp when sensor data is gathered
+     */
     public void saveMobileData(List<SensorDataProtos.MobileData> _mobileData, long timestamp) {
         final List<SensorDataProtos.MobileData> mobileData = _mobileData;
         Thread thread = new Thread() {
@@ -68,6 +81,11 @@ public class PersistenceManager {
         thread.start();
     }
 
+    /**
+     * Create and run separate thread for storing data gathered from smart watch
+     * @param _deviceData list of objects that represent sensor data gathered from smart watch
+     * @param timestamp timestamp when sensor data is gathered
+     */
     public void saveDeviceData(List<SensorDataProtos.DeviceData> _deviceData, String nodeId, long timestamp) {
         final List<SensorDataProtos.DeviceData> deviceData = _deviceData;
         Thread thread = new Thread() {
@@ -114,6 +132,9 @@ public class PersistenceManager {
         is.close();
     }
 
+    /**
+     * Create and run separate thread for saving daily activities in json file
+     */
     public void saveDailyActivity() {
         Thread thread = new Thread() {
             @Override
@@ -127,6 +148,10 @@ public class PersistenceManager {
         thread.start();
     }
 
+    /**
+     * Delete data gathered from sensors in interval [timestamp - 4 hours, timestamp]
+     * @param timestamp represents current timestamp
+     */
     public void deleteLastFourHoursOfSensorData(long timestamp) {
         File[] files = dataDirectory.listFiles();
         if (files == null) {
