@@ -97,25 +97,21 @@ public class ApplicationSensorBackgroundService extends Service {
                     case Sensor.TYPE_ACCELEROMETER: {
                         Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
                         deviceSensorData.setAccelerometer(accelerometer);
-//                        databaseManager.insertOrUpdateAccelerometer(accelerometer);
                         break;
                     }
                     case Sensor.TYPE_GYROSCOPE: {
                         Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
                         deviceSensorData.setGyroscope(gyroscope);
-//                        databaseManager.insertOrUpdateGyroscope(gyroscope);
                         break;
                     }
                     case Sensor.TYPE_HEART_RATE: {
                         HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
                         deviceSensorData.setHeartRateMonitor(heartRate);
-//                        databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                         break;
                     }
                     case Sensor.TYPE_STEP_COUNTER: {
                         Pedometer pedometer = new Pedometer((int) event.values[0]);
                         deviceSensorData.setPedometer(pedometer);
-//                        databaseManager.insertOrUpdatePedometer(pedometer);
                         break;
                     }
                     default: {

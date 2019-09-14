@@ -65,7 +65,6 @@ public class ApplicationDataListenerService extends WearableListenerService {
                         deviceSensorData.setTimestamp(timestamp);
                     }
                     deviceSensorData.setHeartRateMonitor(heartRate);
-//                    databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                     break;
                 }
                 case DATA_ACCELEROMETER_PATH: {
@@ -81,7 +80,6 @@ public class ApplicationDataListenerService extends WearableListenerService {
                         deviceSensorData.setTimestamp(timestamp);
                     }
                     deviceSensorData.setAccelerometer(accelerometer);
-//                    databaseManager.insertOrUpdateAccelerometer(accelerometer);
                     break;
                 }
                 case DATA_GYROSCOPE_PATH: {
@@ -97,7 +95,6 @@ public class ApplicationDataListenerService extends WearableListenerService {
                         deviceSensorData.setTimestamp(timestamp);
                     }
                     deviceSensorData.setGyroscope(gyroscope);
-//                    databaseManager.insertOrUpdateGyroscope(gyroscope);
                     break;
                 }
                 case DATA_STEPS_PATH: {
@@ -113,7 +110,6 @@ public class ApplicationDataListenerService extends WearableListenerService {
                         deviceSensorData.setTimestamp(timestamp);
                     }
                     deviceSensorData.setPedometer(pedometer);
-//                    databaseManager.insertOrUpdatePedometer(pedometer);
                     break;
                 }
                 default: {
