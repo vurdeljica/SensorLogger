@@ -147,6 +147,8 @@ public class HomeViewModel extends BaseObservable {
 
                     networkManager.uploadDirectoryContentToServer(serverInfo, dirP);
 
+                    networkManager.removeLocalServerInfo(serverInfo.getInstanceName());
+
                     transferred = true;
                 } catch (Exception e) {
                     e.printStackTrace();

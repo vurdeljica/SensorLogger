@@ -44,7 +44,7 @@ public class NetworkManager {
         });
     }
 
-    private void removeLocalServerInfo(String instanceName) {
+    public void removeLocalServerInfo(String instanceName) {
         for (Iterator<ServerInfo> iter = localServersInfo.listIterator(); iter.hasNext(); ) {
             ServerInfo sInfo = iter.next();
             if (sInfo.getInstanceName().equals(instanceName)) {
