@@ -22,6 +22,7 @@ import androidx.core.app.NotificationCompat;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
+import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
@@ -80,37 +81,50 @@ public class ApplicationSensorBackgroundService extends Service {
             public void onSensorChanged(SensorEvent event) {
 //                Log.d(TAG, prettyPrintFloatArray(event.values));
 
-                event.timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
+                long timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
 
                 String nodeId = getDefaultSharedPreferences(getApplicationContext()).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
 
                 DatabaseManager databaseManager = DatabaseManager.getInstance();
+                DeviceSensorData deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+                if (deviceSensorData == null) {
+                    deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                } else {
+                    deviceSensorData.setTimestamp(timestamp);
+                }
 
                 switch (event.sensor.getType()) {
                     case Sensor.TYPE_ACCELEROMETER: {
-                        Accelerometer accelerometer = new Accelerometer(event.timestamp, event.values[0], event.values[1], event.values[2], nodeId);
-                        databaseManager.insertOrUpdateAccelerometer(accelerometer);
+                        Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
+                        deviceSensorData.setAccelerometer(accelerometer);
+//                        databaseManager.insertOrUpdateAccelerometer(accelerometer);
                         break;
                     }
                     case Sensor.TYPE_GYROSCOPE: {
-                        Gyroscope gyroscope = new Gyroscope(event.timestamp, event.values[0], event.values[1], event.values[2], nodeId);
-                        databaseManager.insertOrUpdateGyroscope(gyroscope);
+                        Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
+                        deviceSensorData.setGyroscope(gyroscope);
+//                        databaseManager.insertOrUpdateGyroscope(gyroscope);
                         break;
                     }
                     case Sensor.TYPE_HEART_RATE: {
-                        HeartRateMonitor heartRate = new HeartRateMonitor(event.timestamp, (int) event.values[0], nodeId);
-                        databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
+                        HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
+                        deviceSensorData.setHeartRateMonitor(heartRate);
+//                        databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                         break;
                     }
                     case Sensor.TYPE_STEP_COUNTER: {
-                        Pedometer pedometer = new Pedometer(event.timestamp, (int) event.values[0], nodeId);
-                        databaseManager.insertOrUpdatePedometer(pedometer);
+                        Pedometer pedometer = new Pedometer((int) event.values[0]);
+                        deviceSensorData.setPedometer(pedometer);
+//                        databaseManager.insertOrUpdatePedometer(pedometer);
                         break;
                     }
                     default: {
                         Log.e(TAG, "onSensorChanged: Invalid sensor type");
+                        return;
                     }
                 }
+
+                databaseManager.insertOrUpdateDeviceSensorData(deviceSensorData);
             }
 
             @Override

@@ -11,6 +11,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
+import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
 import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
@@ -46,15 +47,25 @@ public class ApplicationDataListenerService extends WearableListenerService {
     public void onDataChanged(DataEventBuffer dataEvents) {
         for (DataEvent dataEvent : dataEvents) {
             DataItem dataItem = dataEvent.getDataItem();
+
             DatabaseManager databaseManager = DatabaseManager.getInstance();
+            DeviceSensorData deviceSensorData;
+
             switch (dataItem.getUri().getPath()) {
                 case DATA_HEART_RATE_PATH: {
                     DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
                     float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
                     long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
                     String nodeId = dataMap.getString(DATA_HEART_RATE_NODE_KEY);
-                    HeartRateMonitor heartRate = new HeartRateMonitor(timestamp, (int) data, nodeId);
-                    databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
+                    HeartRateMonitor heartRate = new HeartRateMonitor((int) data);
+                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+                    if (deviceSensorData == null) {
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                    } else {
+                        deviceSensorData.setTimestamp(timestamp);
+                    }
+                    deviceSensorData.setHeartRateMonitor(heartRate);
+//                    databaseManager.insertOrUpdateHeartRateMonitor(heartRate);
                     break;
                 }
                 case DATA_ACCELEROMETER_PATH: {
@@ -62,8 +73,15 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     float[] data = dataMap.getFloatArray(DATA_ACCELEROMETER_DATA_KEY);
                     long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
                     String nodeId = dataMap.getString(DATA_ACCELEROMETER_NODE_KEY);
-                    Accelerometer accelerometer = new Accelerometer(timestamp, data[0], data[1], data[2], nodeId);
-                    databaseManager.insertOrUpdateAccelerometer(accelerometer);
+                    Accelerometer accelerometer = new Accelerometer(data[0], data[1], data[2]);
+                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+                    if (deviceSensorData == null) {
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                    } else {
+                        deviceSensorData.setTimestamp(timestamp);
+                    }
+                    deviceSensorData.setAccelerometer(accelerometer);
+//                    databaseManager.insertOrUpdateAccelerometer(accelerometer);
                     break;
                 }
                 case DATA_GYROSCOPE_PATH: {
@@ -71,8 +89,15 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     float[] data = dataMap.getFloatArray(DATA_GYROSCOPE_DATA_KEY);
                     long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
                     String nodeId = dataMap.getString(DATA_GYROSCOPE_NODE_KEY);
-                    Gyroscope gyroscope = new Gyroscope(timestamp, data[0], data[1], data[2], nodeId);
-                    databaseManager.insertOrUpdateGyroscope(gyroscope);
+                    Gyroscope gyroscope = new Gyroscope(data[0], data[1], data[2]);
+                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+                    if (deviceSensorData == null) {
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                    } else {
+                        deviceSensorData.setTimestamp(timestamp);
+                    }
+                    deviceSensorData.setGyroscope(gyroscope);
+//                    databaseManager.insertOrUpdateGyroscope(gyroscope);
                     break;
                 }
                 case DATA_STEPS_PATH: {
@@ -80,14 +105,24 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     float[] data = dataMap.getFloatArray(DATA_STEPS_DATA_KEY);
                     long timestamp = dataMap.getLong(DATA_STEPS_TIMESTAMP_KEY);
                     String nodeId = dataMap.getString(DATA_STEPS_NODE_KEY);
-                    Pedometer pedometer = new Pedometer(timestamp, (int) data[0], nodeId);
-                    databaseManager.insertOrUpdatePedometer(pedometer);
+                    Pedometer pedometer = new Pedometer((int) data[0]);
+                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+                    if (deviceSensorData == null) {
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, nodeId, timestamp);
+                    } else {
+                        deviceSensorData.setTimestamp(timestamp);
+                    }
+                    deviceSensorData.setPedometer(pedometer);
+//                    databaseManager.insertOrUpdatePedometer(pedometer);
                     break;
                 }
                 default: {
                     Log.e(TAG, "Unknown data path: " + dataItem.getUri().getPath());
+                    return;
                 }
             }
+
+            databaseManager.insertOrUpdateDeviceSensorData(deviceSensorData);
         }
     }
 

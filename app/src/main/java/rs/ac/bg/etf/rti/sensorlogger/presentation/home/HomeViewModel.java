@@ -20,14 +20,14 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
+import rs.ac.bg.etf.rti.sensorlogger.workers.StoreLocationInFileWorker;
+import rs.ac.bg.etf.rti.sensorlogger.workers.StoreSensorDataInFileWorker;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -44,11 +44,16 @@ public class HomeViewModel extends BaseObservable {
         SharedPreferences sharedPref = getDefaultSharedPreferences(context);
         sharedPref.edit().putBoolean(IS_LISTENING_KEY, on).apply();
         if (!on) {
+            WorkManager workManager = WorkManager.getInstance(context);
             Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(StoreFileWorker.class)
+            OneTimeWorkRequest storeLocationWorkRequest = new OneTimeWorkRequest.Builder(StoreLocationInFileWorker.class)
                     .setConstraints(constraints)
                     .build();
-            WorkManager.getInstance(context).enqueue(workRequest);
+            workManager.enqueue(storeLocationWorkRequest);
+            OneTimeWorkRequest storeSensorDataWorkRequest = new OneTimeWorkRequest.Builder(StoreSensorDataInFileWorker.class)
+                    .setConstraints(constraints)
+                    .build();
+            workManager.enqueue(storeSensorDataWorkRequest);
         }
     };
     private NetworkManager networkManager;

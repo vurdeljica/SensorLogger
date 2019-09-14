@@ -24,11 +24,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreFileWorker;
+import rs.ac.bg.etf.rti.sensorlogger.workers.StoreLocationInFileWorker;
+import rs.ac.bg.etf.rti.sensorlogger.workers.StoreSensorDataInFileWorker;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
-    private static final String STORE_WORKER_ID = "StoreFileWorker";
+    private static final String STORE_WORKER_ID = "StoreLocationInFileWorker";
 
     public static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String START_ACTIVITY_PATH = "/start-activity";
@@ -55,13 +56,18 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
     }
 
     void startStoreWorker() {
+        WorkManager workManager = WorkManager.getInstance(context);
         Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
-        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(StoreFileWorker.class, 15, TimeUnit.MINUTES)
+        PeriodicWorkRequest storeLocationWorkRequest = new PeriodicWorkRequest.Builder(StoreLocationInFileWorker.class, 15, TimeUnit.MINUTES)
                 .setInitialDelay(15, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build();
-        WorkManager workManager = WorkManager.getInstance(context);
-        workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, workRequest);
+        workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, storeLocationWorkRequest);
+        PeriodicWorkRequest storeSensorDataWorkRequest = new PeriodicWorkRequest.Builder(StoreSensorDataInFileWorker.class, 15, TimeUnit.MINUTES)
+                .setInitialDelay(15, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build();
+        workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, storeSensorDataWorkRequest);
     }
 
     /**
