@@ -3,14 +3,14 @@ syntax = "proto3";
 option java_package = "rs.ac.bg.etf.rti.sensorlogger";
 option java_outer_classname = "SensorDataProtos";
 
-message MobileData {
+message LocationData {
     float gps_latitude = 1;
     float gps_longitude = 2;
     float gps_altitude = 3;
     int64 timestamp = 4;
 }
 
-message DeviceData {
+message SensorData {
     string nodeId = 1;
     float acc_x = 2;
     float acc_y = 3;

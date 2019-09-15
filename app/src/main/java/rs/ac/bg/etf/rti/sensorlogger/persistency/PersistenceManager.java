@@ -51,22 +51,22 @@ public class PersistenceManager {
     }
 
     /**
-     * Create and run separate thread for storing data gathered from mobile device
-     * @param _mobileData list of objects that represent sensor data gathered from mobile device
+     * Create and run separate thread for storing data gathered from location
+     * @param _locationData list of objects that represent location data
      * @param timestamp timestamp when sensor data is gathered
      */
-    public void saveMobileData(List<SensorDataProtos.MobileData> _mobileData, long timestamp) {
-        final List<SensorDataProtos.MobileData> mobileData = _mobileData;
+    public void saveLocationData(List<SensorDataProtos.LocationData> _locationData, long timestamp) {
+        final List<SensorDataProtos.LocationData> locationData = _locationData;
         Thread thread = new Thread() {
             @Override
             public void run() {
 //                int fileId = mobileFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile.txt";
-                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-mobile-compressed.txt";
+                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-location.txt";
+                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-compressed.txt";
 
                 try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
-                    for (SensorDataProtos.MobileData mobileSensorData : mobileData) {
-                        mobileSensorData.writeDelimitedTo(output);
+                    for (SensorDataProtos.LocationData location : locationData) {
+                        location.writeDelimitedTo(output);
                     }
 
                     compressFile(binaryFilePath, compressedFilePath);
@@ -82,12 +82,12 @@ public class PersistenceManager {
     }
 
     /**
-     * Create and run separate thread for storing data gathered from smart watch
-     * @param _deviceData list of objects that represent sensor data gathered from smart watch
+     * Create and run separate thread for storing data gathered from sensors
+     * @param _sensorData list of objects that represent sensor data gathered from sensors
      * @param timestamp timestamp when sensor data is gathered
      */
-    public void saveDeviceData(List<SensorDataProtos.DeviceData> _deviceData, String nodeId, long timestamp) {
-        final List<SensorDataProtos.DeviceData> deviceData = _deviceData;
+    public void saveSensorData(List<SensorDataProtos.SensorData> _sensorData, String nodeId, long timestamp) {
+        final List<SensorDataProtos.SensorData> sensorData = _sensorData;
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -96,8 +96,8 @@ public class PersistenceManager {
                 String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.txt";
 
                 try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
-                    for (SensorDataProtos.DeviceData mobileDeviceData : deviceData) {
-                        mobileDeviceData.writeDelimitedTo(output);
+                    for (SensorDataProtos.SensorData sensor : sensorData) {
+                        sensor.writeDelimitedTo(output);
                     }
 
                     compressFile(binaryFilePath, compressedFilePath);

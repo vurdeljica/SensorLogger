@@ -31,18 +31,18 @@ public class StoreSensorDataInFileWorker extends Worker {
         long endTime = System.currentTimeMillis();
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();
-        HashMap<String, List<SensorDataProtos.DeviceData>> deviceDataHashMap = new HashMap<>();
+        HashMap<String, List<SensorDataProtos.SensorData>> sensorDataMap = new HashMap<>();
 
         for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData()) {
             String nodeId = deviceSensorData.getNodeId();
 
-            SensorDataProtos.DeviceData.Builder deviceDataBuilder = SensorDataProtos.DeviceData.newBuilder()
+            SensorDataProtos.SensorData.Builder sensorDataBuilder = SensorDataProtos.SensorData.newBuilder()
                     .setTimestamp(deviceSensorData.getTimestamp())
                     .setNodeId(deviceSensorData.getNodeId());
 
             Accelerometer accelerometer = deviceSensorData.getAccelerometer();
             if (accelerometer != null) {
-                deviceDataBuilder
+                sensorDataBuilder
                         .setAccX(accelerometer.getX())
                         .setAccY(accelerometer.getY())
                         .setAccZ(accelerometer.getZ());
@@ -50,7 +50,7 @@ public class StoreSensorDataInFileWorker extends Worker {
 
             Gyroscope gyroscope = deviceSensorData.getGyroscope();
             if (gyroscope != null) {
-                deviceDataBuilder
+                sensorDataBuilder
                         .setGyrX(gyroscope.getX())
                         .setGyrY(gyroscope.getY())
                         .setGyrZ(gyroscope.getZ());
@@ -58,7 +58,7 @@ public class StoreSensorDataInFileWorker extends Worker {
 
             Magnetometer magnetometer = deviceSensorData.getMagnetometer();
             if (magnetometer != null) {
-                deviceDataBuilder
+                sensorDataBuilder
                         .setMagX(magnetometer.getX())
                         .setMagY(magnetometer.getY())
                         .setMagZ(magnetometer.getZ());
@@ -66,25 +66,25 @@ public class StoreSensorDataInFileWorker extends Worker {
 
             Pedometer pedometer = deviceSensorData.getPedometer();
             if (pedometer != null) {
-                deviceDataBuilder.setStepCount(pedometer.getStepCount());
+                sensorDataBuilder.setStepCount(pedometer.getStepCount());
             }
 
             HeartRateMonitor heartRateMonitor = deviceSensorData.getHeartRateMonitor();
             if (heartRateMonitor != null) {
-                deviceDataBuilder.setHeartRate(heartRateMonitor.getHeartRate());
+                sensorDataBuilder.setHeartRate(heartRateMonitor.getHeartRate());
             }
 
-            SensorDataProtos.DeviceData deviceData = deviceDataBuilder.build();
+            SensorDataProtos.SensorData sensorData = sensorDataBuilder.build();
 
-            if (!deviceDataHashMap.containsKey(nodeId)) {
-                deviceDataHashMap.put(nodeId, new ArrayList<>());
+            if (!sensorDataMap.containsKey(nodeId)) {
+                sensorDataMap.put(nodeId, new ArrayList<>());
             }
-            deviceDataHashMap.get(nodeId).add(deviceData);
+            sensorDataMap.get(nodeId).add(sensorData);
         }
 
-        if (!deviceDataHashMap.isEmpty()) {
-            for (String node : deviceDataHashMap.keySet()) {
-                persistenceManager.saveDeviceData(deviceDataHashMap.get(node), node, dbManager.getDeviceSensorDataTimestamp(node));
+        if (!sensorDataMap.isEmpty()) {
+            for (String node : sensorDataMap.keySet()) {
+                persistenceManager.saveSensorData(sensorDataMap.get(node), node, dbManager.getDeviceSensorDataTimestamp(node));
             }
             dbManager.deleteSensorDataBefore(endTime);
         }

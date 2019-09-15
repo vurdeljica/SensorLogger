@@ -1,6 +1,5 @@
 package rs.ac.bg.etf.rti.sensorlogger.network;
 
-import android.os.Environment;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -16,6 +15,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,8 +24,6 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import java.io.File;
 import java.util.concurrent.Future;
 
 /**
@@ -38,6 +36,7 @@ public class NetworkFileTransfer {
 
     /**
      * Classic Singleton method for getting instance.
+     *
      * @return NetworkFileTransfer instance
      */
     public static NetworkFileTransfer getInstance() {
@@ -54,6 +53,7 @@ public class NetworkFileTransfer {
 
     /**
      * Send all files from given directory to server
+     *
      * @param _serverURL server uri in form: "http://<ipAddress>:<port>;
      * @param _directory directory which files will be sent to server
      */
@@ -75,14 +75,14 @@ public class NetworkFileTransfer {
                     List<Future<?>> futures = new ArrayList<>();
                     executor = Executors.newFixedThreadPool(10);//creating a pool of 10 threads
 
-                    for(int i = 0; i < files.length; i++) {
+                    for (int i = 0; i < files.length; i++) {
                         Callable<?> worker = makeCallableTaskForFileUpload(serverURL, files[i], id);
                         Future<?> f = executor.submit(worker);
                         futures.add(f);
                     }
 
-                    for(Future<?> future : futures) {
-                        boolean noErrorOccurred = (Boolean)future.get();
+                    for (Future<?> future : futures) {
+                        boolean noErrorOccurred = (Boolean) future.get();
                         if (!noErrorOccurred) {
                             executor.shutdownNow();
                             break;
@@ -109,8 +109,7 @@ public class NetworkFileTransfer {
             HttpPost httppost = new HttpPost(serverURL);
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse response = httpclient.execute(httppost);
-        }
-        catch (ClientProtocolException e) {
+        } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -140,17 +139,15 @@ public class NetworkFileTransfer {
         int fileType = -1;
         if (file.getName().contains("json")) {
             fileType = 0;
-        }
-        else if (file.getName().contains("mobile")) {
+        } else if (file.getName().contains("location")) {
             fileType = 1;
-        }
-        else if (file.getName().contains("device")) {
+        } else if (file.getName().contains("device")) {
             fileType = 2;
         }
 
         HttpConnectionParams.setConnectionTimeout(httpParams, 20000);
         HttpClient httpclient = new DefaultHttpClient(httpParams);
-        HttpPost httppost = new HttpPost(serverURL + "/upload?fileType="+ fileType + "&id=" +id);
+        HttpPost httppost = new HttpPost(serverURL + "/upload?fileType=" + fileType + "&id=" + id);
         FileInputStream fIn = new FileInputStream(file);
         InputStreamEntity reqEntity = new InputStreamEntity(fIn, -1);
         reqEntity.setContentType("binary/octet-stream");

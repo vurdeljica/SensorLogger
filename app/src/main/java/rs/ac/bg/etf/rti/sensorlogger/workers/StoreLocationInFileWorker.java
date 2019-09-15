@@ -25,20 +25,20 @@ public class StoreLocationInFileWorker extends Worker {
         long endTime = System.currentTimeMillis();
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();
-        List<SensorDataProtos.MobileData> mobileDataList = new ArrayList<>();
+        List<SensorDataProtos.LocationData> mobileDataList = new ArrayList<>();
 
         for (GPSData gpsData : dbManager.getGPSData()) {
-            SensorDataProtos.MobileData mobileData = SensorDataProtos.MobileData.newBuilder()
+            SensorDataProtos.LocationData locationData = SensorDataProtos.LocationData.newBuilder()
                     .setGpsAltitude((float) gpsData.getAltitude())
                     .setGpsLongitude((float) gpsData.getLongitude())
                     .setGpsLatitude((float) gpsData.getLatitude())
                     .setTimestamp(gpsData.getTimestamp())
                     .build();
-            mobileDataList.add(mobileData);
+            mobileDataList.add(locationData);
         }
 
         if (!mobileDataList.isEmpty()) {
-            persistenceManager.saveMobileData(mobileDataList, dbManager.getGPSTimestamp());
+            persistenceManager.saveLocationData(mobileDataList, dbManager.getGPSTimestamp());
             dbManager.deleteGPSDataBefore(endTime);
         }
 
