@@ -20,7 +20,7 @@
     <string name="location_unknown">Location unknown</string>
     <string name="location_updates_label">Location Updates</string>
     <string name="recording_location">This App is using GPS</string>
-    <string name="permission_rationale">Location permission is needed for core functionality</string>
+    <string name="permission_rationale">Permission is needed for core functionality</string>
     <string name="permission_denied_explanation">Permission was denied, but is needed for core
         functionality.</string>
     <string name="settings">Settings</string>
@@ -39,4 +39,6 @@
     <string name="manual">Enter manually</string>
     <string name="unknown">unknown</string>
     <string name="collecting_data">Collecting data</string>
+    <string name="no_ble_support">This device doesn\'t support Bluetooth, data can\'t be collected from Bluetooth devices</string>
+    <string name="settings_change_unavailable">Location settings are inadequate, and cannot be fixed here. Fix in Settings.</string>
 </resources>

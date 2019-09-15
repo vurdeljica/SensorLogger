@@ -1,18 +1,28 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.wearable.activity.WearableActivity;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
+import rs.ac.bg.etf.rti.sensorlogger.BuildConfig;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.ActivityMainBinding;
 import rs.ac.bg.etf.rti.sensorlogger.services.WearableSensorBackgroundService;
 
 public class WearableMainActivity extends WearableActivity implements ServiceHandler {
+
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
     private WearableMainViewModel viewModel;
 
@@ -31,6 +41,10 @@ public class WearableMainActivity extends WearableActivity implements ServiceHan
     protected void onStart() {
         super.onStart();
         viewModel.init();
+
+        if (!checkPermissions()) {
+            requestPermissions();
+        }
     }
 
     @Override
@@ -61,4 +75,18 @@ public class WearableMainActivity extends WearableActivity implements ServiceHan
     public void unbindSensorService(ServiceConnection serviceConnection) {
         unbindService(serviceConnection);
     }
+
+    /**
+     * Returns the current state of the permissions needed.
+     */
+    private boolean checkPermissions() {
+        return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.BODY_SENSORS);
+    }
+
+    private void requestPermissions() {
+            ActivityCompat.requestPermissions(WearableMainActivity.this,
+                    new String[]{Manifest.permission.BODY_SENSORS}, REQUEST_PERMISSIONS_REQUEST_CODE);
+    }
+
 }

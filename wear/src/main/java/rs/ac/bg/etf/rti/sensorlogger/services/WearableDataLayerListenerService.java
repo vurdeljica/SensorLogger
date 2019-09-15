@@ -36,7 +36,7 @@ public class WearableDataLayerListenerService extends WearableListenerService {
         } else if (messageEvent.getPath().equals(SHOULD_START_LISTENING_PATH)) {
             getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean(IS_LISTENING_KEY, messageEvent.getData()[0] != 0).apply();
             Intent startIntent = new Intent(this, WearableMainActivity.class);
-            startIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(startIntent);
         }
     }
