@@ -1,6 +1,5 @@
 package rs.ac.bg.etf.rti.sensorlogger.services;
 
-import android.content.Intent;
 import android.util.Log;
 
 import com.google.android.gms.wearable.DataEvent;
@@ -10,6 +9,9 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
@@ -17,141 +19,115 @@ import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
 import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 
 public class ApplicationDataListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerService";
 
-    private final static String DATA_HEART_RATE_PATH = "/heart_rate";
+    private final static String SENSOR_DATA_PATH = "/sensor_data";
+    private final static String SENSOR_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.sensor_data";
+    private final static String DATA_TYPE_KEY = "rs.ac.bg.etf.rti.sensorlogger.sensor_data_type";
+
+    private final static String DATA_HEART_RATE_TYPE = "rs.ac.bg.etf.rti.sensorlogger.heart_rate";
     private final static String DATA_HEART_RATE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
     private final static String DATA_HEART_RATE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
-    private final static String DATA_HEART_RATE_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.node";
 
-    private final static String DATA_ACCELEROMETER_PATH = "/accelerometer";
+    private final static String DATA_ACCELEROMETER_TYPE = "rs.ac.bg.etf.rti.sensorlogger.accelerometer";
     private final static String DATA_ACCELEROMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.data";
     private final static String DATA_ACCELEROMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
-    private final static String DATA_ACCELEROMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.node";
 
-    private final static String DATA_MAGNETOMETER_PATH = "/magnetometer";
+    private final static String DATA_MAGNETOMETER_TYPE = "rs.ac.bg.etf.rti.sensorlogger.magnetometer";
     private final static String DATA_MAGNETOMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.data";
     private final static String DATA_MAGNETOMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.timestamp";
-    private final static String DATA_MAGNETOMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.node";
 
-    private final static String DATA_GYROSCOPE_PATH = "/gyroscope";
+    private final static String DATA_GYROSCOPE_TYPE = "rs.ac.bg.etf.rti.sensorlogger.gyroscope";
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
     private final static String DATA_GYROSCOPE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
-    private final static String DATA_GYROSCOPE_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.node";
 
-    private final static String DATA_STEPS_PATH = "/steps";
+    private final static String DATA_STEPS_TYPE = "rs.ac.bg.etf.rti.sensorlogger.steps";
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
-    private final static String DATA_STEPS_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.noed";
-
-    private static final String MESSAGE_START_ACTIVITY_PATH = "/start-activity";
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
         for (DataEvent dataEvent : dataEvents) {
             DataItem dataItem = dataEvent.getDataItem();
 
+            if (dataItem.getUri() == null || dataItem.getUri().getPath() == null || !dataItem.getUri().getPath().equals(SENSOR_DATA_PATH)) {
+                Log.e(TAG, "Incorrect path");
+                continue;
+            }
             DatabaseManager databaseManager = DatabaseManager.getInstance();
-            DeviceSensorData deviceSensorData;
 
-            switch (dataItem.getUri().getPath()) {
-                case DATA_HEART_RATE_PATH: {
-                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
-                    float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
-                    long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
-                    String nodeId = dataMap.getString(DATA_HEART_RATE_NODE_KEY);
-                    HeartRateMonitor heartRate = new HeartRateMonitor((int) data);
-                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
-                    if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                    } else {
-                        deviceSensorData.setTimestamp(timestamp);
-                    }
-                    deviceSensorData.setHeartRateMonitor(heartRate);
-                    break;
-                }
-                case DATA_ACCELEROMETER_PATH: {
-                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
-                    float[] data = dataMap.getFloatArray(DATA_ACCELEROMETER_DATA_KEY);
-                    long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
-                    String nodeId = dataMap.getString(DATA_ACCELEROMETER_NODE_KEY);
-                    Accelerometer accelerometer = new Accelerometer(data[0], data[1], data[2]);
-                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
-                    if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                    } else {
-                        deviceSensorData.setTimestamp(timestamp);
-                    }
-                    deviceSensorData.setAccelerometer(accelerometer);
-                    break;
-                }
-                case DATA_GYROSCOPE_PATH: {
-                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
-                    float[] data = dataMap.getFloatArray(DATA_GYROSCOPE_DATA_KEY);
-                    long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
-                    String nodeId = dataMap.getString(DATA_GYROSCOPE_NODE_KEY);
-                    Gyroscope gyroscope = new Gyroscope(data[0], data[1], data[2]);
-                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
-                    if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                    } else {
-                        deviceSensorData.setTimestamp(timestamp);
-                    }
-                    deviceSensorData.setGyroscope(gyroscope);
-                    break;
-                }
-                case DATA_STEPS_PATH: {
-                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
-                    float[] data = dataMap.getFloatArray(DATA_STEPS_DATA_KEY);
-                    long timestamp = dataMap.getLong(DATA_STEPS_TIMESTAMP_KEY);
-                    String nodeId = dataMap.getString(DATA_STEPS_NODE_KEY);
-                    Pedometer pedometer = new Pedometer((int) data[0]);
-                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
-                    if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                    } else {
-                        deviceSensorData.setTimestamp(timestamp);
-                    }
-                    deviceSensorData.setPedometer(pedometer);
-                    break;
-                }
-                case DATA_MAGNETOMETER_PATH: {
-                    DataMap dataMap = DataMap.fromByteArray(dataItem.getData());
-                    float[] data = dataMap.getFloatArray(DATA_MAGNETOMETER_DATA_KEY);
-                    long timestamp = dataMap.getLong(DATA_MAGNETOMETER_TIMESTAMP_KEY);
-                    String nodeId = dataMap.getString(DATA_MAGNETOMETER_NODE_KEY);
-                    Magnetometer magnetometer = new Magnetometer(data[0], data[1], data[2]);
-                    deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
-                    if (deviceSensorData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                    } else {
-                        deviceSensorData.setTimestamp(timestamp);
-                    }
-                    deviceSensorData.setMagnetometer(magnetometer);
-                    break;
-                }
-                default: {
-                    Log.e(TAG, "Unknown data path: " + dataItem.getUri().getPath());
-                    return;
-                }
+            DataMap sensorDataMap = DataMap.fromByteArray(dataItem.getData());
+            String nodeId = dataItem.getUri().getAuthority();
+
+            List<DeviceSensorData> deviceSensorDataList = new ArrayList<>();
+            DeviceSensorData latestDeviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
+            if (latestDeviceSensorData == null) {
+                latestDeviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, 0);
             }
 
-            databaseManager.insertOrUpdateDeviceSensorData(deviceSensorData);
+            for (DataMap dataMap : sensorDataMap.getDataMapArrayList(SENSOR_DATA_KEY)) {
+
+                DeviceSensorData deviceSensorData = new DeviceSensorData(latestDeviceSensorData);
+
+                switch (dataMap.getString(DATA_TYPE_KEY)) {
+                    case DATA_HEART_RATE_TYPE: {
+                        float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
+                        long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
+                        HeartRateMonitor heartRate = new HeartRateMonitor((int) data);
+                        deviceSensorData.setTimestamp(timestamp);
+                        deviceSensorData.setHeartRateMonitor(heartRate);
+                        break;
+                    }
+                    case DATA_ACCELEROMETER_TYPE: {
+                        float[] data = dataMap.getFloatArray(DATA_ACCELEROMETER_DATA_KEY);
+                        long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
+                        Accelerometer accelerometer = new Accelerometer(data[0], data[1], data[2]);
+                        deviceSensorData.setTimestamp(timestamp);
+                        deviceSensorData.setAccelerometer(accelerometer);
+                        break;
+                    }
+                    case DATA_GYROSCOPE_TYPE: {
+                        float[] data = dataMap.getFloatArray(DATA_GYROSCOPE_DATA_KEY);
+                        long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
+                        Gyroscope gyroscope = new Gyroscope(data[0], data[1], data[2]);
+                        deviceSensorData.setTimestamp(timestamp);
+                        deviceSensorData.setGyroscope(gyroscope);
+                        break;
+                    }
+                    case DATA_STEPS_TYPE: {
+                        float[] data = dataMap.getFloatArray(DATA_STEPS_DATA_KEY);
+                        long timestamp = dataMap.getLong(DATA_STEPS_TIMESTAMP_KEY);
+                        Pedometer pedometer = new Pedometer((int) data[0]);
+                        deviceSensorData.setTimestamp(timestamp);
+                        deviceSensorData.setPedometer(pedometer);
+                        break;
+                    }
+                    case DATA_MAGNETOMETER_TYPE: {
+                        float[] data = dataMap.getFloatArray(DATA_MAGNETOMETER_DATA_KEY);
+                        long timestamp = dataMap.getLong(DATA_MAGNETOMETER_TIMESTAMP_KEY);
+                        Magnetometer magnetometer = new Magnetometer(data[0], data[1], data[2]);
+                        deviceSensorData.setTimestamp(timestamp);
+                        deviceSensorData.setMagnetometer(magnetometer);
+                        break;
+                    }
+                    default: {
+                        Log.e(TAG, "Unknown data type: " + dataMap.getString(DATA_TYPE_KEY));
+                        return;
+                    }
+                }
+
+                deviceSensorDataList.add(deviceSensorData);
+                latestDeviceSensorData = deviceSensorData;
+            }
+
+            databaseManager.insertOrUpdateDeviceSensorData(deviceSensorDataList);
         }
     }
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.d(TAG, "onMessageReceived: " + messageEvent);
-
-        // Check to see if the message is to start an activity
-        if (messageEvent.getPath().equals(MESSAGE_START_ACTIVITY_PATH)) {
-            Intent startIntent = new Intent(this, MainActivity.class);
-            startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(startIntent);
-        }
     }
 }

@@ -18,13 +18,9 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
-import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
-import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
-import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 
 public class DatabaseManager {
     private static final String TAG = DatabaseManager.class.getSimpleName();
@@ -45,9 +41,9 @@ public class DatabaseManager {
 
     public void init(Context context) {
         Realm.init(context);
-//        try (Realm realm = Realm.getDefaultInstance()) {
-//            realm.executeTransaction(realm1 -> realm1.deleteAll());
-//        }
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> realm1.deleteAll());
+        }
     }
 
     public void insertOrUpdateGPSData(GPSData _gpsData) {
@@ -58,11 +54,11 @@ public class DatabaseManager {
         }
     }
 
-    public void insertOrUpdateDeviceSensorData(DeviceSensorData _deviceSensorData) {
+    public void insertOrUpdateDeviceSensorData(List<DeviceSensorData> deviceSensorDataList) {
         try (Realm realm = Realm.getDefaultInstance()) {
-            final DeviceSensorData deviceSensorData = _deviceSensorData;
-
-            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(deviceSensorData));
+            for (DeviceSensorData deviceSensorData : deviceSensorDataList) {
+                realm.executeTransaction(realm1 -> realm1.insertOrUpdate(deviceSensorData));
+            }
         }
     }
 
@@ -187,7 +183,7 @@ public class DatabaseManager {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
                 RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).lessThan("timestamp", timestamp).findAll();
-                for (DeviceSensorData resultData: result) {
+                for (DeviceSensorData resultData : result) {
                     resultData.cascadeDelete();
                 }
             });

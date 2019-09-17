@@ -20,6 +20,10 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
@@ -126,7 +130,9 @@ public class ApplicationSensorBackgroundService extends Service {
                     }
                 }
 
-                databaseManager.insertOrUpdateDeviceSensorData(deviceSensorData);
+                List<DeviceSensorData> list = new ArrayList<>();
+                list.add(deviceSensorData);
+                databaseManager.insertOrUpdateDeviceSensorData(list);
             }
 
             @Override

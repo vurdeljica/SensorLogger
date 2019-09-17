@@ -24,9 +24,11 @@ import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+
+import java.util.ArrayList;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 
@@ -36,32 +38,29 @@ public class WearableSensorBackgroundService extends Service {
 
     private static final String TAG = WearableSensorBackgroundService.class.getSimpleName();
 
-    private final static String DATA_HEART_RATE_PATH = "/heart_rate";
+    private final static String SENSOR_DATA_PATH = "/sensor_data";
+    private final static String SENSOR_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.sensor_data";
+    private final static String DATA_TYPE_KEY = "rs.ac.bg.etf.rti.sensorlogger.sensor_data_type";
+
+    private final static String DATA_HEART_RATE_TYPE = "rs.ac.bg.etf.rti.sensorlogger.heart_rate";
     private final static String DATA_HEART_RATE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
     private final static String DATA_HEART_RATE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
-    private final static String DATA_HEART_RATE_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.node";
 
-    private final static String DATA_ACCELEROMETER_PATH = "/accelerometer";
+    private final static String DATA_ACCELEROMETER_TYPE = "rs.ac.bg.etf.rti.sensorlogger.accelerometer";
     private final static String DATA_ACCELEROMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.data";
     private final static String DATA_ACCELEROMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.timestamp";
-    private final static String DATA_ACCELEROMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.accelerometer.node";
 
-    private final static String DATA_MAGNETOMETER_PATH = "/magnetometer";
+    private final static String DATA_MAGNETOMETER_TYPE = "rs.ac.bg.etf.rti.sensorlogger.magnetometer";
     private final static String DATA_MAGNETOMETER_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.data";
     private final static String DATA_MAGNETOMETER_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.timestamp";
-    private final static String DATA_MAGNETOMETER_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.magnetometer.node";
 
-    private final static String DATA_GYROSCOPE_PATH = "/gyroscope";
+    private final static String DATA_GYROSCOPE_TYPE = "rs.ac.bg.etf.rti.sensorlogger.gyroscope";
     private final static String DATA_GYROSCOPE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.data";
     private final static String DATA_GYROSCOPE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.timestamp";
-    private final static String DATA_GYROSCOPE_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.gyroscope.node";
 
-    private final static String DATA_STEPS_PATH = "/steps";
+    private final static String DATA_STEPS_TYPE = "rs.ac.bg.etf.rti.sensorlogger.steps";
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
-    private final static String DATA_STEPS_NODE_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.noed";
-
-    private static final String NODE_ID_KEY = "nodeId";
 
     private final int SAMPLING_PERIOD = 33333;
     private final int LATENCY_PERIOD = 100000;
@@ -105,54 +104,45 @@ public class WearableSensorBackgroundService extends Service {
         sensorManager = getSystemService(SensorManager.class);
 
         sensorEventListener = new SensorEventListener() {
+            private ArrayList<DataMap> dataMaps = new ArrayList<>();
+
             @Override
             public void onSensorChanged(SensorEvent event) {
 //                Log.d(TAG, prettyPrintFloatArray(event.values));
 
                 event.timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
 
-                PutDataRequest putDataReq;
-                String nodeId = getDefaultSharedPreferences(getApplicationContext()).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
+                DataMap dataMap = new DataMap();
 
                 switch (event.sensor.getType()) {
                     case Sensor.TYPE_ACCELEROMETER: {
-                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(DATA_ACCELEROMETER_PATH);
-                        putDataMapReq.getDataMap().putFloatArray(DATA_ACCELEROMETER_DATA_KEY, event.values);
-                        putDataMapReq.getDataMap().putLong(DATA_ACCELEROMETER_TIMESTAMP_KEY, event.timestamp);
-                        putDataMapReq.getDataMap().putString(DATA_ACCELEROMETER_NODE_KEY, nodeId);
-                        putDataReq = putDataMapReq.asPutDataRequest();
+                        dataMap.putString(DATA_TYPE_KEY, DATA_ACCELEROMETER_TYPE);
+                        dataMap.putFloatArray(DATA_ACCELEROMETER_DATA_KEY, event.values);
+                        dataMap.putLong(DATA_ACCELEROMETER_TIMESTAMP_KEY, event.timestamp);
                         break;
                     }
                     case Sensor.TYPE_GYROSCOPE: {
-                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(DATA_GYROSCOPE_PATH);
-                        putDataMapReq.getDataMap().putFloatArray(DATA_GYROSCOPE_DATA_KEY, event.values);
-                        putDataMapReq.getDataMap().putLong(DATA_GYROSCOPE_TIMESTAMP_KEY, event.timestamp);
-                        putDataMapReq.getDataMap().putString(DATA_GYROSCOPE_NODE_KEY, nodeId);
-                        putDataReq = putDataMapReq.asPutDataRequest();
+                        dataMap.putString(DATA_TYPE_KEY, DATA_GYROSCOPE_TYPE);
+                        dataMap.putFloatArray(DATA_GYROSCOPE_DATA_KEY, event.values);
+                        dataMap.putLong(DATA_GYROSCOPE_TIMESTAMP_KEY, event.timestamp);
                         break;
                     }
                     case Sensor.TYPE_HEART_RATE: {
-                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(DATA_HEART_RATE_PATH);
-                        putDataMapReq.getDataMap().putFloatArray(DATA_HEART_RATE_DATA_KEY, event.values);
-                        putDataMapReq.getDataMap().putLong(DATA_HEART_RATE_TIMESTAMP_KEY, event.timestamp);
-                        putDataMapReq.getDataMap().putString(DATA_HEART_RATE_NODE_KEY, nodeId);
-                        putDataReq = putDataMapReq.asPutDataRequest();
+                        dataMap.putString(DATA_TYPE_KEY, DATA_HEART_RATE_TYPE);
+                        dataMap.putFloatArray(DATA_HEART_RATE_DATA_KEY, event.values);
+                        dataMap.putLong(DATA_HEART_RATE_TIMESTAMP_KEY, event.timestamp);
                         break;
                     }
                     case Sensor.TYPE_STEP_COUNTER: {
-                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(DATA_STEPS_PATH);
-                        putDataMapReq.getDataMap().putFloatArray(DATA_STEPS_DATA_KEY, event.values);
-                        putDataMapReq.getDataMap().putLong(DATA_STEPS_TIMESTAMP_KEY, event.timestamp);
-                        putDataMapReq.getDataMap().putString(DATA_STEPS_NODE_KEY, nodeId);
-                        putDataReq = putDataMapReq.asPutDataRequest();
+                        dataMap.putString(DATA_TYPE_KEY, DATA_STEPS_TYPE);
+                        dataMap.putFloatArray(DATA_STEPS_DATA_KEY, event.values);
+                        dataMap.putLong(DATA_STEPS_TIMESTAMP_KEY, event.timestamp);
                         break;
                     }
                     case Sensor.TYPE_MAGNETIC_FIELD: {
-                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(DATA_MAGNETOMETER_PATH);
-                        putDataMapReq.getDataMap().putFloatArray(DATA_MAGNETOMETER_DATA_KEY, event.values);
-                        putDataMapReq.getDataMap().putLong(DATA_MAGNETOMETER_TIMESTAMP_KEY, event.timestamp);
-                        putDataMapReq.getDataMap().putString(DATA_MAGNETOMETER_NODE_KEY, nodeId);
-                        putDataReq = putDataMapReq.asPutDataRequest();
+                        dataMap.putString(DATA_TYPE_KEY, DATA_MAGNETOMETER_TYPE);
+                        dataMap.putFloatArray(DATA_MAGNETOMETER_DATA_KEY, event.values);
+                        dataMap.putLong(DATA_MAGNETOMETER_TIMESTAMP_KEY, event.timestamp);
                         break;
                     }
                     default: {
@@ -160,9 +150,15 @@ public class WearableSensorBackgroundService extends Service {
                         return;
                     }
                 }
+                dataMaps.add(dataMap);
+                if (dataMaps.size() == 20) {
+                    PutDataMapRequest putDataRequest = PutDataMapRequest.create(SENSOR_DATA_PATH);
+                    putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
+                    Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());
+                    dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
+                    dataMaps.clear();
+                }
 
-                Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataReq);
-                dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
             }
 
             @Override
