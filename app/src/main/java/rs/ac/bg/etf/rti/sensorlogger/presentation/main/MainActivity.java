@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
 
         viewModel.startCapabilityListener();
 
-        viewModel.startWearableActivity();
+        viewModel.setWearableShouldStartListeners();
 
         checkBluetooth();
         checkGPS();

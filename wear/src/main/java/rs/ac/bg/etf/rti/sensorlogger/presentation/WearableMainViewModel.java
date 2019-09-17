@@ -51,6 +51,8 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
             mBound = true;
             if (listening.get()) {
                 mService.requestSensorEventUpdates();
+            } else {
+                mService.removeSensorEventUpdates();
             }
         }
 
