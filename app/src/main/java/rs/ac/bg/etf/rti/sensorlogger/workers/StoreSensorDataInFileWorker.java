@@ -46,6 +46,11 @@ public class StoreSensorDataInFileWorker extends Worker {
                         .setAccX(accelerometer.getX())
                         .setAccY(accelerometer.getY())
                         .setAccZ(accelerometer.getZ());
+            } else {
+                sensorDataBuilder
+                        .setAccX(0)
+                        .setAccY(0)
+                        .setAccZ(0);
             }
 
             Gyroscope gyroscope = deviceSensorData.getGyroscope();
@@ -54,6 +59,11 @@ public class StoreSensorDataInFileWorker extends Worker {
                         .setGyrX(gyroscope.getX())
                         .setGyrY(gyroscope.getY())
                         .setGyrZ(gyroscope.getZ());
+            } else {
+                sensorDataBuilder
+                        .setGyrX(0)
+                        .setGyrY(0)
+                        .setGyrZ(0);
             }
 
             Magnetometer magnetometer = deviceSensorData.getMagnetometer();
@@ -62,16 +72,25 @@ public class StoreSensorDataInFileWorker extends Worker {
                         .setMagX(magnetometer.getX())
                         .setMagY(magnetometer.getY())
                         .setMagZ(magnetometer.getZ());
+            } else {
+                sensorDataBuilder
+                        .setMagX(0)
+                        .setMagY(0)
+                        .setMagZ(0);
             }
 
             Pedometer pedometer = deviceSensorData.getPedometer();
             if (pedometer != null) {
                 sensorDataBuilder.setStepCount(pedometer.getStepCount());
+            } else {
+                sensorDataBuilder.setStepCount(0);
             }
 
             HeartRateMonitor heartRateMonitor = deviceSensorData.getHeartRateMonitor();
             if (heartRateMonitor != null) {
                 sensorDataBuilder.setHeartRate(heartRateMonitor.getHeartRate());
+            } else {
+                sensorDataBuilder.setHeartRate(0);
             }
 
             SensorDataProtos.SensorData sensorData = sensorDataBuilder.build();

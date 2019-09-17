@@ -177,7 +177,7 @@ public class DatabaseManager {
     public void deleteGPSDataBefore(long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
-                RealmResults<GPSData> result = realm1.where(GPSData.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                RealmResults<GPSData> result = realm1.where(GPSData.class).lessThan("timestamp", timestamp).findAll();
                 result.deleteAllFromRealm();
             });
         }
@@ -186,7 +186,7 @@ public class DatabaseManager {
     public void deleteSensorDataBefore(long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
-                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).lessThanOrEqualTo("timestamp", timestamp).findAll();
+                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).lessThan("timestamp", timestamp).findAll();
                 for (DeviceSensorData resultData: result) {
                     resultData.cascadeDelete();
                 }
