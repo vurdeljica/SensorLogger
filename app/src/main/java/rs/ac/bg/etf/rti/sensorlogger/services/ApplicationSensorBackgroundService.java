@@ -21,7 +21,6 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
@@ -132,7 +131,10 @@ public class ApplicationSensorBackgroundService extends Service {
 
                 List<DeviceSensorData> list = new ArrayList<>();
                 list.add(deviceSensorData);
-                databaseManager.insertOrUpdateDeviceSensorData(list);
+                if (list.size() == 40) {
+                    databaseManager.insertOrUpdateDeviceSensorData(list);
+                    list.clear();
+                }
             }
 
             @Override

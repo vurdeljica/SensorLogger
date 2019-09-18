@@ -151,7 +151,7 @@ public class WearableSensorBackgroundService extends Service {
                     }
                 }
                 dataMaps.add(dataMap);
-                if (dataMaps.size() == 20) {
+                if (dataMaps.size() == 40) {
                     PutDataMapRequest putDataRequest = PutDataMapRequest.create(SENSOR_DATA_PATH);
                     putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
                     Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());
