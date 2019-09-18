@@ -79,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
         if (!checkPermissions()) {
             requestPermissions();
         }
+
+        checkBluetooth();
+        checkGPS();
     }
 
     @Override
@@ -92,9 +95,6 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
         viewModel.startCapabilityListener();
 
         viewModel.setWearableShouldStartListeners();
-
-        checkBluetooth();
-        checkGPS();
     }
 
     @Override
