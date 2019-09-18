@@ -31,7 +31,8 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
-        <service android:name=".services.WearableDataLayerListenerService">
+        <service android:name=".services.WearableDataLayerListenerService"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
                 <data
@@ -42,7 +43,8 @@
         </service>
 
         <service
-            android:name=".services.WearableSensorBackgroundService" />
+            android:name=".services.WearableSensorBackgroundService"
+            android:enabled="true"/>
 
         <uses-library
             android:name="com.google.android.wearable"
