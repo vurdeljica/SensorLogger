@@ -52,12 +52,16 @@ public class ApplicationDataListenerService extends WearableListenerService {
         for (DataEvent dataEvent : dataEvents) {
             DataItem dataItem = dataEvent.getDataItem();
 
-            if (dataItem.getUri() == null || dataItem.getUri().getPath() == null || !dataItem.getUri().getPath().equals(SENSOR_DATA_PATH)) {
+            if (dataItem == null || dataItem.getUri() == null || dataItem.getUri().getPath() == null || !dataItem.getUri().getPath().equals(SENSOR_DATA_PATH)) {
                 Log.e(TAG, "Incorrect path");
                 continue;
             }
             DatabaseManager databaseManager = DatabaseManager.getInstance();
 
+            if (dataItem.getData() == null) {
+                Log.e(TAG, "No data");
+                continue;
+            }
             DataMap sensorDataMap = DataMap.fromByteArray(dataItem.getData());
             String nodeId = dataItem.getUri().getAuthority();
 

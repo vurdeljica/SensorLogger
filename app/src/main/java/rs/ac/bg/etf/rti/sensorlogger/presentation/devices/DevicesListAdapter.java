@@ -11,6 +11,7 @@ import com.google.android.gms.wearable.Node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.DeviceListItemBinding;
@@ -42,7 +43,7 @@ public class DevicesListAdapter extends RecyclerView.Adapter<DevicesListAdapter.
         nodeList.clear();
     }
 
-    void addAll(List<Node> list) {
+    void addAll(Set<Node> list) {
         nodeList.addAll(list);
         notifyDataSetChanged();
     }
