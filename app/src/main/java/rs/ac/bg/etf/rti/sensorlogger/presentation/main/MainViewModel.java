@@ -39,7 +39,8 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
-    private static final String STORE_WORKER_ID = "StoreLocationInFileWorker";
+    private static final String STORE_WORKER_LOCATION_ID = "StoreLocationInFileWorker";
+    private static final String STORE_WORKER_SENSOR_ID = "StoreSensorDataInFileWorker";
     private static final String NODE_ID_KEY = "nodeId";
     public static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
@@ -132,12 +133,12 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
                 .setInitialDelay(15, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build();
-        workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, storeLocationWorkRequest);
+        workManager.enqueueUniquePeriodicWork(STORE_WORKER_LOCATION_ID, ExistingPeriodicWorkPolicy.KEEP, storeLocationWorkRequest);
         PeriodicWorkRequest storeSensorDataWorkRequest = new PeriodicWorkRequest.Builder(StoreSensorDataInFileWorker.class, 15, TimeUnit.MINUTES)
                 .setInitialDelay(15, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build();
-        workManager.enqueueUniquePeriodicWork(STORE_WORKER_ID, ExistingPeriodicWorkPolicy.KEEP, storeSensorDataWorkRequest);
+        workManager.enqueueUniquePeriodicWork(STORE_WORKER_SENSOR_ID, ExistingPeriodicWorkPolicy.KEEP, storeSensorDataWorkRequest);
     }
 
     void bindServices() {
