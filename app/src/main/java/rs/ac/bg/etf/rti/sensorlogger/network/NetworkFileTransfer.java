@@ -52,6 +52,36 @@ public class NetworkFileTransfer {
     }
 
     /**
+     * Calculates total number of relevant files for sending.
+     * All files with compresses and json in the file name are considered
+     * relevant.
+     *
+     * @param directory directory which content should be sent
+     * @return number of files to be sent
+     */
+    private int countNumberOfRelevantFiles(File directory) {
+        File[] files = directory.listFiles();
+        int numOfFiles = 0;
+        for (int i = 0; i < files.length; i++) {
+            String fileName = getFilenameWithouExtension(files[i].getName());
+            if ((!fileName.contains("compressed")) && (!fileName.contains("json"))) continue;
+            numOfFiles++;
+        }
+
+        return numOfFiles;
+    }
+
+    private String getFilenameWithouExtension(String filename) {
+        String fileName = filename;
+        int pos = fileName.lastIndexOf(".");
+        if (pos > 0) {
+            fileName = fileName.substring(0, pos);
+        }
+
+        return fileName;
+    }
+
+    /**
      * Send all files from given directory to server
      *
      * @param _serverURL server uri in form: "http://<ipAddress>:<port>;
@@ -70,12 +100,15 @@ public class NetworkFileTransfer {
                     File[] files = directory.listFiles();
                     Random rand = new Random();
                     int id = rand.nextInt();
-                    sendGeneralInformation(serverURL, files.length, id);
+                    sendGeneralInformation(serverURL, countNumberOfRelevantFiles(directory), id);
 
                     List<Future<?>> futures = new ArrayList<>();
                     executor = Executors.newFixedThreadPool(10);//creating a pool of 10 threads
 
                     for (int i = 0; i < files.length; i++) {
+                        String fileName = getFilenameWithouExtension(files[i].getName());
+                        if ((!fileName.contains("compressed")) && (!fileName.contains("json")) ) continue;
+
                         Callable<?> worker = makeCallableTaskForFileUpload(serverURL, files[i], id);
                         Future<?> f = executor.submit(worker);
                         futures.add(f);

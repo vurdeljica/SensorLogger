@@ -62,6 +62,7 @@ public class PersistenceManager {
             public void run() {
 //                int fileId = mobileFileId.getAndIncrement();
                 String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-location.txt";
+                String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-temp.txt";
                 String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-compressed.txt";
 
                 try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
@@ -69,7 +70,8 @@ public class PersistenceManager {
                         location.writeDelimitedTo(output);
                     }
 
-                    compressFile(binaryFilePath, compressedFilePath);
+                    compressFile(binaryFilePath, tempFilePath);
+                    renameFile(tempFilePath, compressedFilePath);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -93,6 +95,7 @@ public class PersistenceManager {
             public void run() {
 //                int fileId = deviceFileId.getAndIncrement();
                 String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".txt";
+                String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-temp.txt";
                 String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.txt";
 
                 try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
@@ -100,12 +103,12 @@ public class PersistenceManager {
                         sensor.writeDelimitedTo(output);
                     }
 
-                    compressFile(binaryFilePath, compressedFilePath);
+                    compressFile(binaryFilePath, tempFilePath);
+                    renameFile(tempFilePath, compressedFilePath);
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
         };
 
@@ -121,6 +124,12 @@ public class PersistenceManager {
 
         File file = new File(inputFilePath);
         boolean deleted = file.delete();
+    }
+
+    private void renameFile(String originalPath, String renamedPath) {
+        File from = new File(originalPath);
+        File to = new File(renamedPath);
+        from.renameTo(to);
     }
 
     private void copyFiles(InputStream is, OutputStream os) throws Exception {
@@ -140,8 +149,10 @@ public class PersistenceManager {
             @Override
             public void run() {
                DatabaseManager dbManager = DatabaseManager.getInstance();
-               File jsonFile = new File(dataDirectory.getPath() + "/dailyActivity-json.json");
-               dbManager.saveToJson(jsonFile);
+               File jsonFileTemp = new File(dataDirectory.getPath() + "/dailyActivity-temp.json");
+               String jsonFilePath = dataDirectory.getPath() + "/dailyActivity-json.json";
+               dbManager.saveToJson(jsonFileTemp);
+               renameFile(jsonFileTemp.getPath(), jsonFilePath);
             }
         };
 
