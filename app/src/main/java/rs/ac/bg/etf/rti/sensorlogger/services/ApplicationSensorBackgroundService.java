@@ -39,9 +39,6 @@ public class ApplicationSensorBackgroundService extends Service {
     private static final String NODE_ID_KEY = "nodeId";
     private static final String TAG = ApplicationSensorBackgroundService.class.getSimpleName();
 
-    private final int SAMPLING_PERIOD = 33333;
-    private final int LATENCY_PERIOD = 100000;
-
     private SensorManager sensorManager = null;
 
     private SensorEventListener sensorEventListener;
@@ -232,8 +229,7 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     accelerometerSensor,
-                    SAMPLING_PERIOD,
-                    LATENCY_PERIOD,
+                    SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
         }
@@ -243,8 +239,7 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     gyroscopeSensor,
-                    SAMPLING_PERIOD,
-                    LATENCY_PERIOD,
+                    SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
         }
@@ -254,7 +249,6 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     heartRateSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
@@ -265,7 +259,6 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     stepCountSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
@@ -276,8 +269,7 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     magnetometerSensor,
-                    SAMPLING_PERIOD,
-                    LATENCY_PERIOD,
+                    SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
         }

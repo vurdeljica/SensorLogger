@@ -62,9 +62,6 @@ public class WearableSensorBackgroundService extends Service {
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
 
-    private final int SAMPLING_PERIOD = 33333;
-    private final int LATENCY_PERIOD = 100000;
-
     private SensorManager sensorManager = null;
 
     private SensorEventListener sensorEventListener;
@@ -255,8 +252,7 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     accelerometerSensor,
-                    SAMPLING_PERIOD,
-                    LATENCY_PERIOD,
+                    SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
         }
@@ -266,8 +262,7 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     gyroscopeSensor,
-                    SAMPLING_PERIOD,
-                    LATENCY_PERIOD,
+                    SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
         }
@@ -277,7 +272,6 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     heartRateSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
@@ -288,7 +282,6 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     stepCountSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST,
                     SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
@@ -299,8 +292,7 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     magnetometerSensor,
-                    SAMPLING_PERIOD,
-                    LATENCY_PERIOD,
+                    SensorManager.SENSOR_DELAY_NORMAL,
                     mServiceHandler
             );
         }
