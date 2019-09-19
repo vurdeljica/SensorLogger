@@ -81,6 +81,8 @@ public class ApplicationSensorBackgroundService extends Service {
         sensorManager = getSystemService(SensorManager.class);
 
         sensorEventListener = new SensorEventListener() {
+            List<DeviceSensorData> list = new ArrayList<>();
+
             @Override
             public void onSensorChanged(SensorEvent event) {
 //                Log.d(TAG, prettyPrintFloatArray(event.values));
@@ -129,7 +131,6 @@ public class ApplicationSensorBackgroundService extends Service {
                     }
                 }
 
-                List<DeviceSensorData> list = new ArrayList<>();
                 list.add(deviceSensorData);
                 if (list.size() == 40) {
                     databaseManager.insertOrUpdateDeviceSensorData(list);

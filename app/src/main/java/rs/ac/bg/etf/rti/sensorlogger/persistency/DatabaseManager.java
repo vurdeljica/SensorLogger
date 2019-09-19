@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
@@ -41,9 +42,14 @@ public class DatabaseManager {
 
     public void init(Context context) {
         Realm.init(context);
-        try (Realm realm = Realm.getDefaultInstance()) {
-            realm.executeTransaction(realm1 -> realm1.deleteAll());
-        }
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm.setDefaultConfiguration(config);
+//        try (Realm realm = Realm.getDefaultInstance()) {
+//            realm.executeTransaction(realm1 -> realm1.deleteAll());
+//        }
     }
 
     public void insertOrUpdateGPSData(GPSData _gpsData) {
