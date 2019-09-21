@@ -13,7 +13,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -61,11 +64,25 @@ public class DatabaseManager {
     }
 
     public void insertOrUpdateDeviceSensorData(List<DeviceSensorData> deviceSensorDataList) {
+        try(Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> realm1.insertOrUpdate(deviceSensorDataList));
+        }
+    }
+
+    @Nullable
+    public Map<String, DeviceSensorData> getLatestDeviceSensorDataForEachNode(Set<String> nodeIds) {
+        Map<String, DeviceSensorData> latestData = new HashMap<>();
+
         try (Realm realm = Realm.getDefaultInstance()) {
-            for (DeviceSensorData deviceSensorData : deviceSensorDataList) {
-                realm.executeTransaction(realm1 -> realm1.insertOrUpdate(deviceSensorData));
+            for(String nodeId : nodeIds) {
+                DeviceSensorData deviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).sort("timestamp", Sort.DESCENDING).findFirst();
+                if (deviceSensorDataFromRealm != null) {
+                    latestData.put(nodeId, realm.copyFromRealm(deviceSensorDataFromRealm));
+                }
             }
         }
+
+        return latestData;
     }
 
     @Nullable

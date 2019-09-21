@@ -32,11 +32,13 @@ public class DeviceSensorData extends RealmObject {
     }
 
     public DeviceSensorData(DeviceSensorData deviceSensorData) {
-        accelerometer = deviceSensorData.getAccelerometer();
-        gyroscope = deviceSensorData.getGyroscope();
-        heartRateMonitor = deviceSensorData.getHeartRateMonitor();
-        pedometer = deviceSensorData.getPedometer();
-        magnetometer = deviceSensorData.getMagnetometer();
+        if (deviceSensorData == null) return;
+
+        accelerometer = new Accelerometer(deviceSensorData.getAccelerometer());
+        gyroscope = new Gyroscope(deviceSensorData.getGyroscope());
+        heartRateMonitor = new HeartRateMonitor(deviceSensorData.getHeartRateMonitor());
+        pedometer = new Pedometer(deviceSensorData.getPedometer());
+        magnetometer = new Magnetometer(deviceSensorData.getMagnetometer());
         nodeId = deviceSensorData.getNodeId();
         timestamp = deviceSensorData.getTimestamp();
     }

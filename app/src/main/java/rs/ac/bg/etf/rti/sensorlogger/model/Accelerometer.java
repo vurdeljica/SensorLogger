@@ -17,6 +17,14 @@ public class Accelerometer extends RealmObject {
         this.z = z;
     }
 
+    public Accelerometer(Accelerometer acc) {
+        if (acc == null) return;
+
+        this.x = acc.x;
+        this.y = acc.y;
+        this.z = acc.z;
+    }
+
     public float getX() {
         return x;
     }

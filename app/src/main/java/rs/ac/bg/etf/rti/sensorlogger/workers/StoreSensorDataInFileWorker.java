@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.workers;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -31,8 +32,8 @@ public class StoreSensorDataInFileWorker extends Worker {
         long endTime = System.currentTimeMillis();
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();
-        HashMap<String, List<SensorDataProtos.SensorData>> sensorDataMap = new HashMap<>();
 
+        HashMap<String, List<SensorDataProtos.SensorData>> sensorDataMap = new HashMap<>();
         for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData()) {
             String nodeId = deviceSensorData.getNodeId();
 

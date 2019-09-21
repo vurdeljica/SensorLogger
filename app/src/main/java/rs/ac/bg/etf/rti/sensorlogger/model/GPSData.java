@@ -20,6 +20,15 @@ public class GPSData extends RealmObject {
         this.latitude = latitude;
         this.altitude = altitude;
     }
+    public GPSData(GPSData gps) {
+        if (gps == null) return;
+
+        this.timestamp = gps.timestamp;
+        this.longitude = gps.longitude;
+        this.latitude = gps.latitude;
+        this.altitude = gps.altitude;
+    }
+
 
     public long getTimestamp() {
         return timestamp;

@@ -17,6 +17,14 @@ public class Gyroscope extends RealmObject {
         this.z = z;
     }
 
+    public Gyroscope(Gyroscope gyr) {
+        if (gyr == null) return;
+
+        this.x = gyr.x;
+        this.y = gyr.y;
+        this.z = gyr.z;
+    }
+
     public float getX() {
         return x;
     }
