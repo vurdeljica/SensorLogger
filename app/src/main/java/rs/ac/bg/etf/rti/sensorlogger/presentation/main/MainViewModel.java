@@ -11,10 +11,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
-import androidx.work.Constraints;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -27,20 +23,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreLocationInFileWorker;
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreSensorDataInFileWorker;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
-    private static final String STORE_WORKER_LOCATION_ID = "StoreLocationInFileWorker";
-    private static final String STORE_WORKER_SENSOR_ID = "StoreSensorDataInFileWorker";
     private static final String NODE_ID_KEY = "nodeId";
     public static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
@@ -124,21 +115,6 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
         Log.d(TAG, "onCapabilityChanged: ");
-    }
-
-    void startStoreWorker() {
-        WorkManager workManager = WorkManager.getInstance(context);
-        Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
-        PeriodicWorkRequest storeLocationWorkRequest = new PeriodicWorkRequest.Builder(StoreLocationInFileWorker.class, 15, TimeUnit.MINUTES)
-                .setInitialDelay(15, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build();
-        workManager.enqueueUniquePeriodicWork(STORE_WORKER_LOCATION_ID, ExistingPeriodicWorkPolicy.KEEP, storeLocationWorkRequest);
-        PeriodicWorkRequest storeSensorDataWorkRequest = new PeriodicWorkRequest.Builder(StoreSensorDataInFileWorker.class, 15, TimeUnit.MINUTES)
-                .setInitialDelay(15, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build();
-        workManager.enqueueUniquePeriodicWork(STORE_WORKER_SENSOR_ID, ExistingPeriodicWorkPolicy.KEEP, storeSensorDataWorkRequest);
     }
 
     void bindServices() {

@@ -11,8 +11,8 @@ import androidx.core.util.Consumer;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.ObservableBoolean;
-import androidx.work.Constraints;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -20,6 +20,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
@@ -33,6 +34,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class HomeViewModel extends BaseObservable {
     public static final String IS_LISTENING_KEY = "isListeningKey";
+    private static final String WORK_TAG = "StoreWorkTag";
 
     private boolean listening;
     private Context context;
@@ -43,19 +45,31 @@ public class HomeViewModel extends BaseObservable {
     public CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, on) -> {
         SharedPreferences sharedPref = getDefaultSharedPreferences(context);
         sharedPref.edit().putBoolean(IS_LISTENING_KEY, on).apply();
+        WorkManager workManager = WorkManager.getInstance(context);
+        workManager.cancelAllWorkByTag(WORK_TAG);
         if (!on) {
-            WorkManager workManager = WorkManager.getInstance(context);
-            Constraints constraints = new Constraints.Builder().setRequiresStorageNotLow(true).build();
             OneTimeWorkRequest storeLocationWorkRequest = new OneTimeWorkRequest.Builder(StoreLocationInFileWorker.class)
-                    .setConstraints(constraints)
+                    .addTag(WORK_TAG)
                     .build();
             workManager.enqueue(storeLocationWorkRequest);
             OneTimeWorkRequest storeSensorDataWorkRequest = new OneTimeWorkRequest.Builder(StoreSensorDataInFileWorker.class)
-                    .setConstraints(constraints)
+                    .addTag(WORK_TAG)
+                    .build();
+            workManager.enqueue(storeSensorDataWorkRequest);
+        } else {
+            PeriodicWorkRequest storeLocationWorkRequest = new PeriodicWorkRequest.Builder(StoreLocationInFileWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
+                    .setInitialDelay(15, TimeUnit.MINUTES)
+                    .addTag(WORK_TAG)
+                    .build();
+            workManager.enqueue(storeLocationWorkRequest);
+            PeriodicWorkRequest storeSensorDataWorkRequest = new PeriodicWorkRequest.Builder(StoreSensorDataInFileWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
+                    .setInitialDelay(15, TimeUnit.MINUTES)
+                    .addTag(WORK_TAG)
                     .build();
             workManager.enqueue(storeSensorDataWorkRequest);
         }
     };
+
     private NetworkManager networkManager;
 
     HomeViewModel(Context context, Consumer<Void> openMenu, Consumer<Void> closeMenu) {
