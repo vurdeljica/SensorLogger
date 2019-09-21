@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Pair;
@@ -65,6 +66,8 @@ public class ApplicationSensorBackgroundService extends Service {
      */
     private static final int NOTIFICATION_ID = 34567890;
 
+    private PowerManager.WakeLock wakeLock;
+
 
     static class UnbrokenSensorEvent{
         public long timestamp;
@@ -93,6 +96,9 @@ public class ApplicationSensorBackgroundService extends Service {
     @Override
     public void onCreate() {
         sensorManager = getSystemService(SensorManager.class);
+
+        PowerManager pm = getSystemService(PowerManager.class);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
 
         sensorEventListener = new SensorEventListener() {
             List<Pair<String, UnbrokenSensorEvent>> list = new ArrayList<>();
@@ -264,6 +270,9 @@ public class ApplicationSensorBackgroundService extends Service {
      */
     public void requestSensorEventUpdates() {
         Log.i(TAG, "Requesting sensor data");
+
+        wakeLock.acquire();
+
         startService(new Intent(getApplicationContext(), ApplicationSensorBackgroundService.class));
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometerSensor != null) {
@@ -326,6 +335,8 @@ public class ApplicationSensorBackgroundService extends Service {
      */
     public void removeSensorEventUpdates() {
         Log.i(TAG, "Removing sensor event updates");
+        wakeLock.release();
+
         sensorManager.unregisterListener(sensorEventListener);
         stopSelf();
     }
