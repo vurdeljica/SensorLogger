@@ -18,15 +18,11 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
@@ -69,13 +65,13 @@ public class ApplicationSensorBackgroundService extends Service {
     private PowerManager.WakeLock wakeLock;
 
 
-    static class UnbrokenSensorEvent{
+    static class UnbrokenSensorEvent {
         public long timestamp;
         public float[] values;
         public Sensor sensor;
 
         UnbrokenSensorEvent(SensorEvent event) {
-            this.timestamp = event.timestamp;
+            this.timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
             this.values = event.values;
             this.sensor = event.sensor;
         }
@@ -98,11 +94,12 @@ public class ApplicationSensorBackgroundService extends Service {
         sensorManager = getSystemService(SensorManager.class);
 
         PowerManager pm = getSystemService(PowerManager.class);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
+        if (pm != null) {
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
+        }
 
         sensorEventListener = new SensorEventListener() {
-            List<Pair<String, UnbrokenSensorEvent>> list = new ArrayList<>();
-            Set<String> nodeIds = new HashSet<>();
+            List<UnbrokenSensorEvent> list = new ArrayList<>();
 
 
             @Override
@@ -110,32 +107,25 @@ public class ApplicationSensorBackgroundService extends Service {
                 String nodeId = getDefaultSharedPreferences(getApplicationContext()).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
 
                 UnbrokenSensorEvent unbrokenSensorEvent = new UnbrokenSensorEvent(sensorEvent);
-                unbrokenSensorEvent.timestamp = System.currentTimeMillis() + ((unbrokenSensorEvent.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
 
-                list.add(new Pair<>(nodeId, unbrokenSensorEvent));
-                nodeIds.add(nodeId);
+                list.add(unbrokenSensorEvent);
 
                 if (list.size() >= 2000) {
                     DatabaseManager databaseManager = DatabaseManager.getInstance();
 
-                    Map<String, DeviceSensorData> latestData = databaseManager.getLatestDeviceSensorDataForEachNode(nodeIds);
+                    DeviceSensorData latestData = databaseManager.getLatestDeviceSensorData(nodeId);
                     List<DeviceSensorData> bufferedDeviceSensorsData = new ArrayList<>();
 
 
-                    for (Pair<String, UnbrokenSensorEvent> ev : list) {
-                        String deviceNodeId = ev.first;
-
-                        DeviceSensorData latestDeviceData = latestData.get(deviceNodeId);
+                    for (UnbrokenSensorEvent event : list) {
                         DeviceSensorData deviceSensorData;
-
-                        UnbrokenSensorEvent event = ev.second;
 
                         long timestamp = event.timestamp;
 
-                        if (latestDeviceData == null) {
-                            deviceSensorData = new DeviceSensorData(null, null, null, null, null, deviceNodeId, timestamp);
+                        if (latestData == null) {
+                            deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
                         } else {
-                            deviceSensorData = new DeviceSensorData(latestDeviceData);
+                            deviceSensorData = new DeviceSensorData(latestData);
                             deviceSensorData.setTimestamp(timestamp);
                         }
 
@@ -172,13 +162,11 @@ public class ApplicationSensorBackgroundService extends Service {
                         }
 
                         bufferedDeviceSensorsData.add(deviceSensorData);
-                        latestData.remove(deviceNodeId);
-                        latestData.put(deviceNodeId, deviceSensorData);
+                        latestData = deviceSensorData;
                     }
 
                     databaseManager.insertOrUpdateDeviceSensorData(bufferedDeviceSensorsData);
                     list.clear();
-                    nodeIds.clear();
                 }
             }
 
@@ -198,7 +186,7 @@ public class ApplicationSensorBackgroundService extends Service {
             CharSequence name = getString(R.string.app_name);
             // Create the channel for the notification
             NotificationChannel mChannel =
-                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
 
             // Set the Notification Channel for the Notification Manager.
             mNotificationManager.createNotificationChannel(mChannel);
@@ -271,7 +259,9 @@ public class ApplicationSensorBackgroundService extends Service {
     public void requestSensorEventUpdates() {
         Log.i(TAG, "Requesting sensor data");
 
-        wakeLock.acquire();
+        if (!wakeLock.isHeld()) {
+            wakeLock.acquire();
+        }
 
         startService(new Intent(getApplicationContext(), ApplicationSensorBackgroundService.class));
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -335,7 +325,10 @@ public class ApplicationSensorBackgroundService extends Service {
      */
     public void removeSensorEventUpdates() {
         Log.i(TAG, "Removing sensor event updates");
-        wakeLock.release();
+
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
 
         sensorManager.unregisterListener(sensorEventListener);
         stopSelf();

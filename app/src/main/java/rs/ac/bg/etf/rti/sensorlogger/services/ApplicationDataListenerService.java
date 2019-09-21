@@ -47,8 +47,12 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
 
+    private List<DeviceSensorData> deviceSensorDataList = new ArrayList<>();
+
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+        DatabaseManager databaseManager = DatabaseManager.getInstance();
+
         for (DataEvent dataEvent : dataEvents) {
             DataItem dataItem = dataEvent.getDataItem();
 
@@ -56,23 +60,21 @@ public class ApplicationDataListenerService extends WearableListenerService {
                 Log.e(TAG, "Incorrect path");
                 continue;
             }
-            DatabaseManager databaseManager = DatabaseManager.getInstance();
 
             if (dataItem.getData() == null) {
                 Log.e(TAG, "No data");
                 continue;
             }
+
             DataMap sensorDataMap = DataMap.fromByteArray(dataItem.getData());
             String nodeId = dataItem.getUri().getAuthority();
 
-            List<DeviceSensorData> deviceSensorDataList = new ArrayList<>();
             DeviceSensorData latestDeviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
             if (latestDeviceSensorData == null) {
                 latestDeviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, 0);
             }
 
             for (DataMap dataMap : sensorDataMap.getDataMapArrayList(SENSOR_DATA_KEY)) {
-
                 DeviceSensorData deviceSensorData = new DeviceSensorData(latestDeviceSensorData);
 
                 switch (dataMap.getString(DATA_TYPE_KEY)) {
@@ -125,8 +127,10 @@ public class ApplicationDataListenerService extends WearableListenerService {
                 deviceSensorDataList.add(deviceSensorData);
                 latestDeviceSensorData = deviceSensorData;
             }
-
+        }
+        if (deviceSensorDataList.size() >= 2000) {
             databaseManager.insertOrUpdateDeviceSensorData(deviceSensorDataList);
+            deviceSensorDataList.clear();
         }
     }
 

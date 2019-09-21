@@ -70,22 +70,6 @@ public class DatabaseManager {
     }
 
     @Nullable
-    public Map<String, DeviceSensorData> getLatestDeviceSensorDataForEachNode(Set<String> nodeIds) {
-        Map<String, DeviceSensorData> latestData = new HashMap<>();
-
-        try (Realm realm = Realm.getDefaultInstance()) {
-            for(String nodeId : nodeIds) {
-                DeviceSensorData deviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).sort("timestamp", Sort.DESCENDING).findFirst();
-                if (deviceSensorDataFromRealm != null) {
-                    latestData.put(nodeId, realm.copyFromRealm(deviceSensorDataFromRealm));
-                }
-            }
-        }
-
-        return latestData;
-    }
-
-    @Nullable
     public DeviceSensorData getLatestDeviceSensorData(String nodeId) {
         DeviceSensorData deviceSensorData = null;
 

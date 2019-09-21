@@ -1,11 +1,9 @@
 package rs.ac.bg.etf.rti.sensorlogger.services;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -17,6 +15,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -93,12 +92,20 @@ public class WearableSensorBackgroundService extends Service {
 
     private Handler mServiceHandler;
 
+    private PowerManager.WakeLock wakeLock;
+
+
     public WearableSensorBackgroundService() {
     }
 
     @Override
     public void onCreate() {
         sensorManager = getSystemService(SensorManager.class);
+
+        PowerManager pm = getSystemService(PowerManager.class);
+        if (pm != null) {
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
+        }
 
         sensorEventListener = new SensorEventListener() {
             private ArrayList<DataMap> dataMaps = new ArrayList<>();
@@ -148,11 +155,12 @@ public class WearableSensorBackgroundService extends Service {
                     }
                 }
                 dataMaps.add(dataMap);
-                if (dataMaps.size() == 40) {
+                if (dataMaps.size() >= 100) {
                     PutDataMapRequest putDataRequest = PutDataMapRequest.create(SENSOR_DATA_PATH);
                     putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
                     Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());
                     dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
+                    dataItemTask.addOnSuccessListener(e -> Log.e(TAG, "Sent data"));
                     dataMaps.clear();
                 }
 
@@ -246,6 +254,11 @@ public class WearableSensorBackgroundService extends Service {
      */
     public void requestSensorEventUpdates() {
         Log.i(TAG, "Requesting sensor data");
+
+        if (!wakeLock.isHeld()) {
+            wakeLock.acquire();
+        }
+
         startService(new Intent(getApplicationContext(), WearableSensorBackgroundService.class));
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometerSensor != null) {
@@ -308,6 +321,11 @@ public class WearableSensorBackgroundService extends Service {
      */
     public void removeSensorEventUpdates() {
         Log.i(TAG, "Removing sensor event updates");
+
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
+
         sensorManager.unregisterListener(sensorEventListener);
         stopSelf();
     }
@@ -342,25 +360,6 @@ public class WearableSensorBackgroundService extends Service {
         public WearableSensorBackgroundService getService() {
             return WearableSensorBackgroundService.this;
         }
-    }
-
-    /**
-     * Returns true if this is a foreground service.
-     *
-     * @param context The {@link Context}.
-     */
-    public boolean serviceIsRunningInForeground(Context context) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(
-                Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-                Integer.MAX_VALUE)) {
-            if (getClass().getName().equals(service.service.getClassName())) {
-                if (service.foreground) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private String prettyPrintFloatArray(float[] values) {
