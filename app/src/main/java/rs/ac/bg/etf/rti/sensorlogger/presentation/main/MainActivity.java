@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -36,6 +38,8 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.devices.DevicesFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeFragment;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journal.JournalFragment;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
+
+import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
 
 public class MainActivity extends AppCompatActivity implements ServiceHandler {
 
@@ -80,8 +84,22 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
             requestPermissions();
         }
 
+        if (!batteryOptimisationActive()) {
+            ignoreBatteryOptimisation();
+        }
+
         checkBluetooth();
         checkGPS();
+    }
+
+    @SuppressLint("BatteryLife")
+    private void ignoreBatteryOptimisation() {
+        startActivity(new Intent(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName())));
+    }
+
+    private boolean batteryOptimisationActive() {
+        PowerManager powerManager = getSystemService(PowerManager.class);
+        return powerManager != null && powerManager.isIgnoringBatteryOptimizations(getPackageName());
     }
 
     @Override
