@@ -13,6 +13,12 @@ public class HeartRateMonitor extends RealmObject {
         this.heartRate = heartRate;
     }
 
+    public HeartRateMonitor(HeartRateMonitor hrt) {
+        if (hrt == null) return;
+
+        this.heartRate = hrt.heartRate;
+    }
+
     public int getHeartRate() {
         return heartRate;
     }

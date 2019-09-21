@@ -17,6 +17,14 @@ public class Magnetometer extends RealmObject {
         this.z = z;
     }
 
+    public Magnetometer(Magnetometer mag) {
+        if (mag == null) return;
+
+        this.x = mag.x;
+        this.y = mag.y;
+        this.z = mag.z;
+    }
+
     public float getX() {
         return x;
     }

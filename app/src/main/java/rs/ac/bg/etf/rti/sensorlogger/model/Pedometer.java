@@ -13,6 +13,12 @@ public class Pedometer extends RealmObject {
         this.stepCount = stepCount;
     }
 
+    public Pedometer(Pedometer ped) {
+        if (ped == null) return;
+
+        this.stepCount = ped.stepCount;
+    }
+
     public int getStepCount() {
         return stepCount;
     }

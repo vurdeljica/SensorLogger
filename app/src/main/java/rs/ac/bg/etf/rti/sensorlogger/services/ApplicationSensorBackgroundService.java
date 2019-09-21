@@ -17,11 +17,15 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
@@ -61,6 +65,19 @@ public class ApplicationSensorBackgroundService extends Service {
      */
     private static final int NOTIFICATION_ID = 34567890;
 
+
+    static class UnbrokenSensorEvent{
+        public long timestamp;
+        public float[] values;
+        public Sensor sensor;
+
+        UnbrokenSensorEvent(SensorEvent event) {
+            this.timestamp = event.timestamp;
+            this.values = event.values;
+            this.sensor = event.sensor;
+        }
+    }
+
     /**
      * Used to check whether the bound activity has really gone away and not unbound as part of an
      * orientation change. We create a foreground service notification only if the former takes
@@ -78,60 +95,84 @@ public class ApplicationSensorBackgroundService extends Service {
         sensorManager = getSystemService(SensorManager.class);
 
         sensorEventListener = new SensorEventListener() {
-            List<DeviceSensorData> list = new ArrayList<>();
+            List<Pair<String, UnbrokenSensorEvent>> list = new ArrayList<>();
+            Set<String> nodeIds = new HashSet<>();
+
 
             @Override
-            public void onSensorChanged(SensorEvent event) {
-//                Log.d(TAG, prettyPrintFloatArray(event.values));
-
-                long timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
-
+            public void onSensorChanged(SensorEvent sensorEvent) {
                 String nodeId = getDefaultSharedPreferences(getApplicationContext()).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
 
-                DatabaseManager databaseManager = DatabaseManager.getInstance();
-                DeviceSensorData deviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
-                if (deviceSensorData == null) {
-                    deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                } else {
-                    deviceSensorData.setTimestamp(timestamp);
-                }
+                UnbrokenSensorEvent unbrokenSensorEvent = new UnbrokenSensorEvent(sensorEvent);
+                unbrokenSensorEvent.timestamp = System.currentTimeMillis() + ((unbrokenSensorEvent.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
 
-                switch (event.sensor.getType()) {
-                    case Sensor.TYPE_ACCELEROMETER: {
-                        Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
-                        deviceSensorData.setAccelerometer(accelerometer);
-                        break;
-                    }
-                    case Sensor.TYPE_GYROSCOPE: {
-                        Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
-                        deviceSensorData.setGyroscope(gyroscope);
-                        break;
-                    }
-                    case Sensor.TYPE_HEART_RATE: {
-                        HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
-                        deviceSensorData.setHeartRateMonitor(heartRate);
-                        break;
-                    }
-                    case Sensor.TYPE_STEP_COUNTER: {
-                        Pedometer pedometer = new Pedometer((int) event.values[0]);
-                        deviceSensorData.setPedometer(pedometer);
-                        break;
-                    }
-                    case Sensor.TYPE_MAGNETIC_FIELD: {
-                        Magnetometer magnetometer = new Magnetometer(event.values[0], event.values[1], event.values[2]);
-                        deviceSensorData.setMagnetometer(magnetometer);
-                        break;
-                    }
-                    default: {
-                        Log.e(TAG, "onSensorChanged: Invalid sensor type");
-                        return;
-                    }
-                }
+                list.add(new Pair<>(nodeId, unbrokenSensorEvent));
+                nodeIds.add(nodeId);
 
-                list.add(deviceSensorData);
-                if (list.size() == 40) {
-                    databaseManager.insertOrUpdateDeviceSensorData(list);
+                if (list.size() >= 2000) {
+                    DatabaseManager databaseManager = DatabaseManager.getInstance();
+
+                    Map<String, DeviceSensorData> latestData = databaseManager.getLatestDeviceSensorDataForEachNode(nodeIds);
+                    List<DeviceSensorData> bufferedDeviceSensorsData = new ArrayList<>();
+
+
+                    for (Pair<String, UnbrokenSensorEvent> ev : list) {
+                        String deviceNodeId = ev.first;
+
+                        DeviceSensorData latestDeviceData = latestData.get(deviceNodeId);
+                        DeviceSensorData deviceSensorData;
+
+                        UnbrokenSensorEvent event = ev.second;
+
+                        long timestamp = event.timestamp;
+
+                        if (latestDeviceData == null) {
+                            deviceSensorData = new DeviceSensorData(null, null, null, null, null, deviceNodeId, timestamp);
+                        } else {
+                            deviceSensorData = new DeviceSensorData(latestDeviceData);
+                            deviceSensorData.setTimestamp(timestamp);
+                        }
+
+                        switch (event.sensor.getType()) {
+                            case Sensor.TYPE_ACCELEROMETER: {
+                                Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
+                                deviceSensorData.setAccelerometer(accelerometer);
+                                break;
+                            }
+                            case Sensor.TYPE_GYROSCOPE: {
+                                Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
+                                deviceSensorData.setGyroscope(gyroscope);
+                                break;
+                            }
+                            case Sensor.TYPE_HEART_RATE: {
+                                HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
+                                deviceSensorData.setHeartRateMonitor(heartRate);
+                                break;
+                            }
+                            case Sensor.TYPE_STEP_COUNTER: {
+                                Pedometer pedometer = new Pedometer((int) event.values[0]);
+                                deviceSensorData.setPedometer(pedometer);
+                                break;
+                            }
+                            case Sensor.TYPE_MAGNETIC_FIELD: {
+                                Magnetometer magnetometer = new Magnetometer(event.values[0], event.values[1], event.values[2]);
+                                deviceSensorData.setMagnetometer(magnetometer);
+                                break;
+                            }
+                            default: {
+                                Log.e(TAG, "onSensorChanged: Invalid sensor type");
+                                return;
+                            }
+                        }
+
+                        bufferedDeviceSensorsData.add(deviceSensorData);
+                        latestData.remove(deviceNodeId);
+                        latestData.put(deviceNodeId, deviceSensorData);
+                    }
+
+                    databaseManager.insertOrUpdateDeviceSensorData(bufferedDeviceSensorsData);
                     list.clear();
+                    nodeIds.clear();
                 }
             }
 
