@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
@@ -64,7 +63,7 @@ public class WearableSensorBackgroundService extends Service {
 
     private SensorManager sensorManager = null;
 
-    private SensorEventListener sensorEventListener;
+    private FlushableSensorEventListener sensorEventListener;
 
     private static final String PACKAGE_NAME =
             "rs.ac.bg.etf.rti.sensorlogger.services";
@@ -108,7 +107,12 @@ public class WearableSensorBackgroundService extends Service {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
         }
 
-        sensorEventListener = new SensorEventListener() {
+        sensorEventListener = new FlushableSensorEventListener() {
+            @Override
+            public void flushData() {
+                addDataToDatabase();
+            }
+
             private ArrayList<DataMap> dataMaps = new ArrayList<>();
 
             @Override
@@ -157,14 +161,18 @@ public class WearableSensorBackgroundService extends Service {
                 }
                 dataMaps.add(dataMap);
                 if (dataMaps.size() >= 100) {
-                    PutDataMapRequest putDataRequest = PutDataMapRequest.create(SENSOR_DATA_PATH);
-                    putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
-                    Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());
-                    dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
-                    dataItemTask.addOnSuccessListener(e -> Log.e(TAG, "Sent data"));
-                    dataMaps.clear();
+                    addDataToDatabase();
                 }
 
+            }
+
+            private void addDataToDatabase() {
+                PutDataMapRequest putDataRequest = PutDataMapRequest.create(SENSOR_DATA_PATH);
+                putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
+                Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());
+                dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
+                dataItemTask.addOnSuccessListener(e -> Log.e(TAG, "Sent data"));
+                dataMaps.clear();
             }
 
             @Override
@@ -257,7 +265,7 @@ public class WearableSensorBackgroundService extends Service {
         Log.i(TAG, "Requesting sensor data");
 
         if (!wakeLock.isHeld()) {
-            wakeLock.acquire();
+            wakeLock.acquire(10*60*1000L /*10 minutes*/);
         }
 
         startService(new Intent(getApplicationContext(), WearableSensorBackgroundService.class));
@@ -328,6 +336,7 @@ public class WearableSensorBackgroundService extends Service {
         }
 
         sensorManager.unregisterListener(sensorEventListener);
+        sensorEventListener.flushData();
         stopSelf();
     }
 

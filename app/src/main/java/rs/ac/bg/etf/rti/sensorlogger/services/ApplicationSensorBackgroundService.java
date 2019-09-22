@@ -43,7 +43,7 @@ public class ApplicationSensorBackgroundService extends Service {
 
     private SensorManager sensorManager = null;
 
-    private SensorEventListener sensorEventListener;
+    private FlushableSensorEventListener sensorEventListener;
 
     private static final String PACKAGE_NAME =
             "rs.ac.bg.etf.rti.sensorlogger.services";
@@ -99,7 +99,7 @@ public class ApplicationSensorBackgroundService extends Service {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
         }
 
-        sensorEventListener = new SensorEventListener() {
+        sensorEventListener = new FlushableSensorEventListener() {
             List<UnbrokenSensorEvent> list = new ArrayList<>();
 
             @Override
@@ -111,63 +111,74 @@ public class ApplicationSensorBackgroundService extends Service {
                 list.add(unbrokenSensorEvent);
 
                 if (list.size() >= 2000) {
-                    DatabaseManager databaseManager = DatabaseManager.getInstance();
+                    addDataToDatabase(nodeId);
+                }
+            }
 
-                    DeviceSensorData latestData = databaseManager.getLatestDeviceSensorData(nodeId);
-                    List<DeviceSensorData> bufferedDeviceSensorsData = new ArrayList<>();
+            private void addDataToDatabase(String nodeId) {
+                DatabaseManager databaseManager = DatabaseManager.getInstance();
+
+                DeviceSensorData latestData = databaseManager.getLatestDeviceSensorData(nodeId);
+                List<DeviceSensorData> bufferedDeviceSensorsData = new ArrayList<>();
 
 
-                    for (UnbrokenSensorEvent event : list) {
-                        DeviceSensorData deviceSensorData;
+                for (UnbrokenSensorEvent event : list) {
+                    DeviceSensorData deviceSensorData;
 
-                        long timestamp = event.timestamp;
+                    long timestamp = event.timestamp;
 
-                        if (latestData == null) {
-                            deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
-                        } else {
-                            deviceSensorData = new DeviceSensorData(latestData);
-                            deviceSensorData.setTimestamp(timestamp);
-                        }
-
-                        switch (event.sensor.getType()) {
-                            case Sensor.TYPE_ACCELEROMETER: {
-                                Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
-                                deviceSensorData.setAccelerometer(accelerometer);
-                                break;
-                            }
-                            case Sensor.TYPE_GYROSCOPE: {
-                                Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
-                                deviceSensorData.setGyroscope(gyroscope);
-                                break;
-                            }
-                            case Sensor.TYPE_HEART_RATE: {
-                                HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
-                                deviceSensorData.setHeartRateMonitor(heartRate);
-                                break;
-                            }
-                            case Sensor.TYPE_STEP_COUNTER: {
-                                Pedometer pedometer = new Pedometer((int) event.values[0]);
-                                deviceSensorData.setPedometer(pedometer);
-                                break;
-                            }
-                            case Sensor.TYPE_MAGNETIC_FIELD: {
-                                Magnetometer magnetometer = new Magnetometer(event.values[0], event.values[1], event.values[2]);
-                                deviceSensorData.setMagnetometer(magnetometer);
-                                break;
-                            }
-                            default: {
-                                Log.e(TAG, "onSensorChanged: Invalid sensor type");
-                                return;
-                            }
-                        }
-
-                        bufferedDeviceSensorsData.add(deviceSensorData);
-                        latestData = deviceSensorData;
+                    if (latestData == null) {
+                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
+                    } else {
+                        deviceSensorData = new DeviceSensorData(latestData);
+                        deviceSensorData.setTimestamp(timestamp);
                     }
 
-                    databaseManager.insertOrUpdateDeviceSensorData(bufferedDeviceSensorsData);
-                    list.clear();
+                    switch (event.sensor.getType()) {
+                        case Sensor.TYPE_ACCELEROMETER: {
+                            Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
+                            deviceSensorData.setAccelerometer(accelerometer);
+                            break;
+                        }
+                        case Sensor.TYPE_GYROSCOPE: {
+                            Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
+                            deviceSensorData.setGyroscope(gyroscope);
+                            break;
+                        }
+                        case Sensor.TYPE_HEART_RATE: {
+                            HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
+                            deviceSensorData.setHeartRateMonitor(heartRate);
+                            break;
+                        }
+                        case Sensor.TYPE_STEP_COUNTER: {
+                            Pedometer pedometer = new Pedometer((int) event.values[0]);
+                            deviceSensorData.setPedometer(pedometer);
+                            break;
+                        }
+                        case Sensor.TYPE_MAGNETIC_FIELD: {
+                            Magnetometer magnetometer = new Magnetometer(event.values[0], event.values[1], event.values[2]);
+                            deviceSensorData.setMagnetometer(magnetometer);
+                            break;
+                        }
+                        default: {
+                            Log.e(TAG, "onSensorChanged: Invalid sensor type");
+                            return;
+                        }
+                    }
+
+                    bufferedDeviceSensorsData.add(deviceSensorData);
+                    latestData = deviceSensorData;
                 }
+
+                databaseManager.insertOrUpdateDeviceSensorData(bufferedDeviceSensorsData);
+                list.clear();
+            }
+
+            @Override
+            public void flushData() {
+                String nodeId = getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
+
+                addDataToDatabase(nodeId);
             }
 
             @Override
@@ -260,7 +271,7 @@ public class ApplicationSensorBackgroundService extends Service {
         Log.i(TAG, "Requesting sensor data");
 
         if (!wakeLock.isHeld()) {
-            wakeLock.acquire();
+            wakeLock.acquire(10*60*1000L /*10 minutes*/);
         }
 
         startService(new Intent(getApplicationContext(), ApplicationSensorBackgroundService.class));
@@ -331,6 +342,7 @@ public class ApplicationSensorBackgroundService extends Service {
         }
 
         sensorManager.unregisterListener(sensorEventListener);
+        sensorEventListener.flushData();
         stopSelf();
     }
 
