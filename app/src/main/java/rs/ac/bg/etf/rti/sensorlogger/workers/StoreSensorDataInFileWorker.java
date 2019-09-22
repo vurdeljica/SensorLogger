@@ -65,10 +65,9 @@ public class StoreSensorDataInFileWorker extends Worker {
             sensorDataToStore.add(sensorData);
         }
 
-        dbManager.deleteSpecificSensorDataBefore(nodeId, endTime);
-
         persistenceManager.saveSensorData(sensorDataToStore, nodeId, dbManager.getDeviceSensorDataTimestamp(nodeId));
 
+        dbManager.deleteSpecificSensorDataBefore(nodeId, endTime);
 
         // Indicate whether the task finished successfully with the Result
         return Result.success();
