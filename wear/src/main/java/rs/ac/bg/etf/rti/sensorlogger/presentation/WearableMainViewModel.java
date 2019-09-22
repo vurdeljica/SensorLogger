@@ -87,11 +87,13 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
     }
 
     void init() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
+        listening.set(sharedPreferences.getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false));
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
         // Bind to the service. If the service is in foreground mode, this signals to the service
         // that since this activity is in the foreground, the service can exit foreground mode.
         serviceHandler.bindSensorService(new Intent(context, WearableSensorBackgroundService.class), mServiceConnection);
-
-        context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(this);
     }
 
     void destroy() {
