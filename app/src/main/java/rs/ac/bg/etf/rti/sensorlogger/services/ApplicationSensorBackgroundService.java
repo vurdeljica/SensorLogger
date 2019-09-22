@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
@@ -33,7 +35,6 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel.IS_LISTENING_KEY;
 
 public class ApplicationSensorBackgroundService extends Service {
@@ -101,10 +102,9 @@ public class ApplicationSensorBackgroundService extends Service {
         sensorEventListener = new SensorEventListener() {
             List<UnbrokenSensorEvent> list = new ArrayList<>();
 
-
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                String nodeId = getDefaultSharedPreferences(getApplicationContext()).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
+                String nodeId = getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getString(NODE_ID_KEY, getApplicationContext().getString(R.string.unknown));
 
                 UnbrokenSensorEvent unbrokenSensorEvent = new UnbrokenSensorEvent(sensorEvent);
 
@@ -197,7 +197,7 @@ public class ApplicationSensorBackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
 
-        if (intent == null && getDefaultSharedPreferences(this).getBoolean(IS_LISTENING_KEY, false)) {
+        if (intent == null && getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getBoolean(IS_LISTENING_KEY, false)) {
             requestSensorEventUpdates();
         }
 

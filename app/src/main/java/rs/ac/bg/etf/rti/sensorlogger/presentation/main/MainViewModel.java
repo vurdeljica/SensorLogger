@@ -24,11 +24,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
-
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
@@ -97,10 +96,11 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
     MainViewModel(Context context, ServiceHandler serviceHandler) {
         this.context = context;
         this.serviceHandler = serviceHandler;
-        isListening = getDefaultSharedPreferences(context).getBoolean(HomeViewModel.IS_LISTENING_KEY, false);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
+        isListening = sharedPreferences.getBoolean(HomeViewModel.IS_LISTENING_KEY, false);
 
         Wearable.getNodeClient(context).getLocalNode()
-                .addOnSuccessListener(node -> getDefaultSharedPreferences(context).edit().putString(NODE_ID_KEY, node.getId()).apply());
+                .addOnSuccessListener(node -> sharedPreferences.edit().putString(NODE_ID_KEY, node.getId()).apply());
     }
 
     void startCapabilityListener() {
@@ -142,12 +142,12 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
     }
 
     void registerSharedPreferenceListener() {
-        getDefaultSharedPreferences(context)
+        context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this);
     }
 
     void unregisterSharedPreferenceListener() {
-        getDefaultSharedPreferences(context)
+        context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE)
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 

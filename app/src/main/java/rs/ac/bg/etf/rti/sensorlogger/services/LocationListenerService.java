@@ -27,12 +27,11 @@ import com.google.android.gms.location.LocationServices;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.Utils;
+import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
-
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 
 public class LocationListenerService extends Service {
 
@@ -124,7 +123,7 @@ public class LocationListenerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
 
-        if (intent == null && getDefaultSharedPreferences(this).getBoolean(HomeViewModel.IS_LISTENING_KEY, false)) {
+        if (intent == null && getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getBoolean(HomeViewModel.IS_LISTENING_KEY, false)) {
             requestLocationUpdates();
         }
 

@@ -1,7 +1,8 @@
 package rs.ac.bg.etf.rti.sensorlogger;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
+
+import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 
 public class Utils {
     private static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
@@ -12,7 +13,7 @@ public class Utils {
      * @param context The {@link Context}.
      */
     public static boolean requestingLocationUpdates(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
+        return context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE)
                 .getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false);
     }
 
@@ -22,7 +23,7 @@ public class Utils {
      * @param requestingLocationUpdates The location updates state.
      */
     public static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE)
                 .edit()
                 .putBoolean(KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates)
                 .apply();

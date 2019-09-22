@@ -26,6 +26,7 @@ public class SensorLoggerApplication extends Application {
 
     private static final String CHANNEL_ID = "DAILY_ACTIVITIES_REMINDER";
     private static final int NOTIFICATION_ID = 123456;
+    public static final String SHARED_PREFERENCES_ID = "rs.ac.bg.etf.rti.sensorlogger.shared_preferences";
 
     @Override
     public void onCreate() {

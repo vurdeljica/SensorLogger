@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService.SHARED_PREFERENCES_ID;
 
 public class WearableSensorBackgroundService extends Service {
 
@@ -193,7 +194,7 @@ public class WearableSensorBackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
 
-        if (intent == null && getDefaultSharedPreferences(this).getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false)) {
+        if (intent == null && getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false)) {
             requestSensorEventUpdates();
         }
 

@@ -21,13 +21,14 @@ import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService;
 import rs.ac.bg.etf.rti.sensorlogger.services.WearableSensorBackgroundService;
 
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService.SHARED_PREFERENCES_ID;
 
 public class WearableMainViewModel extends BaseObservable implements CapabilityClient.OnCapabilityChangedListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = WearableMainViewModel.class.getSimpleName();
     private static final String SERVER_APP_CAPABILITY = "sensor_app_server";
     private static final String NODE_ID_KEY = "nodeId";
+
 
     private final Context context;
     private final ServiceHandler serviceHandler;
@@ -67,12 +68,13 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
         this.context = context;
         this.serviceHandler = serviceHandler;
 
-        getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(this);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        listening.set(getDefaultSharedPreferences(context).getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false));
+        listening.set(sharedPreferences.getBoolean(WearableDataLayerListenerService.IS_LISTENING_KEY, false));
 
         Wearable.getNodeClient(context).getLocalNode()
-                .addOnSuccessListener(node -> getDefaultSharedPreferences(context).edit().putString(NODE_ID_KEY, node.getId()).apply());
+                .addOnSuccessListener(node -> sharedPreferences.edit().putString(NODE_ID_KEY, node.getId()).apply());
     }
 
     void startCapabilityListener() {
@@ -89,7 +91,7 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
         // that since this activity is in the foreground, the service can exit foreground mode.
         serviceHandler.bindSensorService(new Intent(context, WearableSensorBackgroundService.class), mServiceConnection);
 
-        getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(this);
+        context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(this);
     }
 
     void destroy() {
@@ -101,7 +103,7 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
             mBound = false;
         }
 
-        getDefaultSharedPreferences(context)
+        context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE)
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -126,6 +128,6 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
 
     @Bindable
     public String getNodeId() {
-        return "Node Id: " + getDefaultSharedPreferences(context).getString(NODE_ID_KEY, context.getString(R.string.unknown));
+        return "Node Id: " + context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getString(NODE_ID_KEY, context.getString(R.string.unknown));
     }
 }

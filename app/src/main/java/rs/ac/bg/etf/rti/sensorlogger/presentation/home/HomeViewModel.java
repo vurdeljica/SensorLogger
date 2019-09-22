@@ -23,14 +23,13 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreLocationInFileWorker;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreSensorDataInFileWorker;
-
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class HomeViewModel extends BaseObservable {
     public static final String IS_LISTENING_KEY = "isListeningKey";
@@ -43,7 +42,7 @@ public class HomeViewModel extends BaseObservable {
     private Consumer<Void> closeMenu;
 
     public CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, on) -> {
-        SharedPreferences sharedPref = getDefaultSharedPreferences(context);
+        SharedPreferences sharedPref = context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
         sharedPref.edit().putBoolean(IS_LISTENING_KEY, on).apply();
         WorkManager workManager = WorkManager.getInstance(context);
         workManager.cancelAllWorkByTag(WORK_TAG);
@@ -77,7 +76,7 @@ public class HomeViewModel extends BaseObservable {
         this.openMenu = openMenu;
         this.closeMenu = closeMenu;
 
-        listening = getDefaultSharedPreferences(context).getBoolean(IS_LISTENING_KEY, false);
+        listening = context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getBoolean(IS_LISTENING_KEY, false);
         networkManager = NetworkManager.getInstance(context);
     }
 
