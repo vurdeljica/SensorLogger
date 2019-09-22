@@ -195,6 +195,44 @@ public class DatabaseManager {
         }
     }
 
+    public void deleteSpecificSensorDataBefore(String nodeId, long timestamp) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(realm1 -> {
+                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).findAll();
+                Log.d("REALM", "DELETED: " + result.size() + " . NodeId: " + nodeId);
+                result.deleteAllFromRealm();
+            });
+        }
+    }
+
+    public List<String> getNodeIds() {
+        List<String> nodeIds = new ArrayList<>();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            List<DeviceSensorData> deviceSensorData = realm.where(DeviceSensorData.class).distinct("nodeId").findAll();
+            for (DeviceSensorData sensorData : deviceSensorData) {
+                nodeIds.add(sensorData.getNodeId());
+            }
+        }
+
+        return nodeIds;
+    }
+
+    @NonNull
+    public List<DeviceSensorData> getDeviceSensorData(String nodeId, long timestamp) {
+        List<DeviceSensorData> deviceSensorData = new ArrayList<>();
+
+        try (Realm realm = Realm.getDefaultInstance()) {
+            List<DeviceSensorData> DeviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).findAll();
+            if (DeviceSensorDataFromRealm != null) {
+                deviceSensorData.addAll(realm.copyFromRealm(DeviceSensorDataFromRealm));
+                Log.d("REALM", "GET: " + deviceSensorData.size() + " NODE ID: " + nodeId);
+            }
+        }
+
+        return deviceSensorData;
+    }
+
     void saveToJson(File jsonFile) {
         Gson gson = new GsonBuilder().create();//... obtain your Gson;
         try (Realm realm = Realm.getDefaultInstance()) {

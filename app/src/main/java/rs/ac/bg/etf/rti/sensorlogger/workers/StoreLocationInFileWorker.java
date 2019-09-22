@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.workers;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -13,6 +14,7 @@ import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
 public class StoreLocationInFileWorker extends Worker {
     public StoreLocationInFileWorker(@NonNull Context context, @NonNull WorkerParameters params) {
@@ -22,6 +24,7 @@ public class StoreLocationInFileWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        Log.d(HomeViewModel.WORK_TAG, "Store location worker started");
         long endTime = System.currentTimeMillis();
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();

@@ -30,9 +30,7 @@ import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
-import rs.ac.bg.etf.rti.sensorlogger.workers.PeriodicTriggerWorker;
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreLocationInFileWorker;
-import rs.ac.bg.etf.rti.sensorlogger.workers.StoreSensorDataInFileWorker;
+import rs.ac.bg.etf.rti.sensorlogger.workers.TriggerWorker;
 
 public class HomeViewModel extends BaseObservable {
     public static final String IS_LISTENING_KEY = "isListeningKey";
@@ -51,16 +49,14 @@ public class HomeViewModel extends BaseObservable {
         WorkManager workManager = WorkManager.getInstance(context);
         workManager.cancelAllWorkByTag(WORK_TAG);
         if (!on) {
-            OneTimeWorkRequest storeLocationWorkRequest = new OneTimeWorkRequest.Builder(StoreLocationInFileWorker.class)
+            Log.d(WORK_TAG, "One time trigger worker enqueued");
+            OneTimeWorkRequest storeAll = new OneTimeWorkRequest.Builder(TriggerWorker.class)
                     .addTag(WORK_TAG)
                     .build();
-            workManager.enqueue(storeLocationWorkRequest);
-            OneTimeWorkRequest storeSensorDataWorkRequest = new OneTimeWorkRequest.Builder(StoreSensorDataInFileWorker.class)
-                    .addTag(WORK_TAG)
-                    .build();
-            workManager.enqueue(storeSensorDataWorkRequest);
+            workManager.enqueue(storeAll);
         } else {
-            PeriodicWorkRequest periodicTriggerWorker = new PeriodicWorkRequest.Builder(PeriodicTriggerWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
+            Log.d(WORK_TAG, "Periodic trigger worker enqueued");
+            PeriodicWorkRequest periodicTriggerWorker = new PeriodicWorkRequest.Builder(TriggerWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
                     .addTag(WORK_TAG)
                     .build();
             workManager.enqueueUniquePeriodicWork(PERIODIC_TASK_ID, ExistingPeriodicWorkPolicy.KEEP, periodicTriggerWorker);

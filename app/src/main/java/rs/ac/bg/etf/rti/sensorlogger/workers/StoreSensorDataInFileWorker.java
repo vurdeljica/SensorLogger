@@ -1,19 +1,14 @@
 package rs.ac.bg.etf.rti.sensorlogger.workers;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
@@ -24,27 +19,30 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
 public class StoreSensorDataInFileWorker extends Worker {
 
     private Context context;
+    private String nodeId;
 
     public StoreSensorDataInFileWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
         this.context = context;
+        this.nodeId = getInputData().getString("nodeId");
     }
 
     @NonNull
     @Override
     public Result doWork() {
+        Log.d(HomeViewModel.WORK_TAG, "Store sensor worker started. NodeId: " + nodeId);
         long endTime = System.currentTimeMillis();
         DatabaseManager dbManager = DatabaseManager.getInstance();
         PersistenceManager persistenceManager = PersistenceManager.getInstance();
 
-        HashMap<String, List<SensorDataProtos.SensorData>> sensorDataMap = new HashMap<>();
-        for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData()) {
-            String nodeId = deviceSensorData.getNodeId();
+        List<SensorDataProtos.SensorData> sensorDataToStore = new ArrayList<>();
 
+        for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData(nodeId, endTime)) {
             SensorDataProtos.SensorData.Builder sensorDataBuilder = SensorDataProtos.SensorData.newBuilder()
                     .setTimestamp(deviceSensorData.getTimestamp())
                     .setNodeId(deviceSensorData.getNodeId());
@@ -103,43 +101,13 @@ public class StoreSensorDataInFileWorker extends Worker {
             }
 
             SensorDataProtos.SensorData sensorData = sensorDataBuilder.build();
-
-            if (!sensorDataMap.containsKey(nodeId)) {
-                sensorDataMap.put(nodeId, new ArrayList<>());
-            }
-            sensorDataMap.get(nodeId).add(sensorData);
+            sensorDataToStore.add(sensorData);
         }
 
-        List<Future<?>> futures = new ArrayList<>();
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+        dbManager.deleteSpecificSensorDataBefore(nodeId, endTime);
 
-        if (!sensorDataMap.isEmpty()) {
-            for (String node : sensorDataMap.keySet()) {
+        persistenceManager.saveSensorData(sensorDataToStore, nodeId, dbManager.getDeviceSensorDataTimestamp(nodeId));
 
-                Callable<Boolean> callableTask = () -> {
-                    persistenceManager.saveSensorData(sensorDataMap.get(node), node, dbManager.getDeviceSensorDataTimestamp(node));
-                    return true;
-                };
-
-                Future<?> f = executor.submit(callableTask);
-                futures.add(f);
-
-            }
-
-            for (Future<?> future : futures) {
-                try {
-                    future.get();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            executor.shutdown();
-
-            dbManager.deleteSensorDataBefore(endTime);
-        }
 
         // Indicate whether the task finished successfully with the Result
         return Result.success();
