@@ -9,6 +9,11 @@ import androidx.work.WorkerParameters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
 import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
@@ -19,7 +24,6 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
-import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
 public class StoreSensorDataInFileWorker extends Worker {
 
@@ -106,10 +110,33 @@ public class StoreSensorDataInFileWorker extends Worker {
             sensorDataMap.get(nodeId).add(sensorData);
         }
 
+        List<Future<?>> futures = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
         if (!sensorDataMap.isEmpty()) {
             for (String node : sensorDataMap.keySet()) {
-                persistenceManager.saveSensorData(sensorDataMap.get(node), node, dbManager.getDeviceSensorDataTimestamp(node));
+
+                Callable<Boolean> callableTask = () -> {
+                    persistenceManager.saveSensorData(sensorDataMap.get(node), node, dbManager.getDeviceSensorDataTimestamp(node));
+                    return true;
+                };
+
+                Future<?> f = executor.submit(callableTask);
+                futures.add(f);
+
             }
+
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            executor.shutdown();
 
             dbManager.deleteSensorDataBefore(endTime);
         }
