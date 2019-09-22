@@ -38,17 +38,18 @@ public class TriggerWorker extends Worker {
 
         DatabaseManager dbManager = DatabaseManager.getInstance();
         List<String> nodeIds = dbManager.getNodeIds();
-        for (String nodeId : nodeIds) {
+        for (int i = 0; i < nodeIds.size(); i++) {
+            String nodeId = nodeIds.get(i);
+
             Data.Builder dataBuilder = new Data.Builder();
             dataBuilder.putString("nodeId", nodeId);
             OneTimeWorkRequest storeSensorDataWorkRequest = new OneTimeWorkRequest.Builder(StoreSensorDataInFileWorker.class)
                     .addTag(HomeViewModel.WORK_TAG)
-                    .setInitialDelay(10, TimeUnit.SECONDS)
+                    .setInitialDelay((i * 120 + 10), TimeUnit.SECONDS)
                     .setInputData(dataBuilder.build())
                     .build();
 
             workManager.enqueue(storeSensorDataWorkRequest);
-
         }
 
         return Result.success();
