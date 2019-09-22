@@ -41,4 +41,8 @@
     <string name="collecting_data">Collecting data</string>
     <string name="no_ble_support">This device doesn\'t support Bluetooth, data can\'t be collected from Bluetooth devices</string>
     <string name="settings_change_unavailable">Location settings are inadequate, and cannot be fixed here. Fix in Settings.</string>
+    <string name="lost_connection">Lost connection</string>
+    <string name="establish_connection">Established connection</string>
+    <string name="lost_watch_connection">Connection to %s was lost.</string>
+    <string name="establish_watch_connection">Connection to %s established.</string>
 </resources>

@@ -1,7 +1,20 @@
 package rs.ac.bg.etf.rti.sensorlogger.services;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
+import com.annimon.stream.Stream;
+import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
@@ -9,8 +22,17 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import rs.ac.bg.etf.rti.sensorlogger.R;
+import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 
 import static rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager.deviceSensorDataBuffer;
 
@@ -40,6 +62,10 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_STEPS_TYPE = "rs.ac.bg.etf.rti.sensorlogger.steps";
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
+
+    private static final String CHANNEL_ID = "lostConnectionChannel";
+
+    private static final String CONNECTED_NODES_KEY = "connectedNodesKey";
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
@@ -130,5 +156,69 @@ public class ApplicationDataListenerService extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.d(TAG, "onMessageReceived: " + messageEvent);
+    }
+
+    @Override
+    public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
+        createNotificationChannel();
+
+        SharedPreferences sharedPref = getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
+        Set<String> lastConnectedNodesSet = sharedPref.getStringSet(CONNECTED_NODES_KEY, Collections.emptySet());
+        List<String> nodes = Stream.of(capabilityInfo.getNodes()).map(node -> node.getDisplayName() + " : " + node.getId()).toList();
+        Set<String> newConnectedNodesSet = new HashSet<>(nodes);
+
+        if (lastConnectedNodesSet.size() > nodes.size()) {
+            lastConnectedNodesSet.removeAll(nodes);
+            for (String node : lastConnectedNodesSet) {
+                postNotification(node, true);
+            }
+        } else {
+            nodes.removeAll(lastConnectedNodesSet);
+            for (String node : nodes) {
+                postNotification(node, false);
+            }
+        }
+
+        sharedPref.edit().putStringSet(CONNECTED_NODES_KEY, newConnectedNodesSet).apply();
+    }
+
+    private void createNotificationChannel() {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // Android O requires a Notification Channel.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.app_name);
+            // Create the channel for the notification
+            NotificationChannel mChannel =
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
+
+            // Set the Notification Channel for the Notification Manager.
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+    }
+
+    private void postNotification(String nodeId, boolean isRemoved) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        CharSequence title = isRemoved ? getString(R.string.lost_connection) : getString(R.string.establish_connection);
+        CharSequence text = String.format(isRemoved ? getString(R.string.lost_watch_connection) : getString(R.string.establish_watch_connection), nodeId);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setTicker(title)
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // notificationId is a unique int for each notification that you must define
+        int NOTIFICATION_ID = new Random(System.currentTimeMillis()).nextInt();
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 }

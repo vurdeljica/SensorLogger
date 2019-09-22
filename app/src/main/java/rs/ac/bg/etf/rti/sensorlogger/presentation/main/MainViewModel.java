@@ -9,13 +9,10 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
@@ -29,7 +26,7 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
 
-public class MainViewModel implements CapabilityClient.OnCapabilityChangedListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainViewModel implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
     private static final String NODE_ID_KEY = "nodeId";
     public static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
@@ -101,20 +98,6 @@ public class MainViewModel implements CapabilityClient.OnCapabilityChangedListen
 
         Wearable.getNodeClient(context).getLocalNode()
                 .addOnSuccessListener(node -> sharedPreferences.edit().putString(NODE_ID_KEY, node.getId()).apply());
-    }
-
-    void startCapabilityListener() {
-        Wearable.getCapabilityClient(context)
-                .addListener(this, CLIENT_APP_CAPABILITY);
-    }
-
-    void stopCapabilityListener() {
-        Wearable.getCapabilityClient(context).removeListener(this);
-    }
-
-    @Override
-    public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-        Log.d(TAG, "onCapabilityChanged: ");
     }
 
     void bindServices() {

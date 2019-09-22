@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="rs.ac.bg.etf.rti.sensorlogger">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -11,6 +10,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application
         android:name=".config.SensorLoggerApplication"
@@ -38,7 +38,8 @@
 
         <receiver android:name=".broadcastReceivers.NotificationPublisher" />
 
-        <service android:name=".services.ApplicationDataListenerService"
+        <service
+            android:name=".services.ApplicationDataListenerService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -48,14 +49,21 @@
                     android:path="/sensor_data"
                     android:scheme="wear" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
+                <data android:host="*" android:scheme="wear"
+                    android:path="/sensor_app_client"/>
+            </intent-filter>
         </service>
 
-        <service android:name=".services.LocationListenerService"
+        <service
+            android:name=".services.LocationListenerService"
             android:enabled="true"
             android:exported="false" />
-        <service android:name=".services.ApplicationSensorBackgroundService"
+        <service
+            android:name=".services.ApplicationSensorBackgroundService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
     </application>
 
 </manifest>

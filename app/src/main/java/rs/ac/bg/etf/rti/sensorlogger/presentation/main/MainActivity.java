@@ -108,16 +108,7 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
             ((JournalFragment) selectedFragment).updateFragment();
         }
 
-        viewModel.startCapabilityListener();
-
         viewModel.setWearableShouldStartListeners();
-    }
-
-    @Override
-    protected void onPause() {
-        viewModel.stopCapabilityListener();
-
-        super.onPause();
     }
 
     @Override
