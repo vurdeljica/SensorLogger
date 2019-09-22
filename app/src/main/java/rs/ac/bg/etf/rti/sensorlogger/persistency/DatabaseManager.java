@@ -28,6 +28,8 @@ public class DatabaseManager {
 
     private static DatabaseManager instance;
 
+    public static List<DeviceSensorData> deviceSensorDataBuffer = new ArrayList<>();
+
     private DatabaseManager() {
 
     }

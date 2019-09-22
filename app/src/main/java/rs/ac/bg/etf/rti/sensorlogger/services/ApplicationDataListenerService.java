@@ -9,11 +9,10 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
+
+import static rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager.deviceSensorDataBuffer;
 
 public class ApplicationDataListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerService";
@@ -41,8 +40,6 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_STEPS_TYPE = "rs.ac.bg.etf.rti.sensorlogger.steps";
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
-
-    private List<DeviceSensorData> deviceSensorDataList = new ArrayList<>();
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
@@ -120,13 +117,13 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     }
                 }
 
-                deviceSensorDataList.add(deviceSensorData);
+                deviceSensorDataBuffer.add(deviceSensorData);
                 latestDeviceSensorData = deviceSensorData;
             }
         }
-        if (deviceSensorDataList.size() >= 2000) {
-            databaseManager.insertOrUpdateDeviceSensorData(deviceSensorDataList);
-            deviceSensorDataList.clear();
+        if (deviceSensorDataBuffer.size() >= 2000) {
+            databaseManager.insertOrUpdateDeviceSensorData(deviceSensorDataBuffer);
+            deviceSensorDataBuffer.clear();
         }
     }
 
