@@ -1,7 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger.workers;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -20,10 +19,15 @@ import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
 public class StoreSensorDataInFileWorker extends Worker {
+
+    private Context context;
+
     public StoreSensorDataInFileWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
+        this.context = context;
     }
 
     @NonNull
@@ -106,6 +110,7 @@ public class StoreSensorDataInFileWorker extends Worker {
             for (String node : sensorDataMap.keySet()) {
                 persistenceManager.saveSensorData(sensorDataMap.get(node), node, dbManager.getDeviceSensorDataTimestamp(node));
             }
+
             dbManager.deleteSensorDataBefore(endTime);
         }
 

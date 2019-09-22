@@ -3,6 +3,7 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation.home;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -11,6 +12,7 @@ import androidx.core.util.Consumer;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.ObservableBoolean;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -28,12 +30,14 @@ import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
+import rs.ac.bg.etf.rti.sensorlogger.workers.PeriodicTriggerWorker;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreLocationInFileWorker;
 import rs.ac.bg.etf.rti.sensorlogger.workers.StoreSensorDataInFileWorker;
 
 public class HomeViewModel extends BaseObservable {
     public static final String IS_LISTENING_KEY = "isListeningKey";
-    private static final String WORK_TAG = "StoreWorkTag";
+    public static final String WORK_TAG = "StoreWorkTag";
+    private static final String PERIODIC_TASK_ID = "PeriodicTrigger";
 
     private boolean listening;
     private Context context;
@@ -56,16 +60,10 @@ public class HomeViewModel extends BaseObservable {
                     .build();
             workManager.enqueue(storeSensorDataWorkRequest);
         } else {
-            PeriodicWorkRequest storeLocationWorkRequest = new PeriodicWorkRequest.Builder(StoreLocationInFileWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
-                    .setInitialDelay(15, TimeUnit.MINUTES)
+            PeriodicWorkRequest periodicTriggerWorker = new PeriodicWorkRequest.Builder(PeriodicTriggerWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
                     .addTag(WORK_TAG)
                     .build();
-            workManager.enqueue(storeLocationWorkRequest);
-            PeriodicWorkRequest storeSensorDataWorkRequest = new PeriodicWorkRequest.Builder(StoreSensorDataInFileWorker.class, 15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES)
-                    .setInitialDelay(15, TimeUnit.MINUTES)
-                    .addTag(WORK_TAG)
-                    .build();
-            workManager.enqueue(storeSensorDataWorkRequest);
+            workManager.enqueueUniquePeriodicWork(PERIODIC_TASK_ID, ExistingPeriodicWorkPolicy.KEEP, periodicTriggerWorker);
         }
     };
 

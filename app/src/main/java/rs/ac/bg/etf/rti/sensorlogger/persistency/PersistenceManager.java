@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
@@ -56,32 +57,25 @@ public class PersistenceManager {
      * @param timestamp timestamp when sensor data is gathered
      */
     public void saveLocationData(List<SensorDataProtos.LocationData> _locationData, long timestamp) {
-        final List<SensorDataProtos.LocationData> locationData = _locationData;
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-//                int fileId = mobileFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-location.txt";
-                String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-temp.txt";
-                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-compressed.txt";
+    final List<SensorDataProtos.LocationData> locationData = _locationData;
+        //                int fileId = mobileFileId.getAndIncrement();
+    String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-location.txt";
+    String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-temp.txt";
+    String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-compressed.txt";
 
-                try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
-                    for (SensorDataProtos.LocationData location : locationData) {
-                        location.writeDelimitedTo(output);
-                    }
+        try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
+        for (SensorDataProtos.LocationData location : locationData) {
+            location.writeDelimitedTo(output);
+        }
 
-                    compressFile(binaryFilePath, tempFilePath);
-                    renameFile(tempFilePath, compressedFilePath);
+        compressFile(binaryFilePath, tempFilePath);
+        renameFile(tempFilePath, compressedFilePath);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-
-        thread.start();
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+}
 
     /**
      * Create and run separate thread for storing data gathered from sensors
@@ -90,35 +84,29 @@ public class PersistenceManager {
      */
     public void saveSensorData(List<SensorDataProtos.SensorData> _sensorData, String nodeId, long timestamp) {
         final List<SensorDataProtos.SensorData> sensorData = _sensorData;
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
 //                int fileId = deviceFileId.getAndIncrement();
-                String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".txt";
-                String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-temp.txt";
-                String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.txt";
+        String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".txt";
+        String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-temp.txt";
+        String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.txt";
 
-                try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
-                    for (SensorDataProtos.SensorData sensor : sensorData) {
-                        sensor.writeDelimitedTo(output);
-                    }
-
-                    compressFile(binaryFilePath, tempFilePath);
-                    renameFile(tempFilePath, compressedFilePath);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
+            for (SensorDataProtos.SensorData sensor : sensorData) {
+                sensor.writeDelimitedTo(output);
             }
-        };
 
-        thread.start();
+            compressFile(binaryFilePath, tempFilePath);
+            renameFile(tempFilePath, compressedFilePath);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     private void compressFile(String inputFilePath, String outputFilePath) throws Exception {
         FileInputStream fis = new FileInputStream(inputFilePath);
         FileOutputStream fos = new FileOutputStream(outputFilePath);
-        DeflaterOutputStream dos = new DeflaterOutputStream(fos);
+        DeflaterOutputStream dos = new DeflaterOutputStream(fos, new Deflater(Deflater.BEST_SPEED));
 
         copyFiles(fis, dos);
 

@@ -190,9 +190,7 @@ public class DatabaseManager {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
                 RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).lessThan("timestamp", timestamp).findAll();
-                for (DeviceSensorData resultData : result) {
-                    resultData.cascadeDelete();
-                }
+                result.deleteAllFromRealm();
             });
         }
     }
