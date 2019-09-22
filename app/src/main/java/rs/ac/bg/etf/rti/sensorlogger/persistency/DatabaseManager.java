@@ -13,10 +13,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -64,7 +61,7 @@ public class DatabaseManager {
     }
 
     public void insertOrUpdateDeviceSensorData(List<DeviceSensorData> deviceSensorDataList) {
-        try(Realm realm = Realm.getDefaultInstance()) {
+        try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> realm1.insertOrUpdate(deviceSensorDataList));
         }
     }

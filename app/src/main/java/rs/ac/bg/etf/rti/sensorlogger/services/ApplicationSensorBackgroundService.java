@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
@@ -27,12 +26,7 @@ import java.util.List;
 
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
-import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
-import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
-import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
-import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
-import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
 import static rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel.IS_LISTENING_KEY;
@@ -65,14 +59,13 @@ public class ApplicationSensorBackgroundService extends Service {
 
     private PowerManager.WakeLock wakeLock;
 
-
     static class UnbrokenSensorEvent {
         public long timestamp;
         public float[] values;
         public Sensor sensor;
 
         UnbrokenSensorEvent(SensorEvent event) {
-            this.timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
+            this.timestamp = (System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L)) & ~3L;
             this.values = event.values;
             this.sensor = event.sensor;
         }
@@ -128,7 +121,7 @@ public class ApplicationSensorBackgroundService extends Service {
                     long timestamp = event.timestamp;
 
                     if (latestData == null) {
-                        deviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, timestamp);
+                        deviceSensorData = new DeviceSensorData(nodeId, timestamp);
                     } else {
                         deviceSensorData = new DeviceSensorData(latestData);
                         deviceSensorData.setTimestamp(timestamp);
@@ -136,28 +129,29 @@ public class ApplicationSensorBackgroundService extends Service {
 
                     switch (event.sensor.getType()) {
                         case Sensor.TYPE_ACCELEROMETER: {
-                            Accelerometer accelerometer = new Accelerometer(event.values[0], event.values[1], event.values[2]);
-                            deviceSensorData.setAccelerometer(accelerometer);
+                            deviceSensorData.setAccX(event.values[0]);
+                            deviceSensorData.setAccY(event.values[1]);
+                            deviceSensorData.setAccZ(event.values[2]);
                             break;
                         }
                         case Sensor.TYPE_GYROSCOPE: {
-                            Gyroscope gyroscope = new Gyroscope(event.values[0], event.values[1], event.values[2]);
-                            deviceSensorData.setGyroscope(gyroscope);
+                            deviceSensorData.setGyrX(event.values[0]);
+                            deviceSensorData.setGyrY(event.values[1]);
+                            deviceSensorData.setGyrZ(event.values[2]);
                             break;
                         }
                         case Sensor.TYPE_HEART_RATE: {
-                            HeartRateMonitor heartRate = new HeartRateMonitor((int) event.values[0]);
-                            deviceSensorData.setHeartRateMonitor(heartRate);
+                            deviceSensorData.setHeartRate((int) event.values[0]);
                             break;
                         }
                         case Sensor.TYPE_STEP_COUNTER: {
-                            Pedometer pedometer = new Pedometer((int) event.values[0]);
-                            deviceSensorData.setPedometer(pedometer);
+                            deviceSensorData.setStepCount((int) event.values[0]);
                             break;
                         }
                         case Sensor.TYPE_MAGNETIC_FIELD: {
-                            Magnetometer magnetometer = new Magnetometer(event.values[0], event.values[1], event.values[2]);
-                            deviceSensorData.setMagnetometer(magnetometer);
+                            deviceSensorData.setMagX(event.values[0]);
+                            deviceSensorData.setMagY(event.values[1]);
+                            deviceSensorData.setMagZ(event.values[2]);
                             break;
                         }
                         default: {
@@ -271,7 +265,7 @@ public class ApplicationSensorBackgroundService extends Service {
         Log.i(TAG, "Requesting sensor data");
 
         if (!wakeLock.isHeld()) {
-            wakeLock.acquire(10*60*1000L /*10 minutes*/);
+            wakeLock.acquire();
         }
 
         startService(new Intent(getApplicationContext(), ApplicationSensorBackgroundService.class));

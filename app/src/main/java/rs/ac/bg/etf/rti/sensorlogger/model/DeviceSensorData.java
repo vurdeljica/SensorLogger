@@ -5,11 +5,21 @@ import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class DeviceSensorData extends RealmObject {
-    private Accelerometer accelerometer;
-    private Gyroscope gyroscope;
-    private HeartRateMonitor heartRateMonitor;
-    private Pedometer pedometer;
-    private Magnetometer magnetometer;
+
+    private float accX;
+    private float accY;
+    private float accZ;
+
+    private float gyrX;
+    private float gyrY;
+    private float gyrZ;
+
+    private float magX;
+    private float magY;
+    private float magZ;
+
+    private int heartRate;
+    private int stepCount;
 
     @Index
     private String nodeId;
@@ -20,13 +30,20 @@ public class DeviceSensorData extends RealmObject {
     public DeviceSensorData() {
     }
 
-    public DeviceSensorData(Accelerometer accelerometer, Gyroscope gyroscope, HeartRateMonitor heartRateMonitor,
-                            Pedometer pedometer, Magnetometer magnetometer, String nodeId, long timestamp) {
-        this.accelerometer = accelerometer;
-        this.gyroscope = gyroscope;
-        this.heartRateMonitor = heartRateMonitor;
-        this.pedometer = pedometer;
-        this.magnetometer = magnetometer;
+    public DeviceSensorData(float accX, float accY, float accZ, float gyrX, float gyrY, float gyrZ,
+                            float magX, float magY, float magZ, int heartRate, int stepCount,
+                            String nodeId, long timestamp) {
+        this.accX = accX;
+        this.accY = accY;
+        this.accZ = accZ;
+        this.gyrX = gyrX;
+        this.gyrY = gyrY;
+        this.gyrZ = gyrZ;
+        this.magX = magX;
+        this.magY = magY;
+        this.magZ = magZ;
+        this.heartRate = heartRate;
+        this.stepCount = stepCount;
         this.nodeId = nodeId;
         this.timestamp = timestamp;
     }
@@ -34,83 +51,127 @@ public class DeviceSensorData extends RealmObject {
     public DeviceSensorData(DeviceSensorData deviceSensorData) {
         if (deviceSensorData == null) return;
 
-        accelerometer = new Accelerometer(deviceSensorData.getAccelerometer());
-        gyroscope = new Gyroscope(deviceSensorData.getGyroscope());
-        heartRateMonitor = new HeartRateMonitor(deviceSensorData.getHeartRateMonitor());
-        pedometer = new Pedometer(deviceSensorData.getPedometer());
-        magnetometer = new Magnetometer(deviceSensorData.getMagnetometer());
+        accX = deviceSensorData.getAccX();
+        accY = deviceSensorData.getAccY();
+        accZ = deviceSensorData.getAccZ();
+        gyrX = deviceSensorData.getGyrX();
+        gyrY = deviceSensorData.getGyrY();
+        gyrZ = deviceSensorData.getGyrZ();
+        magX = deviceSensorData.getMagX();
+        magY = deviceSensorData.getMagY();
+        magZ = deviceSensorData.getMagZ();
+        heartRate = deviceSensorData.getHeartRate();
+        stepCount = deviceSensorData.getStepCount();
         nodeId = deviceSensorData.getNodeId();
         timestamp = deviceSensorData.getTimestamp();
     }
 
-    public Accelerometer getAccelerometer() {
-        return accelerometer;
+    public DeviceSensorData(String nodeId, long timestamp) {
+        this.nodeId = nodeId;
+        this.timestamp = timestamp;
     }
 
-    public Gyroscope getGyroscope() {
-        return gyroscope;
+    public float getAccX() {
+        return accX;
     }
 
-    public HeartRateMonitor getHeartRateMonitor() {
-        return heartRateMonitor;
+    public void setAccX(float accX) {
+        this.accX = accX;
     }
 
-    public Pedometer getPedometer() {
-        return pedometer;
+    public float getAccY() {
+        return accY;
     }
 
-    public Magnetometer getMagnetometer() {
-        return magnetometer;
+    public void setAccY(float accY) {
+        this.accY = accY;
+    }
+
+    public float getAccZ() {
+        return accZ;
+    }
+
+    public void setAccZ(float accZ) {
+        this.accZ = accZ;
+    }
+
+    public float getGyrX() {
+        return gyrX;
+    }
+
+    public void setGyrX(float gyrX) {
+        this.gyrX = gyrX;
+    }
+
+    public float getGyrY() {
+        return gyrY;
+    }
+
+    public void setGyrY(float gyrY) {
+        this.gyrY = gyrY;
+    }
+
+    public float getGyrZ() {
+        return gyrZ;
+    }
+
+    public void setGyrZ(float gyrZ) {
+        this.gyrZ = gyrZ;
+    }
+
+    public float getMagX() {
+        return magX;
+    }
+
+    public void setMagX(float magX) {
+        this.magX = magX;
+    }
+
+    public float getMagY() {
+        return magY;
+    }
+
+    public void setMagY(float magY) {
+        this.magY = magY;
+    }
+
+    public float getMagZ() {
+        return magZ;
+    }
+
+    public void setMagZ(float magZ) {
+        this.magZ = magZ;
+    }
+
+    public int getHeartRate() {
+        return heartRate;
+    }
+
+    public void setHeartRate(int heartRate) {
+        this.heartRate = heartRate;
+    }
+
+    public int getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(int stepCount) {
+        this.stepCount = stepCount;
     }
 
     public String getNodeId() {
         return nodeId;
     }
 
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
 
-    public void setAccelerometer(Accelerometer accelerometer) {
-        this.accelerometer = accelerometer;
-    }
-
-    public void setGyroscope(Gyroscope gyroscope) {
-        this.gyroscope = gyroscope;
-    }
-
-    public void setHeartRateMonitor(HeartRateMonitor heartRateMonitor) {
-        this.heartRateMonitor = heartRateMonitor;
-    }
-
-    public void setPedometer(Pedometer pedometer) {
-        this.pedometer = pedometer;
-    }
-
-    public void setMagnetometer(Magnetometer magnetometer) {
-        this.magnetometer = magnetometer;
-    }
-
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public void cascadeDelete() {
-        if (accelerometer != null) {
-            accelerometer.deleteFromRealm();
-        }
-        if (gyroscope != null) {
-            gyroscope.deleteFromRealm();
-        }
-        if (heartRateMonitor != null) {
-            heartRateMonitor.deleteFromRealm();
-        }
-        if (pedometer != null) {
-            pedometer.deleteFromRealm();
-        }
-        if (magnetometer != null) {
-            magnetometer.deleteFromRealm();
-        }
-        deleteFromRealm();
     }
 }

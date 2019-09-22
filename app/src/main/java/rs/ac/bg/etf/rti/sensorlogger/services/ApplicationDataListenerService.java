@@ -12,12 +12,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 import java.util.ArrayList;
 import java.util.List;
 
-import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
-import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
-import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
-import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
-import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
 public class ApplicationDataListenerService extends WearableListenerService {
@@ -71,7 +66,7 @@ public class ApplicationDataListenerService extends WearableListenerService {
 
             DeviceSensorData latestDeviceSensorData = databaseManager.getLatestDeviceSensorData(nodeId);
             if (latestDeviceSensorData == null) {
-                latestDeviceSensorData = new DeviceSensorData(null, null, null, null, null, nodeId, 0);
+                latestDeviceSensorData = new DeviceSensorData(nodeId, System.currentTimeMillis());
             }
 
             for (DataMap dataMap : sensorDataMap.getDataMapArrayList(SENSOR_DATA_KEY)) {
@@ -81,41 +76,42 @@ public class ApplicationDataListenerService extends WearableListenerService {
                     case DATA_HEART_RATE_TYPE: {
                         float data = dataMap.getFloatArray(DATA_HEART_RATE_DATA_KEY)[0];
                         long timestamp = dataMap.getLong(DATA_HEART_RATE_TIMESTAMP_KEY);
-                        HeartRateMonitor heartRate = new HeartRateMonitor((int) data);
                         deviceSensorData.setTimestamp(timestamp);
-                        deviceSensorData.setHeartRateMonitor(heartRate);
+                        deviceSensorData.setHeartRate((int) data);
                         break;
                     }
                     case DATA_ACCELEROMETER_TYPE: {
                         float[] data = dataMap.getFloatArray(DATA_ACCELEROMETER_DATA_KEY);
                         long timestamp = dataMap.getLong(DATA_ACCELEROMETER_TIMESTAMP_KEY);
-                        Accelerometer accelerometer = new Accelerometer(data[0], data[1], data[2]);
                         deviceSensorData.setTimestamp(timestamp);
-                        deviceSensorData.setAccelerometer(accelerometer);
+                        deviceSensorData.setAccX(data[0]);
+                        deviceSensorData.setAccY(data[1]);
+                        deviceSensorData.setAccZ(data[2]);
                         break;
                     }
                     case DATA_GYROSCOPE_TYPE: {
                         float[] data = dataMap.getFloatArray(DATA_GYROSCOPE_DATA_KEY);
                         long timestamp = dataMap.getLong(DATA_GYROSCOPE_TIMESTAMP_KEY);
-                        Gyroscope gyroscope = new Gyroscope(data[0], data[1], data[2]);
                         deviceSensorData.setTimestamp(timestamp);
-                        deviceSensorData.setGyroscope(gyroscope);
+                        deviceSensorData.setGyrX(data[0]);
+                        deviceSensorData.setGyrY(data[1]);
+                        deviceSensorData.setGyrZ(data[2]);
                         break;
                     }
                     case DATA_STEPS_TYPE: {
                         float[] data = dataMap.getFloatArray(DATA_STEPS_DATA_KEY);
                         long timestamp = dataMap.getLong(DATA_STEPS_TIMESTAMP_KEY);
-                        Pedometer pedometer = new Pedometer((int) data[0]);
                         deviceSensorData.setTimestamp(timestamp);
-                        deviceSensorData.setPedometer(pedometer);
+                        deviceSensorData.setStepCount((int) data[0]);
                         break;
                     }
                     case DATA_MAGNETOMETER_TYPE: {
                         float[] data = dataMap.getFloatArray(DATA_MAGNETOMETER_DATA_KEY);
                         long timestamp = dataMap.getLong(DATA_MAGNETOMETER_TIMESTAMP_KEY);
-                        Magnetometer magnetometer = new Magnetometer(data[0], data[1], data[2]);
                         deviceSensorData.setTimestamp(timestamp);
-                        deviceSensorData.setMagnetometer(magnetometer);
+                        deviceSensorData.setMagX(data[0]);
+                        deviceSensorData.setMagY(data[1]);
+                        deviceSensorData.setMagZ(data[2]);
                         break;
                     }
                     default: {

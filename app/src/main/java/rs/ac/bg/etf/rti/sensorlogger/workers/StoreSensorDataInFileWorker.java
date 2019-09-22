@@ -11,12 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rs.ac.bg.etf.rti.sensorlogger.SensorDataProtos;
-import rs.ac.bg.etf.rti.sensorlogger.model.Accelerometer;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
-import rs.ac.bg.etf.rti.sensorlogger.model.Gyroscope;
-import rs.ac.bg.etf.rti.sensorlogger.model.HeartRateMonitor;
-import rs.ac.bg.etf.rti.sensorlogger.model.Magnetometer;
-import rs.ac.bg.etf.rti.sensorlogger.model.Pedometer;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
@@ -47,58 +42,24 @@ public class StoreSensorDataInFileWorker extends Worker {
                     .setTimestamp(deviceSensorData.getTimestamp())
                     .setNodeId(deviceSensorData.getNodeId());
 
-            Accelerometer accelerometer = deviceSensorData.getAccelerometer();
-            if (accelerometer != null) {
-                sensorDataBuilder
-                        .setAccX(accelerometer.getX())
-                        .setAccY(accelerometer.getY())
-                        .setAccZ(accelerometer.getZ());
-            } else {
-                sensorDataBuilder
-                        .setAccX(0)
-                        .setAccY(0)
-                        .setAccZ(0);
-            }
+            sensorDataBuilder
+                    .setAccX(deviceSensorData.getAccX())
+                    .setAccY(deviceSensorData.getAccY())
+                    .setAccZ(deviceSensorData.getAccZ());
 
-            Gyroscope gyroscope = deviceSensorData.getGyroscope();
-            if (gyroscope != null) {
-                sensorDataBuilder
-                        .setGyrX(gyroscope.getX())
-                        .setGyrY(gyroscope.getY())
-                        .setGyrZ(gyroscope.getZ());
-            } else {
-                sensorDataBuilder
-                        .setGyrX(0)
-                        .setGyrY(0)
-                        .setGyrZ(0);
-            }
+            sensorDataBuilder
+                    .setGyrX(deviceSensorData.getGyrX())
+                    .setGyrY(deviceSensorData.getGyrY())
+                    .setGyrZ(deviceSensorData.getGyrZ());
 
-            Magnetometer magnetometer = deviceSensorData.getMagnetometer();
-            if (magnetometer != null) {
-                sensorDataBuilder
-                        .setMagX(magnetometer.getX())
-                        .setMagY(magnetometer.getY())
-                        .setMagZ(magnetometer.getZ());
-            } else {
-                sensorDataBuilder
-                        .setMagX(0)
-                        .setMagY(0)
-                        .setMagZ(0);
-            }
+            sensorDataBuilder
+                    .setMagX(deviceSensorData.getMagX())
+                    .setMagY(deviceSensorData.getMagY())
+                    .setMagZ(deviceSensorData.getMagZ());
 
-            Pedometer pedometer = deviceSensorData.getPedometer();
-            if (pedometer != null) {
-                sensorDataBuilder.setStepCount(pedometer.getStepCount());
-            } else {
-                sensorDataBuilder.setStepCount(0);
-            }
+            sensorDataBuilder.setStepCount(deviceSensorData.getStepCount());
 
-            HeartRateMonitor heartRateMonitor = deviceSensorData.getHeartRateMonitor();
-            if (heartRateMonitor != null) {
-                sensorDataBuilder.setHeartRate(heartRateMonitor.getHeartRate());
-            } else {
-                sensorDataBuilder.setHeartRate(0);
-            }
+            sensorDataBuilder.setHeartRate(deviceSensorData.getHeartRate());
 
             SensorDataProtos.SensorData sensorData = sensorDataBuilder.build();
             sensorDataToStore.add(sensorData);

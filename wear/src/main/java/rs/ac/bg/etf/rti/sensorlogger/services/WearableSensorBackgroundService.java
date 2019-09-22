@@ -119,7 +119,7 @@ public class WearableSensorBackgroundService extends Service {
             public void onSensorChanged(SensorEvent event) {
 //                Log.d(TAG, prettyPrintFloatArray(event.values));
 
-                event.timestamp = System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L);
+                event.timestamp = (System.currentTimeMillis() + ((event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L)) & ~3L;
 
                 DataMap dataMap = new DataMap();
 
@@ -171,7 +171,7 @@ public class WearableSensorBackgroundService extends Service {
                 putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
                 Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());
                 dataItemTask.addOnFailureListener(e -> Log.e(TAG, "Failed to send data"));
-                dataItemTask.addOnSuccessListener(e -> Log.e(TAG, "Sent data"));
+                dataItemTask.addOnSuccessListener(e -> Log.i(TAG, "Sent data"));
                 dataMaps.clear();
             }
 
@@ -265,7 +265,7 @@ public class WearableSensorBackgroundService extends Service {
         Log.i(TAG, "Requesting sensor data");
 
         if (!wakeLock.isHeld()) {
-            wakeLock.acquire(10*60*1000L /*10 minutes*/);
+            wakeLock.acquire();
         }
 
         startService(new Intent(getApplicationContext(), WearableSensorBackgroundService.class));
