@@ -58,6 +58,7 @@ public class HomeViewModel extends BaseObservable {
             Log.d(WORK_TAG, "Periodic trigger worker enqueued");
             PeriodicWorkRequest periodicTriggerWorker = new PeriodicWorkRequest.Builder(TriggerWorker.class, 15, TimeUnit.MINUTES)
                     .addTag(WORK_TAG)
+                    .setInitialDelay(15, TimeUnit.MINUTES)
                     .build();
             workManager.enqueueUniquePeriodicWork(PERIODIC_TASK_ID, ExistingPeriodicWorkPolicy.KEEP, periodicTriggerWorker);
         }
