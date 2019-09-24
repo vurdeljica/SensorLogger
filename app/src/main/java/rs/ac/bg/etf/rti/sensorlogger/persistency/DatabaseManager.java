@@ -197,7 +197,11 @@ public class DatabaseManager {
     public void deleteSpecificSensorDataBefore(String nodeId, long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
-                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).findAll();
+                Number latest = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).max("timestamp");
+                if (latest == null) {
+                    return;
+                }
+                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", latest.longValue()).findAll();
                 Log.d("REALM", "DELETED: " + result.size() + " . NodeId: " + nodeId);
                 result.deleteAllFromRealm();
             });
