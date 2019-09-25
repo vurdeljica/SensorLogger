@@ -4,16 +4,22 @@ import io.realm.RealmObject;
 import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
+/**
+ * Data object for storing the sensor data collected from the sensors from the phone and the wearables
+ */
 public class DeviceSensorData extends RealmObject {
 
+    // Values received from the accelerometer for all three axis
     private float accX;
     private float accY;
     private float accZ;
 
+    // Values received from the gyroscope for all three axis
     private float gyrX;
     private float gyrY;
     private float gyrZ;
 
+    // Values received from the magnetometer for all three axis
     private float magX;
     private float magY;
     private float magZ;
@@ -21,31 +27,15 @@ public class DeviceSensorData extends RealmObject {
     private int heartRate;
     private int stepCount;
 
+    //Node id of the device the data was collected from
     @Index
     private String nodeId;
 
+    //Timestamp of the data
     @PrimaryKey
     private long timestamp;
 
     public DeviceSensorData() {
-    }
-
-    public DeviceSensorData(float accX, float accY, float accZ, float gyrX, float gyrY, float gyrZ,
-                            float magX, float magY, float magZ, int heartRate, int stepCount,
-                            String nodeId, long timestamp) {
-        this.accX = accX;
-        this.accY = accY;
-        this.accZ = accZ;
-        this.gyrX = gyrX;
-        this.gyrY = gyrY;
-        this.gyrZ = gyrZ;
-        this.magX = magX;
-        this.magY = magY;
-        this.magZ = magZ;
-        this.heartRate = heartRate;
-        this.stepCount = stepCount;
-        this.nodeId = nodeId;
-        this.timestamp = timestamp;
     }
 
     public DeviceSensorData(DeviceSensorData deviceSensorData) {

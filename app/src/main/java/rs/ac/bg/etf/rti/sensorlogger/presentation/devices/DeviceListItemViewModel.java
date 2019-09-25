@@ -5,6 +5,9 @@ import androidx.databinding.Bindable;
 
 import com.google.android.gms.wearable.Node;
 
+/**
+ * View model class for a device list item
+ */
 public class DeviceListItemViewModel extends BaseObservable {
     private Node node;
 

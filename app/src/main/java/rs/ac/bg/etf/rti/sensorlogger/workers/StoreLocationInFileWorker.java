@@ -16,6 +16,10 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
+/**
+ * Worker that stores collected location data in local memory of the phone, compresses it
+ * and removes the saved objects from the database
+ */
 public class StoreLocationInFileWorker extends Worker {
     public StoreLocationInFileWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);

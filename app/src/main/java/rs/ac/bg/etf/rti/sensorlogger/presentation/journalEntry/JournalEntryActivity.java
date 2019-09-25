@@ -12,6 +12,9 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.ActivityJournalEntryBinding;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 
+/**
+ * Activity for preview and editing of journal entries - daily activities
+ */
 public class JournalEntryActivity extends AppCompatActivity implements JournalEntryHandler {
 
     private JournalEntryViewModel journalEntryViewModel;

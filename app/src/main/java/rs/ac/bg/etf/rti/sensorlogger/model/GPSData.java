@@ -3,10 +3,16 @@ package rs.ac.bg.etf.rti.sensorlogger.model;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
+/**
+ * Data object for storing the location received from the phone (not collected from wearables)
+ */
 public class GPSData extends RealmObject {
+
+    //Timestamp of the data
     @PrimaryKey
     private long timestamp;
 
+    //The three GPS coordinates
     private double longitude;
     private double latitude;
     private double altitude;
@@ -20,15 +26,6 @@ public class GPSData extends RealmObject {
         this.latitude = latitude;
         this.altitude = altitude;
     }
-    public GPSData(GPSData gps) {
-        if (gps == null) return;
-
-        this.timestamp = gps.timestamp;
-        this.longitude = gps.longitude;
-        this.latitude = gps.latitude;
-        this.altitude = gps.altitude;
-    }
-
 
     public long getTimestamp() {
         return timestamp;

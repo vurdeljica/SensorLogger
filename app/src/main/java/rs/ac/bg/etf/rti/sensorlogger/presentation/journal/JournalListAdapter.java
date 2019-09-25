@@ -25,9 +25,21 @@ import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.ListEntryDailyActivityBinding;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 
+/**
+ * List adapter for the journal entries list
+ */
 public class JournalListAdapter extends BaseExpandableListAdapter {
+    /**
+     * List of the journal entries (daily activities)
+     */
     private List<DailyActivity> journalList;
+    /**
+     * List of the headers (dates of the journal entries)
+     */
     private List<String> listDataHeader;
+    /**
+     * Map for connecting the journal entries and their headers
+     */
     private HashMap<String, List<DailyActivity>> listHashMap;
 
     JournalListAdapter() {
@@ -36,6 +48,9 @@ public class JournalListAdapter extends BaseExpandableListAdapter {
         listDataHeader = new ArrayList<>();
     }
 
+    /**
+     * Clear the journal list
+     */
     void clear() {
         journalList.clear();
         listDataHeader.clear();
@@ -43,6 +58,10 @@ public class JournalListAdapter extends BaseExpandableListAdapter {
         notifyDataSetInvalidated();
     }
 
+    /**
+     * Populates the journal entries list
+     * @param list of daily activities to be added to the journal entries list
+     */
     void addAll(List<DailyActivity> list) {
         journalList.addAll(list);
         listHashMap = new HashMap<>(

@@ -31,12 +31,21 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
 import static rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel.IS_LISTENING_KEY;
 
+/**
+ * Service for receiving sensor data from the phone
+ */
 public class ApplicationSensorBackgroundService extends Service {
     private static final String NODE_ID_KEY = "nodeId";
     private static final String TAG = ApplicationSensorBackgroundService.class.getSimpleName();
 
+    /**
+     * Sensor manager used for accessing the sensors
+     */
     private SensorManager sensorManager = null;
 
+    /**
+     * Listener that receives the sensor data updates
+     */
     private FlushableSensorEventListener sensorEventListener;
 
     private static final String PACKAGE_NAME =
@@ -57,6 +66,9 @@ public class ApplicationSensorBackgroundService extends Service {
      */
     private static final int NOTIFICATION_ID = 34567890;
 
+    /**
+     * Wake lock used to prevent device from sleeping when service is running
+     */
     private PowerManager.WakeLock wakeLock;
 
     static class UnbrokenSensorEvent {
@@ -370,17 +382,5 @@ public class ApplicationSensorBackgroundService extends Service {
         public ApplicationSensorBackgroundService getService() {
             return ApplicationSensorBackgroundService.this;
         }
-    }
-
-    private String prettyPrintFloatArray(float[] values) {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < values.length; i++) {
-            sb.append(values[i]);
-            if (i < values.length - 1) {
-                sb.append("|");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
     }
 }

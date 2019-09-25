@@ -41,9 +41,16 @@ import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
 
 import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
 
+/**
+ * Main activity of the application
+ */
 public class MainActivity extends AppCompatActivity implements ServiceHandler {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    /**
+     * Capability request ids
+     */
     private static final int REQUEST_ENABLE_BT = 444;
     private static final int REQUEST_ENABLE_GPS = 222;
 
@@ -90,11 +97,17 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
         checkGPS();
     }
 
+    /**
+     * Asks user to disable battery optimisation for the application
+     */
     @SuppressLint("BatteryLife")
     private void ignoreBatteryOptimisation() {
         startActivity(new Intent(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName())));
     }
 
+    /**
+     * @return whether battery optimisation is active for the application
+     */
     private boolean batteryOptimisationActive() {
         PowerManager powerManager = getSystemService(PowerManager.class);
         return powerManager != null && powerManager.isIgnoringBatteryOptimizations(getPackageName());
@@ -118,6 +131,9 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
         super.onStop();
     }
 
+    /**
+     * Checks whether Bluetooth is on
+     */
     private void checkBluetooth() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
@@ -135,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
         }
     }
 
+    /**
+     * Checks whether GPD is on
+     */
     private void checkGPS() {
         LocationManager locationManager = getSystemService(LocationManager.class);
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -194,6 +213,9 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
                         Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
+    /**
+     * Requests missing permissions
+     */
     private void requestPermissions() {
         boolean shouldProvideRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
@@ -268,6 +290,9 @@ public class MainActivity extends AppCompatActivity implements ServiceHandler {
         }
     }
 
+    /**
+     * Navigation listener for navigating between the tabs
+     */
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             item -> {
                 switch (item.getItemId()) {

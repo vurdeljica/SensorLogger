@@ -16,6 +16,9 @@ import java.util.Set;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.DeviceListItemBinding;
 
+/**
+ * List adapter for the device list in the Devices tab
+ */
 public class DevicesListAdapter extends RecyclerView.Adapter<DevicesListAdapter.DeviceViewHolder> {
 
     private List<Node> nodeList;

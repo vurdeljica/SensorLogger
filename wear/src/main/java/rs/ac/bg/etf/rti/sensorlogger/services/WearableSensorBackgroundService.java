@@ -33,14 +33,23 @@ import rs.ac.bg.etf.rti.sensorlogger.R;
 
 import static rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService.SHARED_PREFERENCES_ID;
 
+/**
+ * Service for receiving sensor data from the wearable
+ */
 public class WearableSensorBackgroundService extends Service {
 
     private static final String TAG = WearableSensorBackgroundService.class.getSimpleName();
 
+    /**
+     * Path and keys of the data item to be sent to the phone
+     */
     private final static String SENSOR_DATA_PATH = "/sensor_data";
     private final static String SENSOR_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.sensor_data";
     private final static String DATA_TYPE_KEY = "rs.ac.bg.etf.rti.sensorlogger.sensor_data_type";
 
+    /**
+     * Keys for each sensor type for storing the sensor data in the data item to be sent to the phone
+     */
     private final static String DATA_HEART_RATE_TYPE = "rs.ac.bg.etf.rti.sensorlogger.heart_rate";
     private final static String DATA_HEART_RATE_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.data";
     private final static String DATA_HEART_RATE_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.heart_rate.timestamp";
@@ -110,9 +119,12 @@ public class WearableSensorBackgroundService extends Service {
         sensorEventListener = new FlushableSensorEventListener() {
             @Override
             public void flushData() {
-                addDataToDatabase();
+                sendData();
             }
 
+            /**
+             * Buffer for storing the sensor data to be sent
+             */
             private ArrayList<DataMap> dataMaps = new ArrayList<>();
 
             @Override
@@ -161,12 +173,15 @@ public class WearableSensorBackgroundService extends Service {
                 }
                 dataMaps.add(dataMap);
                 if (dataMaps.size() >= 100) {
-                    addDataToDatabase();
+                    sendData();
                 }
 
             }
 
-            private void addDataToDatabase() {
+            /**
+             * Adds the collected sensor data to the data request and sends it to the phone
+             */
+            private void sendData() {
                 PutDataMapRequest putDataRequest = PutDataMapRequest.create(SENSOR_DATA_PATH);
                 putDataRequest.getDataMap().putDataMapArrayList(SENSOR_DATA_KEY, dataMaps);
                 Task<DataItem> dataItemTask = Wearable.getDataClient(getApplicationContext()).putDataItem(putDataRequest.asPutDataRequest());

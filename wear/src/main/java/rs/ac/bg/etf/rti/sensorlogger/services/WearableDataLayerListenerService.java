@@ -10,11 +10,20 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 import rs.ac.bg.etf.rti.sensorlogger.presentation.WearableMainActivity;
 
+/**
+ * Service for listening to messages sent from the phone
+ */
 public class WearableDataLayerListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerService";
 
+    /**
+     * Path of the message to start the activity and update the collection status
+     */
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
 
+    /**
+     * Key for storing the collection status in the shared preferences
+     */
     public static final String IS_LISTENING_KEY = "isListening";
     public static final String SHARED_PREFERENCES_ID = "rs.ac.bg.etf.rti.sensorlogger.shared_preferences";
 

@@ -23,15 +23,11 @@ public class PersistenceManager {
     private static final long HISTORY_DELETION_PERIOD = (4 * 60 + 15) * 60;
 
     private static PersistenceManager instance;
-//    private AtomicInteger mobileFileId = new AtomicInteger(0);
-//    private AtomicInteger deviceFileId = new AtomicInteger(0);
 
     private File dataDirectory;
 
     private PersistenceManager() {
         try {
-            //Todo: Namestiti gde se cuvaju podaci, samo treba izmeniti dataPath
-            //dataDirectory = new File(dataPath);
             dataDirectory = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
             dataDirectory.mkdir();
         } catch (Exception e) {
@@ -52,7 +48,7 @@ public class PersistenceManager {
     }
 
     /**
-     * Create and run separate thread for storing data gathered from location
+     * Stores location data
      * @param _locationData list of objects that represent location data
      * @param timestamp timestamp when sensor data is gathered
      */
@@ -78,7 +74,7 @@ public class PersistenceManager {
 }
 
     /**
-     * Create and run separate thread for storing data gathered from sensors
+     * Stores data gathered from sensors
      * @param _sensorData list of objects that represent sensor data gathered from sensors
      * @param timestamp timestamp when sensor data is gathered
      */

@@ -2,7 +2,6 @@ package rs.ac.bg.etf.rti.sensorlogger.presentation.journal;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,12 +19,12 @@ import rs.ac.bg.etf.rti.sensorlogger.databinding.FragmentJournalBinding;
 import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journalEntry.JournalEntryActivity;
 
-
+/**
+ * Fragment for the Journal tab
+ */
 public class JournalFragment extends Fragment {
 
     private JournalViewModel viewModel;
-
-    private OnFragmentInteractionListener mListener;
 
     public JournalFragment() {
 
@@ -35,7 +34,6 @@ public class JournalFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-
 
     public void updateFragment() {
         viewModel.inflateJournalListAdapter();
@@ -59,6 +57,9 @@ public class JournalFragment extends Fragment {
         return binding.getRoot();
     }
 
+    /**
+     * @return the on click listener for a journal entry
+     */
     private ExpandableListView.OnChildClickListener getOnChildClickListener() {
         return (parent, v, groupPosition, childPosition, id) -> {
             Log.d("TEST", "Journal Entry on click");
@@ -68,34 +69,16 @@ public class JournalFragment extends Fragment {
         };
     }
 
+    /**
+     * Starts the {@link JournalEntryActivity}
+     *
+     * @param id      of the selected daily activity
+     * @param context from which the activity is started
+     */
     private void startJournalEntryActivity(long id, Context context) {
         Intent intent = new Intent(context, JournalEntryActivity.class);
         intent.putExtra("id", id);
         context.startActivity(intent);
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 
 }

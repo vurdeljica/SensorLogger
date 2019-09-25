@@ -26,13 +26,31 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
 
+/**
+ * View model for main activity
+ */
 public class MainViewModel implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = MainViewModel.class.getSimpleName();
+
+    /**
+     * Key for storing the node Id of the device in the shared preferences
+     */
     private static final String NODE_ID_KEY = "nodeId";
+
+    /**
+     * Capability of the wearable application
+     */
     public static final String CLIENT_APP_CAPABILITY = "sensor_app_client";
+
+    /**
+     * Path of the collection status message sent to the wearable apps
+     */
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
 
     private Context context;
+    /**
+     * Handler for interacting with the services
+     */
     private ServiceHandler serviceHandler;
 
     // Used for saving the listening state
@@ -208,6 +226,9 @@ public class MainViewModel implements SharedPreferences.OnSharedPreferenceChange
         return results;
     }
 
+    /**
+     * Async task for sending messages to the wearable apps
+     */
     private class WearableShouldStartListenersTask extends AsyncTask<Boolean, Void, Void> {
 
         @Override

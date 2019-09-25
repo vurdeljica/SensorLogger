@@ -36,6 +36,10 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 
 import static rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager.deviceSensorDataBuffer;
 
+/**
+ * Background service that listens for sensor data sent from wearables
+ * and the connection status changes in the node network
+ */
 public class ApplicationDataListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerService";
 
@@ -63,10 +67,16 @@ public class ApplicationDataListenerService extends WearableListenerService {
     private final static String DATA_STEPS_DATA_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.data";
     private final static String DATA_STEPS_TIMESTAMP_KEY = "rs.ac.bg.etf.rti.sensorlogger.steps.timestamp";
 
+    //channel id for the connection status change of the
     private static final String CHANNEL_ID = "lostConnectionChannel";
 
+    //key for saving the connected nodes in the shared preferences
     private static final String CONNECTED_NODES_KEY = "connectedNodesKey";
 
+    /**
+     * Method called when data is received from other devices (nodes) in the network
+     * @param dataEvents buffer containing the received data
+     */
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
         DatabaseManager databaseManager = DatabaseManager.getInstance();
@@ -153,11 +163,11 @@ public class ApplicationDataListenerService extends WearableListenerService {
         }
     }
 
-    @Override
-    public void onMessageReceived(MessageEvent messageEvent) {
-        Log.d(TAG, "onMessageReceived: " + messageEvent);
-    }
-
+    /**
+     * Method called when connection status changes
+     * @param capabilityInfo information about the capabilities of the connected devices (nodes),
+     *                       devices with the wearable application have a special capability
+     */
     @Override
     public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
         createNotificationChannel();
@@ -182,6 +192,9 @@ public class ApplicationDataListenerService extends WearableListenerService {
         sharedPref.edit().putStringSet(CONNECTED_NODES_KEY, newConnectedNodesSet).apply();
     }
 
+    /**
+     * Creates notification channel for the connection status change notification
+     */
     private void createNotificationChannel() {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -197,6 +210,10 @@ public class ApplicationDataListenerService extends WearableListenerService {
         }
     }
 
+
+    /**
+     * Posts the connection status change notification
+     */
     private void postNotification(String nodeId, boolean isRemoved) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

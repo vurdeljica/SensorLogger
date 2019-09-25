@@ -32,17 +32,36 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.workers.TriggerWorker;
 
+/**
+ * View model of the Home fragment
+ */
 public class HomeViewModel extends BaseObservable {
+    /**
+     * Key for accessing the data collection status from the shared preferences
+     */
     public static final String IS_LISTENING_KEY = "isListeningKey";
+    /**
+     * Tag for store data work requests
+     */
     public static final String WORK_TAG = "StoreWorkTag";
+    /**
+     * Id of the work request that periodically triggers the data storage
+     */
     private static final String PERIODIC_TASK_ID = "PeriodicTrigger";
 
+    /**
+     * Sensor data collection status
+     */
     private boolean listening;
     private Context context;
+
     private ObservableBoolean isFabMenuOpen = new ObservableBoolean();
     private Consumer<Void> openMenu;
     private Consumer<Void> closeMenu;
 
+    /**
+     * Listener called when sensor data collection status changes
+     */
     public CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (compoundButton, on) -> {
         SharedPreferences sharedPref = context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
         sharedPref.edit().putBoolean(IS_LISTENING_KEY, on).apply();
@@ -75,6 +94,9 @@ public class HomeViewModel extends BaseObservable {
         networkManager = NetworkManager.getInstance(context);
     }
 
+    /**
+     * Shows the confirmation dialog for data deletion
+     */
     public void showDeletionConfirmationDialog() {
         new MaterialAlertDialogBuilder(context, R.style.AlertDialogStyle)
                 .setTitle(context.getString(R.string.delete_alert_title))
@@ -89,6 +111,9 @@ public class HomeViewModel extends BaseObservable {
                 .show();
     }
 
+    /**
+     * Deletes the last four hours of data collected from all devices
+     */
     private void deleteLastFourHoursOfData() {
         long timestamp = System.currentTimeMillis();
         PersistenceManager.getInstance().deleteLastFourHoursOfSensorData(timestamp);
@@ -96,6 +121,9 @@ public class HomeViewModel extends BaseObservable {
         DatabaseManager.getInstance().deleteSensorDataBefore(timestamp);
     }
 
+    /**
+     * Shows the transfer dialog with the receiving server list that is refreshed automatically
+     */
     public void showAutomaticTransferDialog() {
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(context, R.style.AlertDialogStyle)
                 .setTitle(context.getString(R.string.send_alert_title)).setNegativeButton(context.getString(android.R.string.cancel),
@@ -113,6 +141,9 @@ public class HomeViewModel extends BaseObservable {
         materialAlertDialogBuilder.show();
     }
 
+    /**
+     * Shows the transfer dialog where the user can manually enter receiving server data
+     */
     private void showManualTransferDialog() {
         LayoutInflater li = context.getSystemService(LayoutInflater.class);
         View v = li.inflate(R.layout.dialog_manual_server_entry, null);
@@ -148,6 +179,10 @@ public class HomeViewModel extends BaseObservable {
                 .show();
     }
 
+    /**
+     * Transfers collected data to the server
+     * @param serverInfo information about the receiving server
+     */
     private void transferDataToServer(ServerInfo serverInfo) {
         Thread thread = new Thread(new Runnable() {
             boolean transferred = false;
@@ -172,6 +207,9 @@ public class HomeViewModel extends BaseObservable {
         thread.start();
     }
 
+    /**
+     * Listener that shows and hides the fab menu
+     */
     public View.OnClickListener menuFabOnClickListener = view -> {
         if (isFabMenuOpen.get()) {
             openMenu.accept(null);

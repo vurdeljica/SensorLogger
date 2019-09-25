@@ -10,7 +10,11 @@ import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
+/**
+ * Simple data object for storing daily activities of the user
+ */
 public class DailyActivity extends RealmObject {
+
     private static SimpleDateFormat sdf_date = new SimpleDateFormat("MMM d", Locale.US);
     private static SimpleDateFormat sdf_time = new SimpleDateFormat("h:mm a", Locale.US);
 
@@ -19,6 +23,7 @@ public class DailyActivity extends RealmObject {
 
     private String activityTitle;
 
+    //Type of activity, can be high, medium or low intensity
     @Required
     private String activityType;
 
@@ -121,6 +126,9 @@ public class DailyActivity extends RealmObject {
         this.endTime = endTime;
     }
 
+    /**
+     * @return activity duration as a String suitable for showing on the UI
+     */
     public String getActivityDuration() {
         long timeDiff = endTime.getTime() - startTime.getTime();
         long hours = timeDiff / 3600000;

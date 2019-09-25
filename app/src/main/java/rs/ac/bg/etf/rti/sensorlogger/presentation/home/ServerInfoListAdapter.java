@@ -14,13 +14,28 @@ import java.util.List;
 import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 
+/**
+ * List adapter for the server info list in the data transfer dialog
+ */
 class ServerInfoListAdapter extends ArrayAdapter<String> {
+    /**
+     * List of potential receiving servers
+     */
     private List<ServerInfo> serverInfoList;
+    /**
+     * Manager used for sending the data to the server
+     */
     private NetworkManager networkManager;
 
+    /**
+     * Update interval for refreshing the server list
+     */
     private long updateInterval = 1500L;
     private Handler updateHandler = new Handler();
 
+    /**
+     * Runnable for getting the list of servers
+     */
     private Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -29,6 +44,9 @@ class ServerInfoListAdapter extends ArrayAdapter<String> {
         }
     };
 
+    /**
+     * Updates the server info list
+     */
     private void updateServerInfoList() {
         serverInfoList.clear();
         clear();
@@ -50,6 +68,9 @@ class ServerInfoListAdapter extends ArrayAdapter<String> {
         return serverInfoList.get(position);
     }
 
+    /**
+     * Starts the server info updates
+     */
     private void startUpdates() {
         updateHandler.postDelayed(updateRunnable, updateInterval);
     }

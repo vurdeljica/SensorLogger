@@ -1,6 +1,5 @@
 package rs.ac.bg.etf.rti.sensorlogger.services;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -33,6 +32,9 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.main.MainActivity;
 
+/**
+ * Service for receiving location data from the phone
+ */
 public class LocationListenerService extends Service {
 
     private static final String TAG = LocationListenerService.class.getSimpleName();
@@ -63,7 +65,7 @@ public class LocationListenerService extends Service {
 
     /**
      * Used to check whether the bound activity has really gone away and not unbound as part of an
-     * orientation change. We create a foreground service notification only if the former takes
+     * orientation change. A foreground service notification is created only if the former takes
      * place.
      */
     private boolean mChangingConfiguration = false;
@@ -254,24 +256,5 @@ public class LocationListenerService extends Service {
         public LocationListenerService getService() {
             return LocationListenerService.this;
         }
-    }
-
-    /**
-     * Returns true if this is a foreground service.
-     *
-     * @param context The {@link Context}.
-     */
-    public boolean serviceIsRunningInForeground(Context context) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(
-                Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-                Integer.MAX_VALUE)) {
-            if (getClass().getName().equals(service.service.getClassName())) {
-                if (service.foreground) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

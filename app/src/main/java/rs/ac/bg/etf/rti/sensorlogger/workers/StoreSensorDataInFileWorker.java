@@ -16,6 +16,10 @@ import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
+/**
+ * Worker that stores collected sensor data in local memory of the phone, compresses it
+ * and removes the saved objects from the database
+ */
 public class StoreSensorDataInFileWorker extends Worker {
 
     private Context context;

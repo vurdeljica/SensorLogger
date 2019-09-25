@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+/**
+ * Broadcast receiver for posting the reminder notification for entering the daily activities
+ */
 public class NotificationPublisher extends BroadcastReceiver {
 
     public static final String NOTIFICATION = "notification";

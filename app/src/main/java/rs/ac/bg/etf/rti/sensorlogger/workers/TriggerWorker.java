@@ -16,6 +16,9 @@ import java.util.concurrent.TimeUnit;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
+/**
+ * Worker that triggers separate workers for storing location data and sensor data for each device separately
+ */
 public class TriggerWorker extends Worker {
 
     private Context context;

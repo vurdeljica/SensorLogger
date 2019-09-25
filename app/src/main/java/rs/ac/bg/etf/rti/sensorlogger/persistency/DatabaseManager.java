@@ -23,17 +23,26 @@ import rs.ac.bg.etf.rti.sensorlogger.model.DailyActivity;
 import rs.ac.bg.etf.rti.sensorlogger.model.DeviceSensorData;
 import rs.ac.bg.etf.rti.sensorlogger.model.GPSData;
 
+/**
+ * Singleton manager for working with the Realm database used in the application
+ */
 public class DatabaseManager {
     private static final String TAG = DatabaseManager.class.getSimpleName();
 
+    //Singleton instance of the DatabaseManager
     private static DatabaseManager instance;
 
+    //Buffer for storing the sensor data collected from wearables
+    //Used for buffering the data to avoid multiple transactions
     public static List<DeviceSensorData> deviceSensorDataBuffer = new ArrayList<>();
 
     private DatabaseManager() {
 
     }
 
+    /**
+     * @return the shared instance of the DatabaseManager
+     */
     public static DatabaseManager getInstance() {
         if (instance == null) {
             instance = new DatabaseManager();
@@ -42,6 +51,10 @@ public class DatabaseManager {
         return instance;
     }
 
+    /**
+     * Initialises the database
+     * @param context context that is used for initialising the database
+     */
     public void init(Context context) {
         Realm.init(context);
         RealmConfiguration config = new RealmConfiguration
@@ -54,6 +67,10 @@ public class DatabaseManager {
 //        }
     }
 
+    /**
+     * Insert or updates the {@link GPSData} object in the database
+     * @param _gpsData object to be inserted or updated
+     */
     public void insertOrUpdateGPSData(GPSData _gpsData) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final GPSData gpsData = _gpsData;
@@ -62,12 +79,21 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Insert or updates the {@link DeviceSensorData} objects in the database
+     * @param deviceSensorDataList list of objects to be inserted or updated
+     */
     public void insertOrUpdateDeviceSensorData(List<DeviceSensorData> deviceSensorDataList) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> realm1.insertOrUpdate(deviceSensorDataList));
         }
     }
 
+    /**
+     * Returns the latest {@link DeviceSensorData} object collected from a device (node)
+     * @param nodeId id of the device the data was collected from
+     * @return the latest sensor data of the node
+     */
     @Nullable
     public DeviceSensorData getLatestDeviceSensorData(String nodeId) {
         DeviceSensorData deviceSensorData = null;
@@ -82,6 +108,10 @@ public class DatabaseManager {
         return deviceSensorData;
     }
 
+    /**
+     * Insert or updates the {@link DailyActivity} object in the database
+     * @param _dailyActivity object to be inserted or updated
+     */
     public void insertOrUpdateDailyActivity(DailyActivity _dailyActivity) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final DailyActivity dailyActivity = _dailyActivity;
@@ -102,6 +132,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes the daily activity from the database
+     * @param dailyActivityId daily activity to be deleted
+     */
     public void deleteDailyActivity(long dailyActivityId) {
         try (Realm realm = Realm.getDefaultInstance()) {
             final long id = dailyActivityId;
@@ -112,6 +146,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * @param dailyActivityId id of the daily activity to be returned
+     * @return daily activity with the passed id
+     */
     public DailyActivity getDailyActivity(long dailyActivityId) {
         DailyActivity dailyActivity;
 
@@ -123,6 +161,9 @@ public class DatabaseManager {
         return dailyActivity;
     }
 
+    /**
+     * @return list of GPSData objects from the database
+     */
     @NonNull
     public List<GPSData> getGPSData() {
         List<GPSData> gpsData = new ArrayList<>();
@@ -137,20 +178,9 @@ public class DatabaseManager {
         return gpsData;
     }
 
-    @NonNull
-    public List<DeviceSensorData> getDeviceSensorData() {
-        List<DeviceSensorData> deviceSensorData = new ArrayList<>();
-
-        try (Realm realm = Realm.getDefaultInstance()) {
-            List<DeviceSensorData> DeviceSensorDataFromRealm = realm.where(DeviceSensorData.class).findAll();
-            if (DeviceSensorDataFromRealm != null) {
-                deviceSensorData.addAll(realm.copyFromRealm(DeviceSensorDataFromRealm));
-            }
-        }
-
-        return deviceSensorData;
-    }
-
+    /**
+     * @return the timestamp of the oldest GPSData entry in the database
+     */
     public long getGPSTimestamp() {
         try (Realm realm = Realm.getDefaultInstance()) {
             Number timestamp = realm.where(GPSData.class).min("timestamp");
@@ -158,6 +188,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * @param nodeId id of the device (node) the sensor data was collected from
+     * @return the timestamp of the oldest {@link DeviceSensorData} entry in the database from the selected node
+     */
     public long getDeviceSensorDataTimestamp(String nodeId) {
         try (Realm realm = Realm.getDefaultInstance()) {
             Number timestamp = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).min("timestamp");
@@ -165,6 +199,9 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * @return a list of daily activities from the database
+     */
     public List<DailyActivity> getDailyActivities() {
         List<DailyActivity> dailyActivities = new ArrayList<>();
 
@@ -176,6 +213,10 @@ public class DatabaseManager {
         return dailyActivities;
     }
 
+    /**
+     * Deletes {@link GPSData} objects older than the passed timestamp
+     * @param timestamp timestamp before which objects need to be deleted
+     */
     public void deleteGPSDataBefore(long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
@@ -185,6 +226,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes {@link DeviceSensorData} objects older than the passed timestamp
+     * @param timestamp timestamp before which objects need to be deleted
+     */
     public void deleteSensorDataBefore(long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
@@ -194,6 +239,11 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes {@link DeviceSensorData} objects older than the passed timestamp collected from the specified device
+     * @param nodeId id of the device (node) the data was collected from
+     * @param timestamp timestamp before which objects need to be deleted
+     */
     public void deleteSpecificSensorDataBefore(String nodeId, long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
@@ -208,6 +258,9 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * @return list of ids of the devices (nodes) sensor data has been collected from
+     */
     public List<String> getNodeIds() {
         List<String> nodeIds = new ArrayList<>();
 
@@ -221,6 +274,11 @@ public class DatabaseManager {
         return nodeIds;
     }
 
+    /**
+     * @param nodeId id of the device (node) the data was collected from
+     * @param timestamp timestamp before which objects need to be returned
+     * @return list of {@link DeviceSensorData} objects older than the passed timestamp collected from the specified device
+     */
     @NonNull
     public List<DeviceSensorData> getDeviceSensorData(String nodeId, long timestamp) {
         List<DeviceSensorData> deviceSensorData = new ArrayList<>();
@@ -236,6 +294,10 @@ public class DatabaseManager {
         return deviceSensorData;
     }
 
+    /**
+     * Saves all daily activities from the database in a json file
+     * @param jsonFile json file containing the daily activities
+     */
     void saveToJson(File jsonFile) {
         Gson gson = new GsonBuilder().create();//... obtain your Gson;
         try (Realm realm = Realm.getDefaultInstance()) {

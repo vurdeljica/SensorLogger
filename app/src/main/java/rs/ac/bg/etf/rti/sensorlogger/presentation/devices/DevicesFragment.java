@@ -13,6 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.FragmentDevicesBinding;
 
+/**
+ * Device fragment class for the Devices tab
+ */
 public class DevicesFragment extends Fragment {
 
     @Nullable

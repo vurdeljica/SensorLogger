@@ -23,12 +23,20 @@ import rs.ac.bg.etf.rti.sensorlogger.services.WearableSensorBackgroundService;
 
 import static rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService.SHARED_PREFERENCES_ID;
 
+/**
+ * View model for the main activity
+ */
 public class WearableMainViewModel extends BaseObservable implements CapabilityClient.OnCapabilityChangedListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = WearableMainViewModel.class.getSimpleName();
+    /**
+     * Capability of th ephone application
+     */
     private static final String SERVER_APP_CAPABILITY = "sensor_app_server";
+    /**
+     * Key used to access the collection status from the shared preferences
+     */
     private static final String NODE_ID_KEY = "nodeId";
-
 
     private final Context context;
     private final ServiceHandler serviceHandler;

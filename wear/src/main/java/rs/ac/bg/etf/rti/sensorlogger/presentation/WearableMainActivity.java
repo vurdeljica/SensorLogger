@@ -20,6 +20,9 @@ import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.ActivityMainBinding;
 import rs.ac.bg.etf.rti.sensorlogger.services.WearableSensorBackgroundService;
 
+/**
+ * Main activity of the application
+ */
 public class WearableMainActivity extends WearableActivity implements ServiceHandler {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -84,6 +87,9 @@ public class WearableMainActivity extends WearableActivity implements ServiceHan
                 Manifest.permission.BODY_SENSORS);
     }
 
+    /**
+     * Requests missing permissions
+     */
     private void requestPermissions() {
             ActivityCompat.requestPermissions(WearableMainActivity.this,
                     new String[]{Manifest.permission.BODY_SENSORS}, REQUEST_PERMISSIONS_REQUEST_CODE);

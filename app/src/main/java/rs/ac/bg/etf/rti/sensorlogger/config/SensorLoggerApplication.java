@@ -22,12 +22,18 @@ import rs.ac.bg.etf.rti.sensorlogger.broadcastReceivers.NotificationPublisher;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.journalEntry.JournalEntryActivity;
 
+/**
+ * Application wrapper class for setting up the app configuration
+ */
 public class SensorLoggerApplication extends Application {
 
     private static final String CHANNEL_ID = "DAILY_ACTIVITIES_REMINDER";
     private static final int NOTIFICATION_ID = 123456;
     public static final String SHARED_PREFERENCES_ID = "rs.ac.bg.etf.rti.sensorlogger.shared_preferences";
 
+    /**
+     * Initialises DB and schedules the reminder notification to enter daily activities
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -39,6 +45,9 @@ public class SensorLoggerApplication extends Application {
         scheduleNotification();
     }
 
+    /**
+     * Schedules reminder notification to enter daily activities
+     */
     private void scheduleNotification() {
         Notification notification = createNotification();
 
@@ -55,6 +64,9 @@ public class SensorLoggerApplication extends Application {
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 24 * 60 * 60 * 100, pendingIntent);
     }
 
+    /**
+     * Creates notification channel for reminder notification to enter daily activities
+     */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -72,6 +84,9 @@ public class SensorLoggerApplication extends Application {
         }
     }
 
+    /**
+     * @return reminder notification to enter daily activities
+     */
     private Notification createNotification() {
         Intent intent = new Intent(this, JournalEntryActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);

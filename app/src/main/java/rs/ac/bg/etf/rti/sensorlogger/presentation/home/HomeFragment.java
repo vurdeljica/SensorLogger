@@ -15,6 +15,9 @@ import android.view.animation.AnimationUtils;
 import rs.ac.bg.etf.rti.sensorlogger.R;
 import rs.ac.bg.etf.rti.sensorlogger.databinding.FragmentHomeBinding;
 
+/**
+ * Fragment class for the Home tab
+ */
 public class HomeFragment extends Fragment {
 
     private Animation fabOpen, fabClose, fabClock, fabAntiClock;

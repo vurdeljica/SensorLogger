@@ -6,14 +6,18 @@ import androidx.databinding.BaseObservable;
 
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 
+/**
+ * View model for the journal fragment
+ */
 public class JournalViewModel extends BaseObservable {
 
     private JournalListAdapter journalListAdapter;
 
-    public JournalViewModel() {
+    JournalViewModel() {
         journalListAdapter = new JournalListAdapter();
         journalListAdapter.registerDataSetObserver(getDataSetObserver());
     }
+
 
     private DataSetObserver getDataSetObserver() {
         return new DataSetObserver() {
@@ -31,7 +35,10 @@ public class JournalViewModel extends BaseObservable {
         };
     }
 
-    public void inflateJournalListAdapter() {
+    /**
+     * Reloads the journal entries list
+     */
+    void inflateJournalListAdapter() {
         DatabaseManager dbManager = DatabaseManager.getInstance();
         journalListAdapter.clear();
         journalListAdapter.addAll(dbManager.getDailyActivities());
@@ -39,7 +46,7 @@ public class JournalViewModel extends BaseObservable {
         notifyChange();
     }
 
-    public JournalListAdapter getJournalListAdapter() {
+    JournalListAdapter getJournalListAdapter() {
         return journalListAdapter;
     }
 }
