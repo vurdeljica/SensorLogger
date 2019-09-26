@@ -22,12 +22,10 @@ import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
  */
 public class StoreSensorDataInFileWorker extends Worker {
 
-    private Context context;
     private String nodeId;
 
     public StoreSensorDataInFileWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
-        this.context = context;
         this.nodeId = getInputData().getString("nodeId");
     }
 
@@ -41,39 +39,43 @@ public class StoreSensorDataInFileWorker extends Worker {
 
         List<SensorDataProtos.SensorData> sensorDataToStore = new ArrayList<>();
 
-        for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData(nodeId, endTime)) {
-            SensorDataProtos.SensorData.Builder sensorDataBuilder = SensorDataProtos.SensorData.newBuilder()
-                    .setTimestamp(deviceSensorData.getTimestamp())
-                    .setNodeId(deviceSensorData.getNodeId());
+        while (true) {
+            for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData(nodeId, endTime)) {
+                SensorDataProtos.SensorData.Builder sensorDataBuilder = SensorDataProtos.SensorData.newBuilder()
+                        .setTimestamp(deviceSensorData.getTimestamp())
+                        .setNodeId(deviceSensorData.getNodeId());
 
-            sensorDataBuilder
-                    .setAccX(deviceSensorData.getAccX())
-                    .setAccY(deviceSensorData.getAccY())
-                    .setAccZ(deviceSensorData.getAccZ());
+                sensorDataBuilder
+                        .setAccX(deviceSensorData.getAccX())
+                        .setAccY(deviceSensorData.getAccY())
+                        .setAccZ(deviceSensorData.getAccZ());
 
-            sensorDataBuilder
-                    .setGyrX(deviceSensorData.getGyrX())
-                    .setGyrY(deviceSensorData.getGyrY())
-                    .setGyrZ(deviceSensorData.getGyrZ());
+                sensorDataBuilder
+                        .setGyrX(deviceSensorData.getGyrX())
+                        .setGyrY(deviceSensorData.getGyrY())
+                        .setGyrZ(deviceSensorData.getGyrZ());
 
-            sensorDataBuilder
-                    .setMagX(deviceSensorData.getMagX())
-                    .setMagY(deviceSensorData.getMagY())
-                    .setMagZ(deviceSensorData.getMagZ());
+                sensorDataBuilder
+                        .setMagX(deviceSensorData.getMagX())
+                        .setMagY(deviceSensorData.getMagY())
+                        .setMagZ(deviceSensorData.getMagZ());
 
-            sensorDataBuilder.setStepCount(deviceSensorData.getStepCount());
+                sensorDataBuilder.setStepCount(deviceSensorData.getStepCount());
 
-            sensorDataBuilder.setHeartRate(deviceSensorData.getHeartRate());
+                sensorDataBuilder.setHeartRate(deviceSensorData.getHeartRate());
 
-            SensorDataProtos.SensorData sensorData = sensorDataBuilder.build();
-            sensorDataToStore.add(sensorData);
+                SensorDataProtos.SensorData sensorData = sensorDataBuilder.build();
+                sensorDataToStore.add(sensorData);
+            }
+
+            if (sensorDataToStore.size() <= 1)
+                return Result.success();
+
+            persistenceManager.saveSensorData(sensorDataToStore, nodeId, dbManager.getDeviceSensorDataTimestamp(nodeId));
+
+            dbManager.deleteSpecificSensorDataBefore(nodeId, endTime);
+
+            sensorDataToStore.clear();
         }
-
-        persistenceManager.saveSensorData(sensorDataToStore, nodeId, dbManager.getDeviceSensorDataTimestamp(nodeId));
-
-        dbManager.deleteSpecificSensorDataBefore(nodeId, endTime);
-
-        // Indicate whether the task finished successfully with the Result
-        return Result.success();
     }
 }

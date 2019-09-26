@@ -284,7 +284,7 @@ public class DatabaseManager {
         List<DeviceSensorData> deviceSensorData = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            List<DeviceSensorData> DeviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).findAll();
+            List<DeviceSensorData> DeviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).limit(10000).findAll();
             if (DeviceSensorDataFromRealm != null) {
                 deviceSensorData.addAll(realm.copyFromRealm(DeviceSensorDataFromRealm));
                 Log.d("REALM", "GET: " + deviceSensorData.size() + " NODE ID: " + nodeId);

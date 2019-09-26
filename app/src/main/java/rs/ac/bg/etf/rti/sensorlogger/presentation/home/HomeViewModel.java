@@ -190,8 +190,6 @@ public class HomeViewModel extends BaseObservable {
             @Override
             public void run() {
                 try {
-                    PersistenceManager.getInstance().saveDailyActivity();
-
                     File dirP = new File(Environment.getExternalStorageDirectory() + "/testDirectory");
 
                     networkManager.uploadDirectoryContentToServer(serverInfo, dirP);

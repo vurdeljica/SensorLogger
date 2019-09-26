@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
+import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 
 /**
@@ -54,6 +55,8 @@ public class TriggerWorker extends Worker {
 
             workManager.enqueue(storeSensorDataWorkRequest);
         }
+
+        PersistenceManager.getInstance().saveDailyActivity();
 
         return Result.success();
     }
