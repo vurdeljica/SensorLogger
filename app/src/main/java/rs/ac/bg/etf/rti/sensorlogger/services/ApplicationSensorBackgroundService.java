@@ -286,8 +286,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     accelerometerSensor,
-                    33333,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    1000000,
                     mServiceHandler
             );
         }
@@ -297,8 +297,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     gyroscopeSensor,
-                    33333,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    1000000,
                     mServiceHandler
             );
         }
@@ -308,8 +308,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     heartRateSensor,
-                    33333,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    1000000,
                     mServiceHandler
             );
         }
@@ -319,8 +319,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     stepCountSensor,
-                    33333,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    1000000,
                     mServiceHandler
             );
         }
@@ -330,8 +330,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     magnetometerSensor,
-                    33333,
                     SensorManager.SENSOR_DELAY_NORMAL,
+                    1000000,
                     mServiceHandler
             );
         }
