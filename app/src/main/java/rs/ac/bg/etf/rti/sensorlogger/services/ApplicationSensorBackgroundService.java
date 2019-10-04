@@ -36,6 +36,7 @@ import static rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel.IS_L
  */
 public class ApplicationSensorBackgroundService extends Service {
     private static final String NODE_ID_KEY = "nodeId";
+    public static final String SENSOR_SAMPLING_RATE_KEY = "sensorSamplingRate";
     private static final String TAG = ApplicationSensorBackgroundService.class.getSimpleName();
 
     /**
@@ -280,14 +281,16 @@ public class ApplicationSensorBackgroundService extends Service {
             wakeLock.acquire();
         }
 
+        int samplingRate = getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getInt(SENSOR_SAMPLING_RATE_KEY, 200000);
+
         startService(new Intent(getApplicationContext(), ApplicationSensorBackgroundService.class));
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometerSensor != null) {
             sensorManager.registerListener(
                     sensorEventListener,
                     accelerometerSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -297,8 +300,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     gyroscopeSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -308,8 +311,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     heartRateSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -319,8 +322,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     stepCountSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -330,8 +333,8 @@ public class ApplicationSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     magnetometerSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }

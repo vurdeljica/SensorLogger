@@ -35,6 +35,10 @@
             android:name=".presentation.journalEntry.JournalEntryActivity"
             android:parentActivityName=".presentation.main.MainActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".presentation.settings.SettingsActivity"
+            android:parentActivityName=".presentation.main.MainActivity"
+            android:screenOrientation="portrait" />
 
         <receiver android:name=".broadcastReceivers.NotificationPublisher" />
 

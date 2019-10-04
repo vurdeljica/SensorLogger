@@ -39,6 +39,7 @@ import static rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerSe
 public class WearableSensorBackgroundService extends Service {
 
     private static final String TAG = WearableSensorBackgroundService.class.getSimpleName();
+    public static final String SENSOR_SAMPLING_RATE_KEY = "sensorSamplingRate";
 
     /**
      * Path and keys of the data item to be sent to the phone
@@ -283,14 +284,16 @@ public class WearableSensorBackgroundService extends Service {
             wakeLock.acquire();
         }
 
+        int samplingRate = getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getInt(SENSOR_SAMPLING_RATE_KEY, 200000);
+
         startService(new Intent(getApplicationContext(), WearableSensorBackgroundService.class));
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometerSensor != null) {
             sensorManager.registerListener(
                     sensorEventListener,
                     accelerometerSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -300,8 +303,8 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     gyroscopeSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -311,8 +314,8 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     heartRateSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -322,8 +325,8 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     stepCountSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }
@@ -333,8 +336,8 @@ public class WearableSensorBackgroundService extends Service {
             sensorManager.registerListener(
                     sensorEventListener,
                     magnetometerSensor,
+                    samplingRate,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    1000000,
                     mServiceHandler
             );
         }

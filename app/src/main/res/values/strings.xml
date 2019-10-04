@@ -45,4 +45,5 @@
     <string name="establish_connection">Established connection</string>
     <string name="lost_watch_connection">Connection to %s was lost.</string>
     <string name="establish_watch_connection">Connection to %s established.</string>
+    <string name="sampling_rate">Sampling rate</string>
 </resources>

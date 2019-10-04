@@ -40,6 +40,13 @@
                     android:pathPrefix="/should-start-listening"
                     android:scheme="wear" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/sampling-rate"
+                    android:scheme="wear" />
+            </intent-filter>
         </service>
 
         <service

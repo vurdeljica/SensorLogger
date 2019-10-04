@@ -22,6 +22,7 @@ import rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService;
 import rs.ac.bg.etf.rti.sensorlogger.services.WearableSensorBackgroundService;
 
 import static rs.ac.bg.etf.rti.sensorlogger.services.WearableDataLayerListenerService.SHARED_PREFERENCES_ID;
+import static rs.ac.bg.etf.rti.sensorlogger.services.WearableSensorBackgroundService.SENSOR_SAMPLING_RATE_KEY;
 
 /**
  * View model for the main activity
@@ -132,6 +133,11 @@ public class WearableMainViewModel extends BaseObservable implements CapabilityC
                 if (mService != null) {
                     mService.removeSensorEventUpdates();
                 }
+            }
+        } else if (key.equals(SENSOR_SAMPLING_RATE_KEY)) {
+            if (listening.get()) {
+                mService.removeSensorEventUpdates();
+                mService.requestSensorEventUpdates();
             }
         }
     }

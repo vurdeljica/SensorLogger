@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.rti.sensorlogger.presentation.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
@@ -30,6 +31,7 @@ import rs.ac.bg.etf.rti.sensorlogger.network.NetworkManager;
 import rs.ac.bg.etf.rti.sensorlogger.network.ServerInfo;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.DatabaseManager;
 import rs.ac.bg.etf.rti.sensorlogger.persistency.PersistenceManager;
+import rs.ac.bg.etf.rti.sensorlogger.presentation.settings.SettingsActivity;
 import rs.ac.bg.etf.rti.sensorlogger.workers.TriggerWorker;
 
 /**
@@ -203,6 +205,10 @@ public class HomeViewModel extends BaseObservable {
             }
         });
         thread.start();
+    }
+
+    public void openSettings() {
+        context.startActivity(new Intent(context, SettingsActivity.class));
     }
 
     /**

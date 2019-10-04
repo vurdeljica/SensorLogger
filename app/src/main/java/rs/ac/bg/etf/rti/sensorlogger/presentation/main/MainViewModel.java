@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,8 @@ import rs.ac.bg.etf.rti.sensorlogger.config.SensorLoggerApplication;
 import rs.ac.bg.etf.rti.sensorlogger.presentation.home.HomeViewModel;
 import rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService;
 import rs.ac.bg.etf.rti.sensorlogger.services.LocationListenerService;
+
+import static rs.ac.bg.etf.rti.sensorlogger.services.ApplicationSensorBackgroundService.SENSOR_SAMPLING_RATE_KEY;
 
 /**
  * View model for main activity
@@ -46,6 +49,11 @@ public class MainViewModel implements SharedPreferences.OnSharedPreferenceChange
      * Path of the collection status message sent to the wearable apps
      */
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
+
+    /**
+     * Path of the sampling rate message sent to the wearable apps
+     */
+    private static final String SAMPLING_RATE_PATH = "/sampling-rate";
 
     private Context context;
     /**
@@ -162,12 +170,26 @@ public class MainViewModel implements SharedPreferences.OnSharedPreferenceChange
         }
     }
 
+    private void restartServices() {
+        mLocationService.removeLocationUpdates();
+        mSensorService.removeSensorEventUpdates();
+
+        mLocationService.requestLocationUpdates();
+        mSensorService.requestSensorEventUpdates();
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         if (s.equals(HomeViewModel.IS_LISTENING_KEY)) {
             isListening = sharedPreferences.getBoolean(s, false);
             updateServicesState();
             setWearableShouldStartListeners();
+            setWearableSamplingRate();
+        } else if (s.equals(SENSOR_SAMPLING_RATE_KEY)) {
+            setWearableSamplingRate();
+            if (isListening) {
+                restartServices();
+            }
         }
     }
 
@@ -185,6 +207,39 @@ public class MainViewModel implements SharedPreferences.OnSharedPreferenceChange
         byte[] bytes = {(byte) (payload ? 1 : 0)};
         Task<Integer> sendMessageTask =
                 Wearable.getMessageClient(context).sendMessage(node, SHOULD_START_LISTENING_PATH, bytes);
+
+        try {
+            // Block on a task and get the result synchronously (because this is on a background
+            // thread).
+            Integer result = Tasks.await(sendMessageTask);
+            Log.d(TAG, "Message sent: " + result);
+
+        } catch (ExecutionException exception) {
+            Log.e(TAG, "Task failed: " + exception);
+
+        } catch (InterruptedException exception) {
+            Log.e(TAG, "Interrupt occurred: " + exception);
+        }
+    }
+
+    private void setWearableSamplingRate() {
+        Log.d(TAG, "Generating sampling rate RPC");
+
+        // Trigger an AsyncTask that will query for a list of connected nodes and send a
+        // "should-start-listening" message to each connected node.
+        int rate = context.getSharedPreferences(SensorLoggerApplication.SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).getInt(SENSOR_SAMPLING_RATE_KEY, 200000);
+        new WearableSamplingRateTask().execute(rate);
+    }
+
+    @WorkerThread
+    private void sendSamplingRateMessage(String node, int rate) {
+
+        ByteBuffer b = ByteBuffer.allocate(4);
+        b.putInt(rate);
+
+        byte[] payload = b.array();
+        Task<Integer> sendMessageTask =
+                Wearable.getMessageClient(context).sendMessage(node, SAMPLING_RATE_PATH, payload);
 
         try {
             // Block on a task and get the result synchronously (because this is on a background
@@ -236,6 +291,22 @@ public class MainViewModel implements SharedPreferences.OnSharedPreferenceChange
             Collection<String> nodes = getNodes();
             for (String node : nodes) {
                 sendShouldStartListenersMessage(node, booleans[0]);
+            }
+            return null;
+        }
+    }
+
+
+    /**
+     * Async task for sending messages to the wearable apps
+     */
+    private class WearableSamplingRateTask extends AsyncTask<Integer, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            Collection<String> nodes = getNodes();
+            for (String node : nodes) {
+                sendSamplingRateMessage(node, integers[0]);
             }
             return null;
         }

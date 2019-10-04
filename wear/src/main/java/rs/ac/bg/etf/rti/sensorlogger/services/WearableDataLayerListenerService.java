@@ -8,6 +8,8 @@ import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.nio.ByteBuffer;
+
 import rs.ac.bg.etf.rti.sensorlogger.presentation.WearableMainActivity;
 
 /**
@@ -22,9 +24,15 @@ public class WearableDataLayerListenerService extends WearableListenerService {
     private static final String SHOULD_START_LISTENING_PATH = "/should-start-listening";
 
     /**
+     * Path of the sampling rate message
+     */
+    private static final String SAMPLING_RATE_PATH = "/sampling-rate";
+
+    /**
      * Key for storing the collection status in the shared preferences
      */
     public static final String IS_LISTENING_KEY = "isListening";
+    public static final String SAMPLING_RATE_KEY = "samplingRate";
     public static final String SHARED_PREFERENCES_ID = "rs.ac.bg.etf.rti.sensorlogger.shared_preferences";
 
     @Override
@@ -43,6 +51,10 @@ public class WearableDataLayerListenerService extends WearableListenerService {
             startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(startIntent);
+        } else if (messageEvent.getPath().equals(SAMPLING_RATE_PATH)) {
+            java.nio.ByteBuffer b = ByteBuffer.allocate(4);
+            b.put(messageEvent.getData());
+            getApplicationContext().getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).edit().putInt(SAMPLING_RATE_KEY, b.asIntBuffer().get(0)).apply();
         }
     }
 }
