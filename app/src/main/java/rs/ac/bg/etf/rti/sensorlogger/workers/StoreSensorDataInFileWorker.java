@@ -40,7 +40,8 @@ public class StoreSensorDataInFileWorker extends Worker {
         List<SensorDataProtos.SensorData> sensorDataToStore = new ArrayList<>();
 
         while (true) {
-            for (DeviceSensorData deviceSensorData : dbManager.getDeviceSensorData(nodeId, endTime)) {
+            List<DeviceSensorData> dataList = dbManager.getDeviceSensorData(nodeId, endTime);
+            for (DeviceSensorData deviceSensorData : dataList) {
                 SensorDataProtos.SensorData.Builder sensorDataBuilder = SensorDataProtos.SensorData.newBuilder()
                         .setTimestamp(deviceSensorData.getTimestamp())
                         .setNodeId(deviceSensorData.getNodeId());
@@ -71,7 +72,8 @@ public class StoreSensorDataInFileWorker extends Worker {
             if (sensorDataToStore.size() <= 1)
                 return Result.success();
 
-            persistenceManager.saveSensorData(sensorDataToStore, nodeId, dbManager.getDeviceSensorDataTimestamp(nodeId));
+            long startTime = dataList.get(dataList.size() - 1).getTimestamp();
+            persistenceManager.saveSensorData(sensorDataToStore, nodeId, startTime);
 
             dbManager.deleteSpecificSensorDataBefore(nodeId, endTime);
 

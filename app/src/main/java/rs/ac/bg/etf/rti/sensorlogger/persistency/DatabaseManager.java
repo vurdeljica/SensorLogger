@@ -189,17 +189,6 @@ public class DatabaseManager {
     }
 
     /**
-     * @param nodeId id of the device (node) the sensor data was collected from
-     * @return the timestamp of the oldest {@link DeviceSensorData} entry in the database from the selected node
-     */
-    public long getDeviceSensorDataTimestamp(String nodeId) {
-        try (Realm realm = Realm.getDefaultInstance()) {
-            Number timestamp = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).min("timestamp");
-            return timestamp != null ? timestamp.longValue() : 0;
-        }
-    }
-
-    /**
      * @return a list of daily activities from the database
      */
     public List<DailyActivity> getDailyActivities() {
@@ -247,11 +236,11 @@ public class DatabaseManager {
     public void deleteSpecificSensorDataBefore(String nodeId, long timestamp) {
         try (Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realm1 -> {
-                Number latest = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).max("timestamp");
+                Number latest = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThanOrEqualTo("timestamp", timestamp).max("timestamp");
                 if (latest == null) {
                     return;
                 }
-                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", latest.longValue()).findAll();
+                RealmResults<DeviceSensorData> result = realm1.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", latest.longValue()).limit(9999).findAll();
                 Log.d("REALM", "DELETED: " + result.size() + " . NodeId: " + nodeId);
                 result.deleteAllFromRealm();
             });
@@ -284,7 +273,7 @@ public class DatabaseManager {
         List<DeviceSensorData> deviceSensorData = new ArrayList<>();
 
         try (Realm realm = Realm.getDefaultInstance()) {
-            List<DeviceSensorData> DeviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThan("timestamp", timestamp).limit(10000).findAll();
+            List<DeviceSensorData> DeviceSensorDataFromRealm = realm.where(DeviceSensorData.class).equalTo("nodeId", nodeId).lessThanOrEqualTo("timestamp", timestamp).limit(10000).findAll();
             if (DeviceSensorDataFromRealm != null) {
                 deviceSensorData.addAll(realm.copyFromRealm(DeviceSensorDataFromRealm));
                 Log.d("REALM", "GET: " + deviceSensorData.size() + " NODE ID: " + nodeId);
