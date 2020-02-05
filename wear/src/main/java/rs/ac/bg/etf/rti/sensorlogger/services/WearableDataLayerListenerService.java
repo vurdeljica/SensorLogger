@@ -52,9 +52,16 @@ public class WearableDataLayerListenerService extends WearableListenerService {
             startIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(startIntent);
         } else if (messageEvent.getPath().equals(SAMPLING_RATE_PATH)) {
-            java.nio.ByteBuffer b = ByteBuffer.allocate(4);
-            b.put(messageEvent.getData());
-            getApplicationContext().getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).edit().putInt(SAMPLING_RATE_KEY, b.asIntBuffer().get(0)).apply();
+            byte[] data = messageEvent.getData();
+            int num = fromByteArray(data);
+            getApplicationContext().getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE).edit().putInt(SAMPLING_RATE_KEY, num).apply();
         }
+    }
+
+    int fromByteArray(byte[] bytes) {
+        return ((bytes[0] & 0xFF) << 24) |
+                ((bytes[1] & 0xFF) << 16) |
+                ((bytes[2] & 0xFF) << 8 ) |
+                ((bytes[3] & 0xFF) << 0 );
     }
 }
