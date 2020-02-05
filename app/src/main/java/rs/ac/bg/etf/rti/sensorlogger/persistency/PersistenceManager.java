@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.rti.sensorlogger.persistency;
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 
 import java.io.File;
@@ -7,8 +8,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
@@ -55,9 +60,10 @@ public class PersistenceManager {
     public void saveLocationData(List<SensorDataProtos.LocationData> _locationData, long timestamp) {
     final List<SensorDataProtos.LocationData> locationData = _locationData;
         //                int fileId = mobileFileId.getAndIncrement();
-    String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-location.txt";
-    String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-temp.txt";
-    String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-compressed.txt";
+        String timeCreation = getTimeCreated(timestamp);
+        String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-location" + timeCreation + ".txt";
+    String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-temp" + timeCreation + ".txt";
+    String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-location-compressed" + timeCreation + ".txt";
 
         try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
         for (SensorDataProtos.LocationData location : locationData) {
@@ -73,6 +79,12 @@ public class PersistenceManager {
 
 }
 
+    private String getTimeCreated(long timestamp) {
+        SimpleDateFormat formatter = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-");
+        Date date = new Date(timestamp);
+        return formatter.format(date);
+    }
+
     /**
      * Stores data gathered from sensors
      * @param _sensorData list of objects that represent sensor data gathered from sensors
@@ -81,9 +93,11 @@ public class PersistenceManager {
     public void saveSensorData(List<SensorDataProtos.SensorData> _sensorData, String nodeId, long timestamp) {
         final List<SensorDataProtos.SensorData> sensorData = _sensorData;
 //                int fileId = deviceFileId.getAndIncrement();
-        String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + ".txt";
-        String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-temp.txt";
-        String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + "-compressed.txt";
+        String timeCreation = getTimeCreated(timestamp);
+
+        String binaryFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + timeCreation + ".txt";
+        String tempFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + timeCreation + "-temp.txt";
+        String compressedFilePath = dataDirectory.getPath() + "/" + timestamp + "-device" + nodeId + timeCreation + "-compressed.txt";
 
         try (FileOutputStream output = new FileOutputStream(binaryFilePath, false)) {
             for (SensorDataProtos.SensorData sensor : sensorData) {
